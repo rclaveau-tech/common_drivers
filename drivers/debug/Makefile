@@ -29,7 +29,7 @@ obj-$(CONFIG_AMLOGIC_DEBUG_IOTRACE) += $(MODULE_NAME_IOTRACE).o
 $(MODULE_NAME_IOTRACE)-y = aml_iotrace.o ftrace_ramoops.o
 
 # builtin
-obj-$(CONFIG_AMLOGIC_BGKI_DEBUG_MISC) += debug_misc.o
+#obj-$(CONFIG_AMLOGIC_BGKI_DEBUG_MISC) += debug_misc.o
 
 # debug test ko
 obj-$(CONFIG_AMLOGIC_DEBUG_TEST) += debug_test.o

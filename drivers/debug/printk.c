@@ -26,7 +26,7 @@ static bool print_task_name_bool;
 module_param(print_task_name_bool, bool, 0664);
 MODULE_PARM_DESC(print_task_name_bool, "\n statistical log printing\n");
 
-void printk_caller_id(void *data, u32 *caller_id)
+/*static void printk_caller_id(void *data, u32 *caller_id)
 {
 	unsigned long irqflags;
 	unsigned long preempt_value = preempt_count();
@@ -45,7 +45,7 @@ void printk_caller_id(void *data, u32 *caller_id)
 	*caller_id = (cpu << 28 | irq_trace << 20 | current->pid);
 }
 
-void printk_caller(void *data, char *caller, size_t size, u32 id, int *ret)
+static void printk_caller(void *data, char *caller, size_t size, u32 id, int *ret)
 {
 	struct task_struct *task = NULL;
 	char task_name[TASK_COMM_LEN] = "";
@@ -65,7 +65,6 @@ void printk_caller(void *data, char *caller, size_t size, u32 id, int *ret)
 
 	irqs_off =
 		(irq_trace & TRACE_FLAG_IRQS_OFF) ? 'd' :
-		(irq_trace & TRACE_FLAG_IRQS_NOSUPPORT) ? 'X' :
 		'.';
 
 	hardsoft_irq =
@@ -81,7 +80,7 @@ void printk_caller(void *data, char *caller, size_t size, u32 id, int *ret)
 		task = find_task_by_vpid(pid);
 		rcu_read_unlock();
 		if (task)
-			__get_task_comm(task_name, TASK_COMM_LEN, task);
+			get_task_comm(task_name, task);
 	} else {
 		sprintf(task_name, "T%u", pid);
 	}
@@ -90,7 +89,7 @@ void printk_caller(void *data, char *caller, size_t size, u32 id, int *ret)
 				cpu,
 				task_name,
 				irqs_off, hardsoft_irq);
-}
+}*/
 
 #if defined(CONFIG_TRACEPOINTS) && defined(CONFIG_ANDROID_VENDOR_HOOKS)
 int printk_vendor_hook_init(void)
@@ -121,16 +120,16 @@ void printk_vendor_hook_exit(void)
 		pr_err("unregister_trace_android_vh_printk_caller fail ret=%d\n", ret);
 }
 #else
-int printk_vendor_hook_init(void)
+static int printk_vendor_hook_init(void)
 {
 	return 0;
 }
 
-void printk_vendor_hook_exit(void)
+static void printk_vendor_hook_exit(void)
 {
 }
 
-void trace_android_vh_printk_caller_id(u32 *caller_id)
+/*void trace_android_vh_printk_caller_id(u32 *caller_id)
 {
 	printk_caller_id(NULL, caller_id);
 }
@@ -140,7 +139,7 @@ void trace_android_vh_printk_caller(char *caller, size_t size, u32 id, int *ret)
 {
 	printk_caller(NULL, caller, size, id, ret);
 }
-EXPORT_SYMBOL(trace_android_vh_printk_caller);
+EXPORT_SYMBOL(trace_android_vh_printk_caller);*/
 
 #endif /* END CONFIG_ANDROID_VENDOR_HOOKS */
 
