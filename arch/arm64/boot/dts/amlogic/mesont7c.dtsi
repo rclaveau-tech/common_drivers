@@ -2112,19 +2112,18 @@
 		};
 
 		uart_A: serial@fe078000 {
-			compatible = "amlogic,meson-uart";
+			compatible = "amlogic,meson-g12a-uart";
 			reg = <0x0 0xfe078000 0x0 0x18>;
 			interrupts = <0 168 1>;
 			status = "disabled";
-			clocks = <&xtal>;
-			clock-names = "clk_uart";
-			xtal_tick_en = <2>;
+			clocks = <&xtal>, <&clkc CLKID_UART_A>, <&xtal>;
+			clock-names = "xtal", "pclk", "baud";
 			fifosize = < 64 >;
-			support-sysrq = <1>;  /* 0 not support*/
+			pinctrl-names = "default";
 		};
 
 		uart_C: serial@fe07c000 {
-			compatible = "amlogic,meson-uart";
+			compatible = "amlogic,meson-g12a-uart";
 			reg = <0x0 0xfe07c000 0x0 0x18>;
 			interrupts = <0 170 1>;
 			status = "disabled";
