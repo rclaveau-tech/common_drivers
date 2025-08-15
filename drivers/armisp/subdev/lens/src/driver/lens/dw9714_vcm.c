@@ -248,9 +248,9 @@ static int dw9714_probe(struct i2c_client *client)
 }
 
 
-static int dw9714_remove(struct i2c_client *client)
+static void dw9714_remove(struct i2c_client *client)
 {
-    return 0;
+    return;
 }
 
 
@@ -271,7 +271,7 @@ static struct i2c_driver dw9714_i2c_driver = {
         .of_match_table = dw9714_dt_ids,
     },
     .id_table = dw9714_id,
-    .probe_new = dw9714_probe,
+    .probe = dw9714_probe,
     .remove   = dw9714_remove,
 };
 

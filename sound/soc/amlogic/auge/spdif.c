@@ -700,7 +700,7 @@ const struct soc_enum spdifin_src_enum =
 	SOC_ENUM_SINGLE(SND_SOC_NOPM, 0, ARRAY_SIZE(spdifin_src_texts),
 	spdifin_src_texts);
 
-int spdifin_source_get_enum(struct snd_kcontrol *kcontrol,
+static int spdifin_source_get_enum(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_soc_component *component = snd_kcontrol_chip(kcontrol);
@@ -711,7 +711,7 @@ int spdifin_source_get_enum(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-int spdifin_source_set_enum(struct snd_kcontrol *kcontrol,
+static int spdifin_source_set_enum(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_soc_component *component = snd_kcontrol_chip(kcontrol);
@@ -1037,9 +1037,9 @@ static int aml_spdif_open(struct snd_soc_component *component,
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct device *dev = asoc_rtd_to_cpu(rtd, 0)->dev;
+	struct device *dev = snd_soc_rtd_to_cpu(rtd, 0)->dev;
 	struct aml_spdif *p_spdif = (struct aml_spdif *)
-		snd_soc_dai_get_drvdata(asoc_rtd_to_cpu(rtd, 0));
+		snd_soc_dai_get_drvdata(snd_soc_rtd_to_cpu(rtd, 0));
 	int ret = 0;
 
 	snd_soc_set_runtime_hwparams(substream, &aml_spdif_hardware);
@@ -1215,7 +1215,7 @@ static int aml_spdif_new(struct snd_soc_component *component, struct snd_soc_pcm
 {
 	struct aml_spdif *p_spdif;
 
-	p_spdif = (struct aml_spdif *)dev_get_drvdata(asoc_rtd_to_cpu(rtd, 0)->dev);
+	p_spdif = (struct aml_spdif *)dev_get_drvdata(snd_soc_rtd_to_cpu(rtd, 0)->dev);
 
 	pr_debug("%s spdif_%s, clk continuous:%d\n",
 		__func__,
@@ -2201,15 +2201,18 @@ struct platform_driver aml_spdif_driver = {
 	.shutdown = aml_spdif_platform_shutdown,
 };
 
-int __init spdif_init(void)
+static int __init spdif_init(void)
 {
 	return platform_driver_register(&aml_spdif_driver);
 }
 
-void __exit spdif_exit(void)
+static void __exit spdif_exit(void)
 {
 	platform_driver_unregister(&aml_spdif_driver);
 }
+
+EXPORT_SYMBOL(spdif_init);
+EXPORT_SYMBOL(spdif_exit);
 
 #ifndef MODULE
 module_init(spdif_init);

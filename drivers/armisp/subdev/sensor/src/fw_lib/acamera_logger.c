@@ -120,7 +120,7 @@ static const char *filename_short( const char *filename )
     return short_name;
 }
 
-void _acamera_log_write_ext( const char *const func, const char *const file, const unsigned line,
+static void _acamera_log_write_ext( const char *const func, const char *const file, const unsigned line,
                              const uint32_t log_level, const uint32_t log_module, const uint8_t flags, const char *const fmt, va_list vaa )
 
 {
@@ -198,7 +198,7 @@ void _acamera_log_write( const char *const func, const char *const file, const u
     _acamera_log_write_ext( func, file, line, log_level, log_module, 0, fmt, va );
     va_end( va );
 }
-void _acamera_log_write_isr( const char *const func, const char *const file, const unsigned line,
+static void _acamera_log_write_isr( const char *const func, const char *const file, const unsigned line,
                              const uint32_t log_level, const uint32_t log_module, const char *const fmt, ... )
 {
     va_list va;

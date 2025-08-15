@@ -84,13 +84,13 @@ static void *p_base = NULL;
 static int32_t base_valid = 0;
 
 
-int32_t IORD_32DIRECT( uint32_t BASE, uint32_t REGNUM )
+static int32_t IORD_32DIRECT( uint32_t BASE, uint32_t REGNUM )
 {
 
     return ioread32( p_base + REGNUM );
 }
 
-void IOWR_32DIRECT( uint32_t BASE, uint32_t REGNUM, uint32_t DATA )
+static void IOWR_32DIRECT( uint32_t BASE, uint32_t REGNUM, uint32_t DATA )
 {
 
     iowrite32( DATA, (void *)p_base + REGNUM );

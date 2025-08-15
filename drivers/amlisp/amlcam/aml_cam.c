@@ -310,19 +310,19 @@ static void cam_devnode_unregister(struct cam_device *cam_dev)
 
 static int cam_async_notifier_bound(struct v4l2_async_notifier *async,
 				       struct v4l2_subdev *subdev,
-				       struct v4l2_async_subdev *asd)
+				       struct v4l2_async_connection *asc)
 {
 	struct csiphy_async_subdev *c_asd =
-			container_of(asd, struct csiphy_async_subdev, asd);
+			container_of(asc, struct csiphy_async_subdev, asc);
 
 	subdev->host_priv = c_asd;
 
 	return 0;
 }
 
-void cam_async_notifier_unbind(struct v4l2_async_notifier *async,
+static void cam_async_notifier_unbind(struct v4l2_async_notifier *async,
 				struct v4l2_subdev *subdev,
-				struct v4l2_async_subdev *asd)
+				struct v4l2_async_connection *asc)
 {
 	return;
 }
@@ -390,14 +390,14 @@ static int cam_async_notifier_register(struct cam_device *cam_dev)
 	struct v4l2_device *v4l2_dev = &cam_dev->v4l2_dev;
 	struct v4l2_async_notifier *notifier = &cam_dev->notifier;
 
-	if (list_empty(&notifier->asd_list)) {
+	/*if (list_empty(&notifier->asd_list)) {
 		dev_err(cam_dev->dev, "Error input param\n");
 		return -EINVAL;
-	}
+	}*/
 
 	notifier->ops = &cam_async_notifier_ops;
 
-	rtn = v4l2_async_notifier_register(v4l2_dev, notifier);
+	rtn = v4l2_async_nf_register(notifier);
 	if (rtn)
 		dev_err(cam_dev->dev, "Failed to notifier register: %d\n", rtn);
 
@@ -570,13 +570,13 @@ error_return:
 	return rtn;
 }
 
-static int cam_remove(struct platform_device *pdev)
+static void cam_remove(struct platform_device *pdev)
 {
 	struct cam_device *cam_dev = platform_get_drvdata(pdev);
 
 	cam_devnode_unregister(cam_dev);
 
-	v4l2_async_notifier_unregister(&cam_dev->notifier);
+	v4l2_async_nf_unregister(&cam_dev->notifier);
 
 	cam_subdevs_unregister(cam_dev);
 
@@ -585,8 +585,6 @@ static int cam_remove(struct platform_device *pdev)
 	cam_deinit_subdevices(cam_dev);
 
 	dev_info(cam_dev->dev, "cam-%u remove finished\n", cam_dev->index);
-
-	return 0;
 }
 
 static int cam_power_suspend(struct device *dev)

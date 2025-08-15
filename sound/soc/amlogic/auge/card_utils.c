@@ -42,10 +42,10 @@ int aml_card_parse_daifmt(struct device *dev,
 	} else {
 		if (codec == bitclkmaster)
 			daifmt |= (codec == framemaster) ?
-				SND_SOC_DAIFMT_CBM_CFM : SND_SOC_DAIFMT_CBM_CFS;
+				SND_SOC_DAIFMT_CBP_CFP : SND_SOC_DAIFMT_CBP_CFC;
 		else
 			daifmt |= (codec == framemaster) ?
-				SND_SOC_DAIFMT_CBS_CFM : SND_SOC_DAIFMT_CBS_CFS;
+				SND_SOC_DAIFMT_CBC_CFP : SND_SOC_DAIFMT_CBC_CFC;
 	}
 
 	of_node_put(bitclkmaster);
@@ -151,7 +151,7 @@ int aml_card_parse_dai(struct device_node *node,
 
 	/* Get dai->name */
 	if (dai_name) {
-		ret = snd_soc_of_get_dai_name(node, dai_name);
+		ret = snd_soc_of_get_dai_name(node, dai_name, 0);
 		if (ret < 0) {
 			pr_err("%s, node=%p failed to get dai name:%s\n",
 			       __func__, node,

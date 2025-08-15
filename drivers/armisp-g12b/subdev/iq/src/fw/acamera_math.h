@@ -64,8 +64,8 @@
 #endif
 
 
-#define array_size( a ) \
-    ( sizeof( a ) / sizeof( a[0] ) )
+/*#define array_size( a ) \
+    ( sizeof( a ) / sizeof( a[0] ) )*/
 
 
 #define round_shift( a, sh ) ( ( ( a ) >> ( sh ) ) + ( ( ( a ) >> ( sh - 1 ) ) & 1 ) )

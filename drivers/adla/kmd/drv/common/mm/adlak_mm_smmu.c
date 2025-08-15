@@ -86,12 +86,12 @@ static struct adlak_mem_handle *adlak_smmu_alloc_inner(
     uint8_t has_iova);
 static void *adlak_smmu_vmap(struct adlak_mem_handle *mm_info);
 
-static void inline adlak_smmu_claim_dev(void) {
+inline static void adlak_smmu_claim_dev(void) {
     AML_LOG_DEBUG("%s[+]", __func__);
     adlak_os_mutex_lock(&ptr_mm_smmu->mutex);
     AML_LOG_DEBUG("%s[-]", __func__);
 }
-static void inline adlak_smmu_release_dev(void) {
+inline static void adlak_smmu_release_dev(void) {
     AML_LOG_DEBUG("%s[+]", __func__);
     adlak_os_mutex_unlock(&ptr_mm_smmu->mutex);
     AML_LOG_DEBUG("%s[-]", __func__);

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 
-obj-$(CONFIG_SND)	+= soc/
+# obj-$(CONFIG_SND)	+= soc/
 
 KBUILD_CFLAGS_MODULE += $(GKI_EXT_KERNEL_MODULE_PREDEFINE)
 all:

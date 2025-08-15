@@ -17,13 +17,10 @@
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
 #include <linux/dma-mapping.h>
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
 #include <linux/dma-map-ops.h>
 #include <linux/cma.h>
 #include <linux/kasan.h>
-#else
-#include <linux/dma-contiguous.h>
-#endif
+#include <linux/dma-resv.h>
 
 #include "isp-vb2-cmalloc.h"
 
@@ -244,7 +241,7 @@ static int vb2_cmalloc_mmap(void *buf_priv, struct vm_area_struct *vma)
     /*
     * Make sure that vm_areas for 2 buffers won't be merged together
     */
-    vma->vm_flags |= VM_DONTEXPAND;
+    vm_flags_set(vma, VM_DONTEXPAND);
 
     /*
     * Use common vm_area operations to track buffer refcount.
@@ -331,15 +328,15 @@ static struct sg_table *vb2_cmalloc_dmabuf_ops_map(
 {
     struct vb2_cmalloc_attachment *attach = db_attach->priv;
     /* stealing dmabuf mutex to serialize map/unmap operations */
-    struct mutex *lock = &db_attach->dmabuf->lock;
+    struct dma_resv *resv = db_attach->dmabuf->resv;
     struct sg_table *sgt;
 
-    mutex_lock(lock);
+    dma_resv_lock(resv, NULL);
 
     sgt = &attach->sgt;
     /* return previously mapped sg table */
     if (attach->dma_dir == dma_dir) {
-        mutex_unlock(lock);
+        dma_resv_unlock(resv);
         return sgt;
     }
 
@@ -355,13 +352,13 @@ static struct sg_table *vb2_cmalloc_dmabuf_ops_map(
                 dma_dir);
     if (!sgt->nents) {
         pr_err("failed to map scatterlist\n");
-        mutex_unlock(lock);
+        dma_resv_unlock(resv);
         return ERR_PTR(-EIO);
     }
 
     attach->dma_dir = dma_dir;
 
-    mutex_unlock(lock);
+    dma_resv_unlock(resv);
 
     return sgt;
 }
@@ -387,11 +384,7 @@ static void *vb2_cmalloc_dmabuf_ops_kmap(struct dma_buf *dbuf, unsigned long pgn
 }
 #endif
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 15, 0))
-static void *vb2_cmalloc_dmabuf_ops_vmap(struct dma_buf *dbuf)
-#else
-static int vb2_cmalloc_dmabuf_ops_vmap(struct dma_buf *dbuf, struct dma_buf_map *map)
-#endif
+static int vb2_cmalloc_dmabuf_ops_vmap(struct dma_buf *dbuf, struct iosys_map *map)
 {
     struct vb2_cmalloc_buf *buf = dbuf->priv;
 

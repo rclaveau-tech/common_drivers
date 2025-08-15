@@ -43,6 +43,14 @@ static struct __adlak_priv_caps adlak_priv_caps;
 
 /************************** Function Prototypes ******************************/
 static void adlak_hal_get_revision(void *data);
+void adlak_parser_set_pend_timer(struct io_region *region, uint32_t time);
+void adlak_parser_set_apb_timeout(struct io_region *region, uint32_t time);
+void adlak_hal_enable(void *data, uint32_t en);
+void adlak_hal_get_all_regs(struct adlak_hw_stat *phw_stat);
+int adlak_hal_set_axisram(void *data);
+int adlak_hal_reset(void *data);
+int adlak_hal_start(void *data);
+int adlak_hal_stop(void *data);
 
 static void adlak_parser_start(struct io_region *region) {
     HAL_ADLAK_PS_CTRL_S d;

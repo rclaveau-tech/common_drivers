@@ -3638,7 +3638,7 @@ static int clk_msr_summary_show(struct seq_file *s, void *data)
 }
 DEFINE_SHOW_ATTRIBUTE(clk_msr_summary);
 
-static char *clk_msr_class_devnode(struct device *dev, umode_t *mode)
+static char *clk_msr_class_devnode(const struct device *dev, umode_t *mode)
 {
 	if (mode)
 		*mode = 0444;
@@ -4122,10 +4122,13 @@ static int __init clk_measure_init(void)
 }
 arch_initcall_sync(clk_measure_init);
 #else
-int __init clk_measure_init(void)
+static int __init clk_measure_init(void)
 {
 	return platform_driver_register(&meson_msr_driver);
 }
+
+EXPORT_SYMBOL(clk_measure_init);
+
 #endif
 #endif
 

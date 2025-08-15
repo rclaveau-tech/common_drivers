@@ -50,7 +50,7 @@
 
 #include <linux/fs.h>
 #include <asm/uaccess.h>
-#include <asm/unaligned.h>
+#include <linux/unaligned.h>
 #include <linux/delay.h>
 #include "v4l2_interface/isp-v4l2.h"
 #include <linux/pm_runtime.h>
@@ -138,8 +138,8 @@ static int v4l2devs_running = 0;
 struct acamera_v4l2_subdev_t {
 
     struct v4l2_subdev *soc_subdevs[V4L2_SOC_SUBDEV_NUMBER];
-    struct v4l2_async_subdev soc_async_sd[V4L2_SOC_SUBDEV_NUMBER];
-    struct v4l2_async_subdev *soc_async_sd_ptr[V4L2_SOC_SUBDEV_NUMBER];
+    struct v4l2_async_connection soc_async_sd[V4L2_SOC_SUBDEV_NUMBER];
+    struct v4l2_async_connection *soc_async_sd_ptr[V4L2_SOC_SUBDEV_NUMBER];
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
     struct device_node *pnode[V4L2_SOC_SUBDEV_NUMBER];
 #endif
@@ -181,7 +181,7 @@ int acamera_camera_v4l2_get_index_by_name( const char *name )
 
 static int acamera_camera_async_bound( struct v4l2_async_notifier *notifier,
                                        struct v4l2_subdev *sd,
-                                       struct v4l2_async_subdev *asd )
+                                       struct v4l2_async_connection *asd )
 {
     int rc = 0;
     LOG( LOG_ERR, "bound called with sd 0x%x, asd 0x%x, sd->dev 0x%x, name %s", sd, asd, sd->dev, sd->name );
@@ -212,7 +212,7 @@ static int acamera_camera_async_bound( struct v4l2_async_notifier *notifier,
 
 static void acamera_camera_async_unbind( struct v4l2_async_notifier *notifier,
                                          struct v4l2_subdev *sd,
-                                         struct v4l2_async_subdev *asd )
+                                         struct v4l2_async_connection *asd )
 {
     LOG( LOG_ERR, "unbind called for subdevice sd 0x%x, asd 0x%x, sd->dev 0x%x, name %s", sd, asd, sd->dev, sd->name );
 
@@ -934,6 +934,8 @@ static int32_t isp_platform_probe( struct platform_device *pdev )
     int32_t rc = 0;
     struct resource *isp_res;
 
+    static DEFINE_MUTEX(list_lock);
+
     // Initialize irq
     isp_res = platform_get_resource_byname( pdev,
         IORESOURCE_IRQ, "ISP" );
@@ -1068,16 +1070,10 @@ static int32_t isp_platform_probe( struct platform_device *pdev )
 
     g_subdevs.subdev_counter = 0;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
-    v4l2_async_notifier_init(&g_subdevs.notifier);
-#endif
+    v4l2_async_nf_init(&g_subdevs.notifier, &v4l2_dev);
 
     for ( idx = 0; idx < V4L2_SOC_SUBDEV_NUMBER; idx++ ) {
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 15, 0))
-        g_subdevs.soc_async_sd[idx].match_type = V4L2_ASYNC_MATCH_CUSTOM;
-        g_subdevs.soc_async_sd[idx].match.custom.match = NULL;
-#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
-        g_subdevs.soc_async_sd[idx].match_type = V4L2_ASYNC_MATCH_FWNODE;
+        g_subdevs.soc_async_sd[idx].match.type = V4L2_ASYNC_MATCH_TYPE_FWNODE;
 
         if (idx == 0)
             g_subdevs.pnode[idx] = of_find_node_by_path("/iq");
@@ -1087,15 +1083,15 @@ static int32_t isp_platform_probe( struct platform_device *pdev )
             g_subdevs.pnode[idx] = of_find_node_by_path("/lens");
         g_subdevs.soc_async_sd[idx].match.fwnode = &(g_subdevs.pnode[idx]->fwnode);
 
-#endif
 
         g_subdevs.soc_async_sd_ptr[idx] = &g_subdevs.soc_async_sd[idx];
         g_subdevs.soc_subdevs[idx] = 0;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
-        __v4l2_async_notifier_add_subdev(&g_subdevs.notifier, g_subdevs.soc_async_sd_ptr[idx]);
-#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
-        v4l2_async_notifier_add_subdev(&g_subdevs.notifier, g_subdevs.soc_async_sd_ptr[idx]);
-#endif
+
+	mutex_lock(&list_lock);
+
+        list_add_tail(&g_subdevs.soc_async_sd[idx].asc_entry, &g_subdevs.notifier.waiting_list);
+
+	mutex_unlock(&list_lock);
     }
 
     g_subdevs.hw_isp_addr = (uint32_t)isp_res->start; //ISP_SOC_START_ADDR;
@@ -1112,7 +1108,7 @@ static int32_t isp_platform_probe( struct platform_device *pdev )
     g_subdevs.notifier.num_subdevs = V4L2_SOC_SUBDEV_NUMBER;
 #endif
 
-    rc = v4l2_async_notifier_register( &v4l2_dev, &g_subdevs.notifier );
+    rc = v4l2_async_nf_register( &g_subdevs.notifier );
 
     device_create_file(&pdev->dev, &dev_attr_reg);
     device_create_file(&pdev->dev, &dev_attr_dump_frame);
@@ -1142,7 +1138,7 @@ free_res:
 }
 
 
-static int isp_platform_remove(struct platform_device *pdev)
+static void isp_platform_remove(struct platform_device *pdev)
 {
 #ifdef CONFIG_AMLOGIC_LEGACY_EARLY_SUSPEND
     unregister_early_suspend(&early_suspend);
@@ -1171,7 +1167,7 @@ static int isp_platform_remove(struct platform_device *pdev)
 #endif
 
 #if V4L2_SOC_SUBDEV_ENABLE
-    v4l2_async_notifier_unregister( &g_subdevs.notifier );
+    v4l2_async_nf_unregister( &g_subdevs.notifier );
 	//v4l2_async_notifier_cleanup( &g_subdevs.notifier );
 
 #endif
@@ -1207,7 +1203,7 @@ static int isp_platform_remove(struct platform_device *pdev)
     close_hw_io();
 
     LOG(LOG_ERR, "Isp remove\n");
-    return 0;
+    return;
 }
 
 #ifdef CONFIG_PM

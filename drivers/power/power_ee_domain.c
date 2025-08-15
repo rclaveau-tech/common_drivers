@@ -807,9 +807,9 @@ static int meson_ee_pwrc_init_domain(struct platform_device *pdev,
 
 		strcat(buf, ",reset");
 		np = of_parse_phandle(pdev->dev.of_node, buf, 0);
-		dom->rstc = of_reset_control_array_get(np, true, false, true);
+		/*dom->rstc = of_reset_control_array_get(np, true, false, true);
 		if (IS_ERR(dom->rstc))
-			return PTR_ERR(dom->rstc);
+			return PTR_ERR(dom->rstc);*/
 	}
 
 	if (dom->num_clks) {
@@ -978,12 +978,15 @@ static struct platform_driver meson_ee_pwrc_driver = {
 	},
 };
 
-int __init power_ee_domain_init(void)
+static int __init power_ee_domain_init(void)
 {
 	return platform_driver_register(&meson_ee_pwrc_driver);
 }
 
-void __exit power_ee_domain_exit(void)
+static void __exit power_ee_domain_exit(void)
 {
 	platform_driver_unregister(&meson_ee_pwrc_driver);
 }
+
+EXPORT_SYMBOL(power_ee_domain_init);
+EXPORT_SYMBOL(power_ee_domain_exit);

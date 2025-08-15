@@ -341,9 +341,9 @@ int adlak_os_alloc_contiguous(struct adlak_mem *mm, struct adlak_mem_handle *mm_
     mm_info->phys_addrs = phys_addrs;
 
     order = get_order(ADLAK_PAGE_ALIGN(size));
-    if (order >= MAX_ORDER) {
+    if (order >= MAX_PAGE_ORDER) {
         AML_LOG_WARN("contiguous alloc contiguous memory order is bigger than MAX, %d >= %d\n",
-                     order, MAX_ORDER);
+                     order, MAX_PAGE_ORDER);
         goto err_order;
     }
     gfp |= (GFP_DMA | GFP_USER | __GFP_ZERO);
@@ -438,11 +438,7 @@ int adlak_os_mmap(struct adlak_mem *mm, struct adlak_mem_handle *mm_info, void *
     pgprot_t                     vm_page_prot;
     struct page **               pages = NULL;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0)
-    vma->vm_flags |= (VM_IO | VM_DONTCOPY | VM_DONTEXPAND | VM_DONTDUMP);
-#else
-    vma->vm_flags |= (VM_IO | VM_DONTCOPY | VM_DONTEXPAND | VM_RESERVED);
-#endif
+    vm_flags_set(vma, VM_IO | VM_DONTCOPY | VM_DONTEXPAND | VM_DONTDUMP);
 
     // always remap as cacheable Virtual Memory Area
     vm_page_prot = vm_get_page_prot(vma->vm_flags); /*cacheable*/

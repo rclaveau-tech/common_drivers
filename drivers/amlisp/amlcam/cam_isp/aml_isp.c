@@ -81,7 +81,7 @@ static int isp_subdrv_reg_buf_alloc(struct isp_dev_t *isp_dev)
 	bsize = wsize + rsize;
 
 	virtaddr = dma_alloc_coherent(isp_dev->dev, bsize, &paddr, GFP_KERNEL);
-	vmaddr = vmalloc(bsize);
+	vmaddr = kvmalloc(bsize, GFP_KERNEL);
 
 	isp_dev->wreg_buff.nplanes = 1;
 	isp_dev->wreg_buff.bsize = wsize;
@@ -114,7 +114,7 @@ static int isp_subdrv_reg_buf_free(struct isp_dev_t *isp_dev)
 
 	vaddr = isp_dev->wreg_buff.vmaddr[AML_PLANE_A];
 	if (vaddr)
-		vfree(vaddr);
+		kvfree(vaddr);
 
 	isp_dev->wreg_buff.addr[AML_PLANE_A] = 0x0000;
 	isp_dev->wreg_buff.vaddr[AML_PLANE_A] = NULL;
@@ -275,7 +275,7 @@ static int isp_subdev_mcnr_buf_free(struct isp_dev_t *isp_dev)
 	return 0;
 }
 
-int isp_subdev_start_manual_dma(struct isp_dev_t *isp_dev)
+static int isp_subdev_start_manual_dma(struct isp_dev_t *isp_dev)
 {
 	struct isp_global_info *g_info = isp_global_get_info();
 
@@ -297,7 +297,7 @@ int isp_subdev_start_manual_dma(struct isp_dev_t *isp_dev)
 	return 0;
 }
 
-int isp_subdev_start_auto_dma(struct isp_dev_t *isp_dev)
+static int isp_subdev_start_auto_dma(struct isp_dev_t *isp_dev)
 {
 	if (isp_dev->apb_dma == 0)
 		return 0;
@@ -317,7 +317,7 @@ int isp_subdev_start_auto_dma(struct isp_dev_t *isp_dev)
 	return 0;
 }
 
-int isp_subdev_update_auto_dma(struct isp_dev_t *isp_dev)
+static int isp_subdev_update_auto_dma(struct isp_dev_t *isp_dev)
 {
 	struct isp_global_info *g_info = isp_global_get_info();
 
@@ -510,7 +510,7 @@ static struct v4l2_ctrl_config mode_cfg = {
 	.def = 0,
 };
 
-int isp_subdev_ctrls_init(struct isp_dev_t *isp_dev)
+static int isp_subdev_ctrls_init(struct isp_dev_t *isp_dev)
 {
 	int rtn = 0;
 
@@ -872,7 +872,7 @@ static int isp_proc_show(struct seq_file *proc_entry, void *arg ) {
 
 static int isp_debug_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, isp_proc_show, PDE_DATA(inode));
+	return single_open(file, isp_proc_show, pde_data(inode));
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)

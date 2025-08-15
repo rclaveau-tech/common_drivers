@@ -170,16 +170,18 @@ static struct platform_driver aml_audio_controller_driver = {
 	.probe = aml_audio_controller_probe,
 };
 
-int __init audio_controller_init(void)
+static int __init audio_controller_init(void)
 {
 	return platform_driver_register(&aml_audio_controller_driver);
 }
 
-void __exit audio_controller_exit(void)
+static void __exit audio_controller_exit(void)
 {
 	platform_driver_unregister(&aml_audio_controller_driver);
 }
 
+EXPORT_SYMBOL(audio_controller_init);
+EXPORT_SYMBOL(audio_controller_exit);
 #ifndef MODULE
 module_init(audio_controller_init);
 module_exit(audio_controller_exit);

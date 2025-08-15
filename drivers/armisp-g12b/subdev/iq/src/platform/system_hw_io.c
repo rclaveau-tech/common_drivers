@@ -30,6 +30,14 @@
 
 static void *p_hw_base = NULL;
 static sys_spinlock reg_lock;
+int32_t init_hw_io( void );
+int32_t close_hw_io( void );
+uint32_t system_hw_read_32( uintptr_t addr );
+uint16_t system_hw_read_16( uintptr_t addr );
+uint8_t system_hw_read_8( uintptr_t addr );
+void system_hw_write_32( uintptr_t addr, uint32_t data );
+void system_hw_write_16( uintptr_t addr, uint16_t data );
+void system_hw_write_8( uintptr_t addr, uint8_t data );
 
 int32_t init_hw_io( void )
 {

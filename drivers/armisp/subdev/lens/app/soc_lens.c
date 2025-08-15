@@ -184,7 +184,7 @@ static int32_t soc_lens_probe( struct platform_device *pdev )
 
     soc_lens.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
 
-    snprintf( soc_lens.name, V4L2_SUBDEV_NAME_SIZE, "%s", V4L2_SOC_LENS_NAME );
+    snprintf( soc_lens.name, sizeof(soc_lens.name), "%s", V4L2_SOC_LENS_NAME );
 
     soc_lens.dev = &pdev->dev;
     rc = v4l2_async_register_subdev( &soc_lens );
@@ -195,11 +195,11 @@ static int32_t soc_lens_probe( struct platform_device *pdev )
     return rc;
 }
 
-static int soc_lens_remove( struct platform_device *pdev )
+static void soc_lens_remove( struct platform_device *pdev )
 {
     v4l2_async_unregister_subdev( &soc_lens );
 
-    return 0;
+    return;
 }
 
 static struct platform_device *soc_lens_dev;

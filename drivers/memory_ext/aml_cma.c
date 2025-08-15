@@ -44,7 +44,7 @@
 #include <linux/vmalloc.h>
 #include <asm/system_misc.h>
 #include <asm/pgtable.h>
-#include <linux/page_pinner.h>
+//#include <linux/page_pinner.h>
 #include <trace/events/page_isolation.h>
 #if IS_MODULE(CONFIG_AMLOGIC_CMA)
 #include <linux/debugfs.h>
@@ -251,15 +251,15 @@ static struct kprobe kp_lookup_name = {
 
 #ifdef CONFIG_PAGE_OWNER
 #if IS_MODULE(CONFIG_AMLOGIC_CMA)
-void (*aml__dump_owner)(const struct page *page);
+void (*aml__dump_owner)(const struct folio *folio);
 #else
-static void aml__dump_owner(const struct page *page)
+static void aml__dump_owner(const struct folio *folio)
 {
 	//__dump_page_owner(page);
 }
 #endif
 #else
-static void aml__dump_owner(const struct page *page)
+static void aml__dump_owner(const struct folio *folio)
 {
 }
 #endif
@@ -1545,45 +1545,45 @@ static bool cma_vma_show(struct page *page, struct vm_area_struct *vma,
 	return false; /* keep loop */
 }
 
-void rmap_walk_vma(struct page *page)
+void rmap_walk_vma(struct folio *folio)
 {
 	struct rmap_walk_control rwc = {
 		.rmap_one = cma_vma_show,
 	};
 
-	pr_info("%s, show map for page:%lx,f:%lx, m:%px, p:%d\n",
-		__func__, page_to_pfn(page), page->flags,
-		page->mapping, page_count(page));
-	if (!page_mapping(page))
+	/*pr_info("%s, show map for folio:%lx,f:%lx, m:%px, p:%d\n",
+		__func__, folio_to_pfn(folio), folio->flags,
+		folio->mapping, page_count(folio));*/
+	if (!page_mapping(folio))
 		return;
 #if IS_BUILTIN(CONFIG_AMLOGIC_CMA)
-	rmap_walk(page, &rwc);
+	rmap_walk(folio, &rwc);
 #else
 	aml_rmap_walk(page, &rwc);
 #endif
 }
 
-void __nocfi show_page(struct page *page)
+void __nocfi show_page(struct folio *folio)
 {
 	unsigned long trace = 0;
 	unsigned long map_flag = -1UL;
 
-	if (!page)
+	if (!folio)
 		return;
 #if (IS_MODULE(CONFIG_AMLOGIC_PAGE_TRACE) && IS_MODULE(CONFIG_AMLOGIC_CMA)) || \
 	(IS_BUILTIN(CONFIG_AMLOGIC_PAGE_TRACE) && IS_BUILTIN(CONFIG_AMLOGIC_CMA))
-	trace = get_page_trace(page);
+	trace = get_page_trace(folio);
 #endif
-	if (page->mapping && !((unsigned long)page->mapping & 0x3))
-		map_flag = page->mapping->flags;
-	pr_info("page:%lx, map:%lx, mf:%lx, pf:%lx, m:%d, c:%d, o:%lx, pt:%lx, f:%ps\n",
-		page_to_pfn(page), (unsigned long)page->mapping, map_flag,
-		page->flags & 0xffffffff,
-		page_mapcount(page), page_count(page), page->private, page->index,
-		(void *)trace);
-	aml__dump_owner(page);
+	if (folio->mapping && !((unsigned long)folio->mapping & 0x3))
+		map_flag = folio->mapping->flags;
+	/*pr_info("page:%lx, map:%lx, mf:%lx, pf:%lx, m:%d, c:%d, o:%lx, pt:%lx, f:%ps\n",
+		folio_to_pfn(folio), (unsigned long)folio->mapping, map_flag,
+		folio->flags & 0xffffffff,
+		page_mapcount(folio), page_count(folio), folio->private, folio->index,
+		(void *)trace);*/
+	aml__dump_owner(folio);
 	if (cma_debug_level > 4 && !irqs_disabled())
-		rmap_walk_vma(page);
+		rmap_walk_vma(folio);
 }
 
 static int cma_debug_show(struct seq_file *m, void *arg)

@@ -37,7 +37,7 @@ enum {
 };
 
 struct csiphy_async_subdev {
-	struct v4l2_async_subdev asd;
+	struct v4l2_async_connection asc;
 	int phy_id;
 	int data_lanes;
 };

@@ -13,6 +13,7 @@
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/of_device.h>
+#include <linux/of_platform.h>
 
 #include <linux/notifier.h>
 #include <linux/suspend.h>
@@ -191,7 +192,7 @@ static int unregister_toddr_l(struct device *dev, void *data)
 	return 0;
 }
 
-int fetch_toddr_index_by_src(int toddr_src)
+/*static int fetch_toddr_index_by_src(int toddr_src)
 {
 	int i;
 
@@ -201,7 +202,7 @@ int fetch_toddr_index_by_src(int toddr_src)
 	}
 
 	return -1;
-}
+}*/
 
 struct toddr *fetch_toddr_by_src(int toddr_src)
 {
@@ -424,13 +425,13 @@ int toddr_src_get_reg(struct toddr *to, enum toddr_src src)
 	return conf->val;
 }
 
-static char *frddr_src2str(enum frddr_dest fsrc)
+/*static char *frddr_src2str(enum frddr_dest fsrc)
 {
 	if (fsrc >= FRDDR_MAX)
 		fsrc = TDMOUT_A;
 
 	return frddr_src_table[fsrc].name;
-}
+}*/
 
 void aml_toddr_select_src(struct toddr *to, enum toddr_src src)
 {
@@ -1282,7 +1283,7 @@ static int unregister_frddr_l(struct device *dev, void *data)
 	return 0;
 }
 
-int fetch_frddr_index_by_src(int frddr_src)
+/*static int fetch_frddr_index_by_src(int frddr_src)
 {
 	int i;
 
@@ -1292,7 +1293,7 @@ int fetch_frddr_index_by_src(int frddr_src)
 	}
 
 	return -1;
-}
+}*/
 
 struct frddr *fetch_frddr_by_src(int frddr_src)
 {
@@ -1333,17 +1334,17 @@ static inline unsigned int
 	return base + reg - EE_AUDIO_FRDDR_A_CTRL0;
 }
 
-void aml_frddr_select_src(struct frddr *fr, enum frddr_dest src)
+/*static void aml_frddr_select_src(struct frddr *fr, enum frddr_dest src)
 {
 	struct aml_audio_controller *actrl = fr->actrl;
 	unsigned int reg_base = fr->reg_base;
 	unsigned int reg;
 	struct toddr_src_conf *conf;
-	char *src_str = frddr_src2str(src);
+	char *src_str = frddr_src2str(src);*/
 
 	/* store to check toddr num */
 
-	conf = fr->chipinfo->fr_srcs;
+	/*conf = fr->chipinfo->fr_srcs;
 	for (; conf->name[0]; conf++) {
 		if (strncmp(conf->name, src_str, strlen(src_str)) == 0)
 			break;
@@ -1353,7 +1354,7 @@ void aml_frddr_select_src(struct frddr *fr, enum frddr_dest src)
 	aml_audiobus_update_bits(actrl, reg,
 				 conf->mask << conf->shift,
 				 conf->val << conf->shift);
-}
+}*/
 /*
  * check frddr_src is used by other frddr for sharebuffer
  * if used, disabled the other share frddr src, the module would
@@ -2623,15 +2624,18 @@ struct platform_driver aml_audio_ddr_manager = {
 	.probe   = aml_ddr_mngr_platform_probe,
 };
 
-int __init audio_ddr_init(void)
+static int __init audio_ddr_init(void)
 {
 	return platform_driver_register(&(aml_audio_ddr_manager));
 }
 
-void __exit audio_ddr_exit(void)
+static void __exit audio_ddr_exit(void)
 {
 	platform_driver_unregister(&aml_audio_ddr_manager);
 }
+
+EXPORT_SYMBOL(audio_ddr_init);
+EXPORT_SYMBOL(audio_ddr_exit);
 
 #ifndef MODULE
 module_init(audio_ddr_init);

@@ -626,7 +626,7 @@ static int ad82584f_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 static int ad82584f_set_dai_fmt(struct snd_soc_dai *codec_dai, unsigned int fmt)
 {
 	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
-	case SND_SOC_DAIFMT_CBS_CFS:
+	case SND_SOC_DAIFMT_CBC_CFC:
 		break;
 	default:
 		return 0;
@@ -948,8 +948,7 @@ static int ad82584f_parse_dt(struct ad82584f_priv *ad82584f,
 	return ret;
 }
 
-static int ad82584f_i2c_probe(struct i2c_client *i2c,
-			      const struct i2c_device_id *id)
+static int ad82584f_i2c_probe(struct i2c_client *i2c)
 {
 	struct ad82584f_priv *ad82584f;
 	struct ad82584f_platform_data *pdata;

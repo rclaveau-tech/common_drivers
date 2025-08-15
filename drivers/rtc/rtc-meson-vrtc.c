@@ -342,12 +342,15 @@ static struct platform_driver meson_vrtc_driver = {
 #endif
 };
 
-int __init vrtc_init(void)
+static int __init vrtc_init(void)
 {
 	return platform_driver_register(&meson_vrtc_driver);
 }
 
-void __exit vrtc_exit(void)
+static void __exit vrtc_exit(void)
 {
 	platform_driver_unregister(&meson_vrtc_driver);
 }
+
+EXPORT_SYMBOL(vrtc_init);
+EXPORT_SYMBOL(vrtc_exit);

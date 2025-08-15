@@ -623,13 +623,13 @@ void fratv_enable(bool enable)
  * 0: select from ATV;
  * 1: select from ADEC;
  */
-void fratv_src_select(bool src)
+static void fratv_src_select(bool src)
 {
 	audiobus_update_bits(EE_AUDIO_FRATV_CTRL0, 0x1 << 20, src << 20);
 }
 EXPORT_SYMBOL_GPL(fratv_src_select);
 
-void fratv_LR_swap(bool swap)
+static void fratv_LR_swap(bool swap)
 {
 	audiobus_update_bits(EE_AUDIO_FRATV_CTRL0, 0x1 << 19, swap << 19);
 }

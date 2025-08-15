@@ -44,7 +44,7 @@ int adlak_axi_sram_init(void *data) {
     of_property_read_u32(padlak->dev->of_node, "adla_smc_cmd", &adlak_smc_cmd);
 #endif
 
-    printk("cc: adlak_smc_cmd: 0x%lx\n", adlak_smc_cmd);
+    printk("cc: adlak_smc_cmd: 0x%x\n", adlak_smc_cmd);
     if (adlak_smc_cmd != 0) {
         ret = adlak_axi_sram_setup((unsigned long)adlak_smc_cmd, 0);
         if (ret != 0) {

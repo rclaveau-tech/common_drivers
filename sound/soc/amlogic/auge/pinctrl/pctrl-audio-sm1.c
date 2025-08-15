@@ -541,15 +541,18 @@ static struct platform_driver sm1_audio_pinctrl_driver = {
 	.probe  = sm1_audio_pinctrl_probe,
 };
 
-int __init sm1_audio_pinctrl_init(void)
+static int __init sm1_audio_pinctrl_init(void)
 {
 	return platform_driver_register(&sm1_audio_pinctrl_driver);
 }
 
-void __exit sm1_audio_pinctrl_exit(void)
+static void __exit sm1_audio_pinctrl_exit(void)
 {
 	platform_driver_unregister(&sm1_audio_pinctrl_driver);
 }
+
+EXPORT_SYMBOL(sm1_audio_pinctrl_init);
+EXPORT_SYMBOL(sm1_audio_pinctrl_exit);
 
 #ifndef MODULE
 module_init(sm1_audio_pinctrl_init);

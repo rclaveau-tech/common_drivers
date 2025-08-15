@@ -47,6 +47,10 @@
 #define CQHCI_CRCFG0            (CQHCI_CFGPTR * 0x100)
 #define CQHCI_CRCFG1            (CQHCI_CFGPTR * 0X100 + 0x80)
 
+#define CQHCI_SSC1_CIT_MASK	GENMASK(15, 0)
+#define CQHCI_SSC1_CBC(x)	(((x) & 0xF) << 16)
+#define CQHCI_SSC1_CIT(x)	((x) & 0xFFFF)
+
 
 bool aml_cqe_irq(struct meson_host *host, u32 intmask, int *cmd_error,
 	int *data_error);

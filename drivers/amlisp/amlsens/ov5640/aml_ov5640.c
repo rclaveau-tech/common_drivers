@@ -260,8 +260,8 @@ static int ov5640_get_fmt(struct v4l2_subdev *sd,
 	mutex_lock(&ov5640->lock);
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		framefmt = v4l2_subdev_get_try_format(&ov5640->sd, cfg,
-						      fmt->pad);
+		framefmt = v4l2_subdev_state_get_format(cfg,
+						      fmt->pad, fmt->stream);
 	else
 		framefmt = &ov5640->current_format;
 
@@ -339,7 +339,7 @@ static int ov5640_set_fmt(struct v4l2_subdev *sd,
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
 		dev_info(ov5640->dev, "try format \n");
-		format = v4l2_subdev_get_try_format(sd, cfg, fmt->pad);
+		format = v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 		mutex_unlock(&ov5640->lock);
 		return 0;
 	} else {
@@ -377,7 +377,7 @@ static int ov5640_set_fmt(struct v4l2_subdev *sd,
 }
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
-int ov5640_get_selection(struct v4l2_subdev *sd,
+static int ov5640_get_selection(struct v4l2_subdev *sd,
 			     struct v4l2_subdev_state *cfg,
 			     struct v4l2_subdev_selection *sel)
 #else
@@ -528,13 +528,13 @@ static int ov5640_log_status(struct v4l2_subdev *sd)
 	return 0;
 }
 
-int ov5640_sbdev_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
+static int ov5640_sbdev_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
 	struct ov5640 *ov5640 = to_ov5640(sd);
 	ov5640_power_on(ov5640->dev, ov5640->gpio);
 	return 0;
 }
 
-int ov5640_sbdev_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
+static int ov5640_sbdev_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
 	struct ov5640 *ov5640 = to_ov5640(sd);
 	ov5640_stop_streaming(ov5640);
 	ov5640_power_off(ov5640->dev, ov5640->gpio);
@@ -555,7 +555,7 @@ static const struct v4l2_subdev_video_ops ov5640_video_ops = {
 };
 
 static const struct v4l2_subdev_pad_ops ov5640_pad_ops = {
-	.init_cfg = ov5640_entity_init_cfg,
+	//.init_cfg = ov5640_entity_init_cfg,
 	.enum_mbus_code = ov5640_enum_mbus_code,
 	.enum_frame_size = ov5640_enum_frame_size,
 	.get_selection = ov5640_get_selection,

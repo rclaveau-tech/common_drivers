@@ -575,7 +575,7 @@ static uint32_t write1_reg(unsigned long addr, uint32_t val)
 }
 #endif
 
-void sensor_deinit_sc8238cs( void *ctx )
+static void sensor_deinit_sc8238cs( void *ctx )
 {
     sensor_context_t *t_ctx = ctx;
 
@@ -669,7 +669,7 @@ static sensor_context_t *sensor_global_parameter(void* sbp)
 }
 
 //--------------------Initialization------------------------------------------------------------
-void sensor_init_sc8238cs( void **ctx, sensor_control_t *ctrl, void* sbp)
+static void sensor_init_sc8238cs( void **ctx, sensor_control_t *ctrl, void* sbp)
 {
     *ctx = sensor_global_parameter(sbp);
 
@@ -697,7 +697,7 @@ void sensor_init_sc8238cs( void **ctx, sensor_control_t *ctrl, void* sbp)
     LOG(LOG_ERR, "%s: Success subdev init\n", __func__);
 }
 
-int sensor_detect_sc8238cs( void* sbp)
+static int sensor_detect_sc8238cs( void* sbp)
 {
     int ret = 0;
     sensor_ctx.sbp = sbp;
@@ -743,3 +743,7 @@ int sensor_detect_sc8238cs( void* sbp)
 }
 
 //*************************************************************************************
+
+EXPORT_SYMBOL(sensor_init_sc8238cs);
+EXPORT_SYMBOL(sensor_deinit_sc8238cs);
+EXPORT_SYMBOL(sensor_detect_sc8238cs);

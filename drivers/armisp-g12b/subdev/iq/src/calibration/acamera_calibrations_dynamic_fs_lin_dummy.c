@@ -747,6 +747,7 @@ static LookupTable calibration_iridix_extension_control = {.ptr = _calibration_i
 static LookupTable calibration_sqrt_extension_control = {.ptr = _calibration_sqrt_extension_control, .rows = sizeof(_calibration_sqrt_extension_control) / sizeof(_calibration_sqrt_extension_control[0]), .cols = 3, .width = sizeof(_calibration_sqrt_extension_control[0][0])};
 static LookupTable calibration_square_be_extension_control = {.ptr = _calibration_square_be_extension_control, .rows = sizeof(_calibration_square_be_extension_control) / sizeof(_calibration_square_be_extension_control[0]), .cols = 3, .width = sizeof(_calibration_square_be_extension_control[0][0])};
 
+uint32_t get_calibrations_dynamic_fs_lin_dummy( ACameraCalibrations *c );
 uint32_t get_calibrations_dynamic_fs_lin_dummy( ACameraCalibrations *c )
 {
     uint32_t result = 0;

@@ -343,15 +343,18 @@ static  struct platform_driver snd_iomap_platform_driver = {
 	},
 };
 
-int __init auge_snd_iomap_init(void)
+static int __init auge_snd_iomap_init(void)
 {
 	return platform_driver_register(&snd_iomap_platform_driver);
 }
 
-void __exit auge_snd_iomap_exit(void)
+static void __exit auge_snd_iomap_exit(void)
 {
 	platform_driver_unregister(&snd_iomap_platform_driver);
 }
+
+EXPORT_SYMBOL(auge_snd_iomap_init);
+EXPORT_SYMBOL(auge_snd_iomap_exit);
 
 #ifndef MODULE
 core_initcall(auge_snd_iomap_init);

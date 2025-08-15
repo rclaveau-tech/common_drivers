@@ -398,7 +398,7 @@ typedef struct adlak_os_thread_inner {
 } adlak_os_thread_inner_t;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
-static void inline signaler_set_rtpriority(adlak_os_thread_t *pthrd) {
+inline static void signaler_set_rtpriority(adlak_os_thread_t *pthrd) {
     adlak_os_thread_inner_t *pthread_inner = (adlak_os_thread_inner_t *)pthrd->handle;
     /* Set maximum priority to preempt all other threads on this CPU. */
     sched_set_fifo(pthread_inner->kthread);
@@ -517,7 +517,7 @@ int adlak_os_timer_destroy(adlak_os_timer_t *ptim) {
     adlak_os_timer_inner_t *ptimer_inner = (adlak_os_timer_inner_t *)*ptim;
     PRINT_FUNC_NAME;
     if (ptimer_inner != NULL) {
-        del_timer_sync(&ptimer_inner->timer);
+        timer_delete_sync(&ptimer_inner->timer);
         adlak_os_free((void *)ptimer_inner);
         *ptim = NULL;
         AML_LOG_DEBUG("timer_destroy success!\n");
@@ -530,7 +530,7 @@ int adlak_os_timer_del(adlak_os_timer_t *ptim) {
     adlak_os_timer_inner_t *ptimer_inner = (adlak_os_timer_inner_t *)*ptim;
     PRINT_FUNC_NAME;
     if (ptimer_inner != NULL) {
-        del_timer_sync(&ptimer_inner->timer);
+        timer_delete_sync(&ptimer_inner->timer);
         AML_LOG_DEBUG("timer_del success!\n");
         return ERR(NONE);
     }

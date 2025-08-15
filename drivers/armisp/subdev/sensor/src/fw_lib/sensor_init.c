@@ -159,7 +159,7 @@ static void sensor_read_data_mask( acamera_sbus_ptr_t p_sbus, uint32_t addr, uin
     }
 }
 
-void acamera_load_binary_sequence( acamera_sbus_ptr_t p_sbus, uintptr_t isp_offset, char size, const char *sequence, int group )
+static void acamera_load_binary_sequence( acamera_sbus_ptr_t p_sbus, uintptr_t isp_offset, char size, const char *sequence, int group )
 {
     uint32_t addr = 0;
     uint8_t *p = (uint8_t *)SENSOR_SEQUENCE_GET_GROUP( sequence, group );
@@ -226,7 +226,7 @@ void acamera_load_binary_sequence( acamera_sbus_ptr_t p_sbus, uintptr_t isp_offs
 }
 
 
-void acamera_load_array_sequence( acamera_sbus_ptr_t p_sbus, uintptr_t isp_offset, char size, const acam_reg_t **sequence, int group )
+static void acamera_load_array_sequence( acamera_sbus_ptr_t p_sbus, uintptr_t isp_offset, char size, const acam_reg_t **sequence, int group )
 {
     const acam_reg_t *seq = sequence[group];
     uint32_t end_seq = 0;

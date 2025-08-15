@@ -59,7 +59,7 @@ static struct adlak_workqueue *g_adlak_pwq = NULL;
 static void adlak_irq_bottom_half(struct adlak_device *padlak, int *device_state,
                                   struct adlak_task *ptask);
 
-int adlak_submit_wait(struct adlak_dev_inference *pinference, struct adlak_task *ptask) {
+static int adlak_submit_wait(struct adlak_dev_inference *pinference, struct adlak_task *ptask) {
     int                  ret;
     int                  repeat = 0;
     uint32_t             timeout;

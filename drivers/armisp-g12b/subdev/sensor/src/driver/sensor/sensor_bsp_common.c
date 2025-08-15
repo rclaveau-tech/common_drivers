@@ -53,7 +53,7 @@ int pwr_am_disable(sensor_bringup_t *sensor_bp)
 {
     if (gpio_is_valid(sensor_bp->vana)) {
         gpio_direction_output(sensor_bp->vana, 0);
-        devm_gpio_free(sensor_bp->dev, sensor_bp->vana);
+        // devm_gpio_free(sensor_bp->dev, sensor_bp->vana);
     } else {
         pr_err("Error invalid pwr gpio\n");
     }
@@ -108,7 +108,7 @@ int reset_am_disable(sensor_bringup_t* sensor_bp)
 {
     if (gpio_is_valid(sensor_bp->reset)) {
         gpio_direction_output(sensor_bp->reset, 0);
-        devm_gpio_free(sensor_bp->dev, sensor_bp->reset);
+        // devm_gpio_free(sensor_bp->dev, sensor_bp->reset);
     } else {
         pr_err("Error invalid reset gpio\n");
     }
@@ -144,7 +144,7 @@ int pwren_am_disable(sensor_bringup_t* sensor_bp)
 {
     if (gpio_is_valid(sensor_bp->pwren)) {
         gpio_direction_output(sensor_bp->pwren, 0);
-        devm_gpio_free(sensor_bp->dev, sensor_bp->pwren);
+        // devm_gpio_free(sensor_bp->dev, sensor_bp->pwren);
     } else {
         pr_err("Error invalid pwren gpio\n");
     }

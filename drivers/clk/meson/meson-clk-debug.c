@@ -302,7 +302,7 @@ static const struct file_operations secure_file_ops = {
 	.write		= secure_reg_write,
 };
 
-int __init clk_debug_init(void)
+static int __init clk_debug_init(void)
 {
 	struct dentry *root;
 
@@ -316,6 +316,8 @@ int __init clk_debug_init(void)
 
 	return 0;
 }
+
+EXPORT_SYMBOL(clk_debug_init);
 
 #ifndef MODULE
 late_initcall_sync(clk_debug_init);

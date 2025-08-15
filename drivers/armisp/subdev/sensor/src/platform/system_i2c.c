@@ -59,8 +59,7 @@ static const struct of_device_id arm_sensor_i2c_dt_match_sssub[] = {
     {}
 };
 
-static int arm_sensor_i2c_probe_sssub(struct i2c_client *client,
-                                    const struct i2c_device_id *dev_id)
+static int arm_sensor_i2c_probe_sssub(struct i2c_client *client)
 {
     int rtn = 0;
     struct arm_i2c_sensor_ctrl *sensor_ctrl = NULL;
@@ -132,7 +131,7 @@ error:
 }
 
 
-static int arm_sensor_i2c_remove_sssub(struct i2c_client *client)
+static void arm_sensor_i2c_remove_sssub(struct i2c_client *client)
 {
     struct arm_i2c_sensor_ctrl *s_ctrl = NULL;
 
@@ -140,7 +139,7 @@ static int arm_sensor_i2c_remove_sssub(struct i2c_client *client)
 
     if (s_ctrl == NULL) {
         pr_err("%s: Error client data is NULL\n", __func__);
-        return -EINVAL;
+        return;
     }
 
     //if (g_sensor_ctrl[0] == NULL)
@@ -151,8 +150,6 @@ static int arm_sensor_i2c_remove_sssub(struct i2c_client *client)
     g_sensor_ctrl[3] = s_ctrl;
 
     pr_info("%s: remove i2c sensor sssub\n", __func__);
-
-    return 0;
 }
 
 static const struct i2c_device_id arm_sensor_i2c_id_ssub[] = {
@@ -165,8 +162,7 @@ static const struct of_device_id arm_sensor_i2c_dt_match_ssub[] = {
     {}
 };
 
-static int arm_sensor_i2c_probe_ssub(struct i2c_client *client,
-                                    const struct i2c_device_id *dev_id)
+static int arm_sensor_i2c_probe_ssub(struct i2c_client *client)
 {
     int rtn = 0;
     struct arm_i2c_sensor_ctrl *sensor_ctrl = NULL;
@@ -238,7 +234,7 @@ error:
 }
 
 
-static int arm_sensor_i2c_remove_ssub(struct i2c_client *client)
+static void arm_sensor_i2c_remove_ssub(struct i2c_client *client)
 {
     struct arm_i2c_sensor_ctrl *s_ctrl = NULL;
 
@@ -246,7 +242,7 @@ static int arm_sensor_i2c_remove_ssub(struct i2c_client *client)
 
     if (s_ctrl == NULL) {
         pr_err("%s: Error client data is NULL\n", __func__);
-        return -EINVAL;
+        return;
     }
 
     //if (g_sensor_ctrl[0] == NULL)
@@ -258,7 +254,7 @@ static int arm_sensor_i2c_remove_ssub(struct i2c_client *client)
 
     pr_info("%s: remove i2c sensor sub\n", __func__);
 
-    return 0;
+    return;
 }
 
 static const struct i2c_device_id arm_sensor_i2c_id_sub[] = {
@@ -271,8 +267,7 @@ static const struct of_device_id arm_sensor_i2c_dt_match_sub[] = {
     {}
 };
 
-static int arm_sensor_i2c_probe_sub(struct i2c_client *client,
-                                    const struct i2c_device_id *dev_id)
+static int arm_sensor_i2c_probe_sub(struct i2c_client *client)
 {
     int rtn = 0;
     struct arm_i2c_sensor_ctrl *sensor_ctrl = NULL;
@@ -344,7 +339,7 @@ error:
 }
 
 
-static int arm_sensor_i2c_remove_sub(struct i2c_client *client)
+static void arm_sensor_i2c_remove_sub(struct i2c_client *client)
 {
     struct arm_i2c_sensor_ctrl *s_ctrl = NULL;
 
@@ -352,7 +347,7 @@ static int arm_sensor_i2c_remove_sub(struct i2c_client *client)
 
     if (s_ctrl == NULL) {
         pr_err("%s: Error client data is NULL\n", __func__);
-        return -EINVAL;
+        return;
     }
 
     //if (g_sensor_ctrl[0] == NULL)
@@ -363,8 +358,6 @@ static int arm_sensor_i2c_remove_sub(struct i2c_client *client)
     g_sensor_ctrl[1] = s_ctrl;
 
     pr_info("%s: remove i2c sensor sub\n", __func__);
-
-    return 0;
 }
 
 static const struct i2c_device_id arm_sensor_i2c_id[] = {
@@ -377,8 +370,7 @@ static const struct of_device_id arm_sensor_i2c_dt_match[] = {
     {}
 };
 
-static int arm_sensor_i2c_probe(struct i2c_client *client,
-                                    const struct i2c_device_id *dev_id)
+static int arm_sensor_i2c_probe(struct i2c_client *client)
 {
     int rtn = 0;
     struct arm_i2c_sensor_ctrl *sensor_ctrl = NULL;
@@ -450,7 +442,7 @@ error:
 }
 
 
-static int arm_sensor_i2c_remove(struct i2c_client *client)
+static void arm_sensor_i2c_remove(struct i2c_client *client)
 {
     struct arm_i2c_sensor_ctrl *s_ctrl = NULL;
 
@@ -458,7 +450,7 @@ static int arm_sensor_i2c_remove(struct i2c_client *client)
 
     if (s_ctrl == NULL) {
         pr_err("%s: Error client data is NULL\n", __func__);
-        return -EINVAL;
+        return;
     }
 
     //if (g_sensor_ctrl[1] == NULL)
@@ -469,8 +461,6 @@ static int arm_sensor_i2c_remove(struct i2c_client *client)
     g_sensor_ctrl[0] = s_ctrl;
 
     pr_info("%s: remove i2c sensor\n", __func__);
-
-    return 0;
 }
 
 static struct i2c_driver arm_sensor_i2c_driver_sssub = {

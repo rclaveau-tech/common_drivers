@@ -32,6 +32,7 @@
 #include "acamera_firmware_settings.h"
 #include "runtime_initialization_settings.h"
 #include "sensor_bsp_common.h"
+#include <linux/of_platform.h>
 
 static int isp_seq_num;
 static int sensor_idx;
@@ -127,7 +128,7 @@ static int camera_log_status( struct v4l2_subdev *sd )
     return 0;
 }
 
-uint32_t write_reg(uint32_t val, unsigned long addr)
+/*static uint32_t write_reg(uint32_t val, unsigned long addr)
 {
     void __iomem *io_addr;
 
@@ -139,7 +140,7 @@ uint32_t write_reg(uint32_t val, unsigned long addr)
     __raw_writel(val, io_addr);
     iounmap(io_addr);
     return 0;
-}
+}*/
 
 static void parse_param(char *buf_orig, char **parm){
     char *ps, *token;
@@ -610,7 +611,7 @@ static int32_t ir_cut_get_named_gpio(struct device_node *np)
     memset(sensor_bp->ir_gname, 0, sizeof(sensor_bp->ir_gname)); //init sensor_bp->ir_gname
     sensor_bp->ir_gcount = 0;
 
-    gcount = of_gpio_named_count(np,"ir_cut_gpio");
+    gcount = of_count_phandle_with_args(np, "ir_cut_gpio", "#gpio-cells");
 
     if (gcount > IR_CUT_GPIO_MAX_NUM) {
         gcount = IR_CUT_GPIO_MAX_NUM;
@@ -621,7 +622,7 @@ static int32_t ir_cut_get_named_gpio(struct device_node *np)
     LOG(LOG_ERR, "ir cut gpio count = %d\n", gcount);
 
     for (i = 0; i < gcount; i++) {
-        gname = of_get_named_gpio_flags(np,"ir_cut_gpio",i,NULL);
+        gname = of_get_named_gpio(np,"ir_cut_gpio",i);
         sensor_bp->ir_gname[i] = gname;
         LOG(LOG_ERR, "ir cut gpio name [%d] = %d\n", i, sensor_bp->ir_gname[i]);
      }
@@ -756,7 +757,7 @@ static int32_t soc_sensor_probe( struct platform_device *pdev )
 
     soc_sensor.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
 
-    snprintf( soc_sensor.name, V4L2_SUBDEV_NAME_SIZE, "%s", V4L2_SOC_SENSOR_NAME );
+    snprintf( soc_sensor.name, sizeof(soc_sensor.name), "%s", V4L2_SOC_SENSOR_NAME );
 
     soc_sensor.dev = &pdev->dev;
     rc = v4l2_async_register_subdev( &soc_sensor );
@@ -769,7 +770,7 @@ static int32_t soc_sensor_probe( struct platform_device *pdev )
     return rc;
 }
 
-static int soc_sensor_remove( struct platform_device *pdev )
+static void soc_sensor_remove( struct platform_device *pdev )
 {
     device_remove_file(&pdev->dev, &dev_attr_sreg);
     device_remove_file(&pdev->dev, &dev_attr_info);
@@ -780,8 +781,6 @@ static int soc_sensor_remove( struct platform_device *pdev )
         kfree(sensor_bp);
         sensor_bp = NULL;
     }
-
-    return 0;
 }
 
 static const struct of_device_id sensor_dt_match[] = {
@@ -798,7 +797,7 @@ static struct platform_driver soc_sensor_driver = {
     },
 };
 
-int __init acamera_camera_sensor_init( void )
+static int __init acamera_camera_sensor_init( void )
 {
     LOG( LOG_ERR, "Sensor subdevice init" );
 
@@ -806,13 +805,15 @@ int __init acamera_camera_sensor_init( void )
 }
 
 
-void __exit acamera_camera_sensor_exit( void )
+static void __exit acamera_camera_sensor_exit( void )
 {
     LOG( LOG_INFO, "Sensor subdevice exit" );
 
     platform_driver_unregister( &soc_sensor_driver );
 }
 
+EXPORT_SYMBOL(acamera_camera_sensor_init);
+EXPORT_SYMBOL(acamera_camera_sensor_exit);
 
 module_init( acamera_camera_sensor_init );
 module_exit( acamera_camera_sensor_exit );

@@ -26,11 +26,11 @@
 uint32_t bus_addr[] = {
 0x0
 } ;
-static uint32_t sensor_counter = 0 ;
-static uint32_t lens_counter = 0 ;
+//static uint32_t sensor_counter = 0 ;
+//static uint32_t lens_counter = 0 ;
 
 
-int32_t get_next_sensor_bus_address(void) {
+/*static int32_t get_next_sensor_bus_address(void) {
     int32_t result = 0 ;
     if ( sensor_counter < FIRMWARE_CONTEXT_NUMBER ) {
         result = bus_addr[ sensor_counter ] ;
@@ -43,7 +43,7 @@ int32_t get_next_sensor_bus_address(void) {
 }
 
 
-int32_t get_next_lens_bus_address(void) {
+static int32_t get_next_lens_bus_address(void) {
     int32_t result = 0 ;
     if ( lens_counter < FIRMWARE_CONTEXT_NUMBER ) {
         result = bus_addr[ lens_counter ] ;
@@ -56,12 +56,12 @@ int32_t get_next_lens_bus_address(void) {
 }
 
 
-void reset_sensor_bus_counter(void) {
+static void reset_sensor_bus_counter(void) {
     sensor_counter = 0 ;
 }
 
 
-void reset_lens_bus_counter(void) {
+static void reset_lens_bus_counter(void) {
     lens_counter = 0 ;
-}
+}*/
 

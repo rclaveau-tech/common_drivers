@@ -107,7 +107,7 @@ static int ad82128_set_dai_fmt(struct snd_soc_dai *dai, unsigned int fmt)
 	u8 serial_format;
 	int ret;
 
-	if ((fmt & SND_SOC_DAIFMT_MASTER_MASK) != SND_SOC_DAIFMT_CBS_CFS) {
+	if ((fmt & SND_SOC_DAIFMT_MASTER_MASK) != SND_SOC_DAIFMT_CBC_CFC) {
 		dev_vdbg(component->dev, "DAI Format master is not found\n");
 		return -EINVAL;
 	}
@@ -756,7 +756,7 @@ static const struct snd_soc_component_driver soc_component_dev_ad82128 = {
 	.idle_bias_on = 1,
 	.use_pmdown_time = 1,
 	.endianness = 1,
-	.non_legacy_dai_naming = 1,
+	// .non_legacy_dai_naming = 1, # default to non legacy since kernel v6
 };
 
 /* PCM rates supported by the AD82128 driver */
@@ -837,14 +837,15 @@ static int ad82128_parse_dt(struct ad82128_data *ad82128,
 	return ret;
 }
 
-static int ad82128_probe(struct i2c_client *client,
-	const struct i2c_device_id *id)
+static int ad82128_probe(struct i2c_client *client)
 {
 	struct device *dev = &client->dev;
 	struct ad82128_data *data;
 	const struct regmap_config *regmap_config;
 	int ret;
 	int i;
+	struct i2c_device_id *id = NULL;
+	id->driver_data = AD82128;
 
 	data = devm_kzalloc(dev, sizeof(*data), GFP_KERNEL);
 	if (!data)

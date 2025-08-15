@@ -5,11 +5,11 @@
 #include <linux/platform_device.h>
 #include <linux/module.h>
 #include "clk-common-init.h"
-#include <linux/amlogic/gki_module.h>
+/* #include <linux/amlogic/gki_module.h> */
 
 int bypass_clk_disable;
 
-static int bypass_clk_disable_setup(char *buf)
+/*static int bypass_clk_disable_setup(char *buf)
 {
 	if (!buf)
 		return -EINVAL;
@@ -20,7 +20,7 @@ static int bypass_clk_disable_setup(char *buf)
 	}
 
 	return 0;
-}
+}*/
 __setup("bypass_clk_disable=", bypass_clk_disable_setup);
 
 static int __init clk_module_init(void)

@@ -27,6 +27,18 @@ struct cmd_param_val {
 extern struct cmd_param_val *cpv;
 extern int cpv_count;
 
+struct kernel_symbol {
+#ifdef CONFIG_HAVE_ARCH_PREL32_RELOCATIONS
+	int value_offset;
+	int name_offset;
+	int namespace_offset;
+#else
+	unsigned long value;
+	const char *name;
+	const char *namespace;
+#endif
+};
+
 #define __setup_gki_module(str, fn, early)			\
 	struct gki_module_setup_struct __gki_setup_##fn =        \
 		   {GKI_MODULE_SETUP_MAGIC1, GKI_MODULE_SETUP_MAGIC2,    \
@@ -64,7 +76,7 @@ void __module_init_hook(struct module *m);
 		__module_init_hook(THIS_MODULE); \
 		return initfn();     \
 	}	\
-	__CFI_ADDRESSABLE(init_module, __initdata);
+	___ADDRESSABLE(init_module, __initdata);
 
 #undef early_initcall
 #undef core_initcall

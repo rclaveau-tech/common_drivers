@@ -756,21 +756,18 @@ static bool aml_on_accessible_stack(const struct task_struct *tsk,
 				unsigned long sp, unsigned long size,
 				struct stack_info *info)
 {
-	if (info)
-		info->type = STACK_TYPE_UNKNOWN;
-
-	if (on_task_stack(tsk, sp, size, info))
+	if (on_task_stack(tsk, sp, size))
 		return true;
 	if (tsk != current || preemptible())
 		return false;
 #if !IS_MODULE(CONFIG_AMLOGIC_PAGE_TRACE)
-	if (on_irq_stack(sp, size, info))
+	if (on_irq_stack(sp, size))
 		return true;
-	if (on_overflow_stack(sp, size, info))
-		return true;
+	/*if (on_overflow_stack(sp, size, info))
+		return true;*/
 #endif
-	if (on_sdei_stack(sp, size, info))
-		return true;
+	/*if (on_sdei_stack(sp, size, info))
+		return true;*/
 
 	return false;
 }

@@ -595,7 +595,7 @@ static void sensor_test_pattern( void *ctx, uint8_t mode )
     return;
 }
 
-uint32_t write1_reg(unsigned long addr, uint32_t val)
+/*static uint32_t write1_reg(unsigned long addr, uint32_t val)
 {
     void __iomem *io_addr;
     io_addr = ioremap(addr, 8);
@@ -606,9 +606,9 @@ uint32_t write1_reg(unsigned long addr, uint32_t val)
     __raw_writel(val, io_addr);
     iounmap(io_addr);
     return 0;
-}
+}*/
 
-void sensor_deinit_ov08a10( void *ctx )
+static void sensor_deinit_ov08a10( void *ctx )
 {
     sensor_context_t *t_ctx = ctx;
 
@@ -705,7 +705,7 @@ static sensor_context_t *sensor_global_parameter(void* sbp)
 }
 
 //--------------------Initialization------------------------------------------------------------
-void sensor_init_ov08a10( void **ctx, sensor_control_t *ctrl, void *sbp )
+static void sensor_init_ov08a10( void **ctx, sensor_control_t *ctrl, void *sbp )
 {
     *ctx = sensor_global_parameter(sbp);
 
@@ -736,7 +736,7 @@ void sensor_init_ov08a10( void **ctx, sensor_control_t *ctrl, void *sbp )
     LOG(LOG_ERR, "%s: Success subdev init\n", __func__);
 }
 
-int sensor_detect_ov08a10( void* sbp)
+static int sensor_detect_ov08a10( void* sbp)
 {
     int ret = 0;
     sensor_ctx.sbp = sbp;
@@ -775,3 +775,7 @@ int sensor_detect_ov08a10( void* sbp)
     return ret;
 }
 //*************************************************************************************
+
+EXPORT_SYMBOL(sensor_init_ov08a10);
+EXPORT_SYMBOL(sensor_deinit_ov08a10);
+EXPORT_SYMBOL(sensor_detect_ov08a10);

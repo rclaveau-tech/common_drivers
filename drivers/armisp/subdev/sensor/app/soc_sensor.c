@@ -640,7 +640,7 @@ static int32_t ir_cut_get_named_gpio(struct device_node *np)
     memset(sensor_bp->ir_gname, 0, sizeof(sensor_bp->ir_gname)); //init sensor_bp->ir_gname
     sensor_bp->ir_gcount = 0;
 
-    gcount = of_gpio_named_count(np,"ir_cut_gpio");
+    gcount = of_count_phandle_with_args(np, "ir_cut_gpio", "#gpio-cells");
 
     if (gcount > IR_CUT_GPIO_MAX_NUM) {
         gcount = IR_CUT_GPIO_MAX_NUM;
@@ -651,7 +651,7 @@ static int32_t ir_cut_get_named_gpio(struct device_node *np)
     LOG(LOG_ERR, "ir cut gpio count = %d\n", gcount);
 
     for (i = 0; i < gcount; i++) {
-        gname = of_get_named_gpio_flags(np,"ir_cut_gpio",i,NULL);
+        gname = of_get_named_gpio(np,"ir_cut_gpio",i);
         sensor_bp->ir_gname[i] = gname;
         LOG(LOG_ERR, "ir cut gpio name [%d] = %d\n", i, sensor_bp->ir_gname[i]);
      }
@@ -837,7 +837,7 @@ static int32_t soc_sensor_probe( struct platform_device *pdev )
 
     soc_sensor.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
 
-    snprintf( soc_sensor.name, V4L2_SUBDEV_NAME_SIZE, "%s", V4L2_SOC_SENSOR_NAME );
+    snprintf( soc_sensor.name, sizeof(soc_sensor.name), "%s", V4L2_SOC_SENSOR_NAME );
 
     soc_sensor.dev = &pdev->dev;
     rc = v4l2_async_register_subdev( &soc_sensor );
@@ -858,7 +858,7 @@ static int32_t soc_sensor_probe( struct platform_device *pdev )
     return rc;
 }
 
-static int soc_sensor_remove( struct platform_device *pdev )
+static void soc_sensor_remove( struct platform_device *pdev )
 {
 #ifdef CONFIG_AMLOGIC_LEGACY_EARLY_SUSPEND
     unregister_early_suspend(&early_suspend);
@@ -874,7 +874,6 @@ static int soc_sensor_remove( struct platform_device *pdev )
         sensor_bp = NULL;
     }
     mipi_power_on(&pdev->dev);
-    return 0;
 }
 
 static const struct of_device_id sensor_dt_match[] = {

@@ -57,8 +57,7 @@ static const struct of_device_id arm_sensor_i2c_dt_match_sub[] = {
 	{.compatible = ARM_I2C_SENSOR_NAME_SUB},
 	{}};
 
-static int arm_sensor_i2c_probe_sub(struct i2c_client *client,
-									const struct i2c_device_id *dev_id)
+static int arm_sensor_i2c_probe_sub(struct i2c_client *client)
 {
 	int rtn = 0;
 	struct arm_i2c_sensor_ctrl *sensor_ctrl = NULL;
@@ -133,7 +132,7 @@ error:
 	return rtn;
 }
 
-static int arm_sensor_i2c_remove_sub(struct i2c_client *client)
+static void arm_sensor_i2c_remove_sub(struct i2c_client *client)
 {
 	struct arm_i2c_sensor_ctrl *s_ctrl = NULL;
 
@@ -142,7 +141,7 @@ static int arm_sensor_i2c_remove_sub(struct i2c_client *client)
 	if (s_ctrl == NULL)
 	{
 		pr_err("%s: Error client data is NULL\n", __func__);
-		return -EINVAL;
+		return;
 	}
 
 	// if(g_sensor_ctrl[0] == NULL)
@@ -153,8 +152,6 @@ static int arm_sensor_i2c_remove_sub(struct i2c_client *client)
 	g_sensor_ctrl[1] = s_ctrl;
 
 	pr_info("%s: remove i2c sensor sub\n", __func__);
-
-	return 0;
 }
 
 static const struct i2c_device_id arm_sensor_i2c_id[] = {
@@ -165,8 +162,7 @@ static const struct of_device_id arm_sensor_i2c_dt_match[] = {
 	{.compatible = ARM_I2C_SENSOR_NAME},
 	{}};
 
-static int arm_sensor_i2c_probe(struct i2c_client *client,
-								const struct i2c_device_id *dev_id)
+static int arm_sensor_i2c_probe(struct i2c_client *client)
 {
 	int rtn = 0;
 	struct arm_i2c_sensor_ctrl *sensor_ctrl = NULL;
@@ -241,7 +237,7 @@ error:
 	return rtn;
 }
 
-static int arm_sensor_i2c_remove(struct i2c_client *client)
+static void arm_sensor_i2c_remove(struct i2c_client *client)
 {
 	struct arm_i2c_sensor_ctrl *s_ctrl = NULL;
 
@@ -250,7 +246,7 @@ static int arm_sensor_i2c_remove(struct i2c_client *client)
 	if (s_ctrl == NULL)
 	{
 		pr_err("%s: Error client data is NULL\n", __func__);
-		return -EINVAL;
+		return;
 	}
 
 	// if(g_sensor_ctrl[1] == NULL)
@@ -261,8 +257,6 @@ static int arm_sensor_i2c_remove(struct i2c_client *client)
 	g_sensor_ctrl[0] = s_ctrl;
 
 	pr_err("%s: DEBUG: remove i2c sensor\n", __func__);
-
-	return 0;
 }
 
 static struct i2c_driver arm_sensor_i2c_driver_sub = {
@@ -422,12 +416,12 @@ uint8_t system_i2c_read(uint32_t bus, uint32_t phy_addr, uint8_t *data, uint32_t
 	return I2C_OK;
 }
 
-uint32_t IORD(uint32_t BASE, uint32_t REGNUM)
+/*static uint32_t IORD(uint32_t BASE, uint32_t REGNUM)
 {
 	return 0;
 }
 
-void IOWR(uint32_t BASE, uint32_t REGNUM, uint32_t DATA)
+static void IOWR(uint32_t BASE, uint32_t REGNUM, uint32_t DATA)
 {
-}
+}*/
 #endif

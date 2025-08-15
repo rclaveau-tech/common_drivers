@@ -393,7 +393,7 @@ int am_adap_get_depth(uint8_t channel)
 	return depth;
 }
 
-int am_disable_irq(uint8_t channel)
+static int am_disable_irq(uint8_t channel)
 {
 	// disable irq mask
 	if (channel == ADAP0_PATH)
@@ -416,7 +416,7 @@ int am_disable_irq(uint8_t channel)
  *========================AM ADAPTER FRONTEND INTERFACE========================
  */
 
-void am_adap_frontend_start(uint8_t channel)
+static void am_adap_frontend_start(uint8_t channel)
 {
 	int width = adap_fsm[channel].para.img.width;
 	int depth, val;
@@ -431,7 +431,7 @@ void am_adap_frontend_start(uint8_t channel)
 	adap_wr_reg_bits(CSI2_GEN_CTRL0 + FTE1_OFFSET * channel, FRONTEND_IO, 0x0f, 0, 4);
 }
 
-int am_adap_frontend_init(uint8_t channel)
+static int am_adap_frontend_init(uint8_t channel)
 {
 	int long_exp_offset = adap_fsm[channel].para.offset.long_offset;
 	int short_exp_offset = adap_fsm[channel].para.offset.short_offset;
@@ -586,7 +586,7 @@ int am_adap_frontend_init(uint8_t channel)
  *========================AM ADAPTER READER INTERFACE==========================
  */
 
-void am_adap_reader_start(uint8_t channel)
+static void am_adap_reader_start(uint8_t channel)
 {
 	int height = adap_fsm[channel].para.img.height;
 	int width = adap_fsm[channel].para.img.width;
@@ -623,7 +623,7 @@ void am_adap_reader_start(uint8_t channel)
 	}
 }
 
-int am_adap_reader_init(uint8_t channel)
+static int am_adap_reader_init(uint8_t channel)
 {
 	if (channel == ADAP0_PATH)
 	{
@@ -705,7 +705,7 @@ int am_adap_reader_init(uint8_t channel)
  *========================AM ADAPTER PIXEL INTERFACE===========================
  */
 
-void am_adap_pixel_start(uint8_t channel)
+static void am_adap_pixel_start(uint8_t channel)
 {
 	int fmt = adap_fsm[channel].para.fmt;
 	int width = adap_fsm[channel].para.img.width;
@@ -738,7 +738,7 @@ void am_adap_pixel_start(uint8_t channel)
 	}
 }
 
-int am_adap_pixel_init(uint8_t channel)
+static int am_adap_pixel_init(uint8_t channel)
 {
 	if (channel == ADAP0_PATH)
 	{
@@ -810,7 +810,7 @@ int am_adap_pixel_init(uint8_t channel)
  *========================AM ADAPTER ALIGNMENT INTERFACE=======================
  */
 
-void am_adap_alig_start(uint8_t channel)
+static void am_adap_alig_start(uint8_t channel)
 {
 	int width, height, alig_width, alig_height, val;
 	width = adap_fsm[channel].para.img.width;
@@ -897,7 +897,7 @@ void am_adap_alig_start(uint8_t channel)
 	}
 }
 
-int am_adap_alig_init(uint8_t channel)
+static int am_adap_alig_init(uint8_t channel)
 {
 	if (channel == ADAP0_PATH)
 	{
@@ -1214,7 +1214,7 @@ static int adap_stream_copy_thread(void *data)
 	return 0;
 }
 
-int am_adap_alloc_mem(uint8_t channel)
+static int am_adap_alloc_mem(uint8_t channel)
 {
 	if (adap_fsm[channel].para.mode == DDR_MODE)
 	{
@@ -1309,7 +1309,7 @@ int am_adap_alloc_mem(uint8_t channel)
 	return 0;
 }
 
-int am_adap_free_mem(uint8_t channel)
+static int am_adap_free_mem(uint8_t channel)
 {
 	if (adap_fsm[channel].para.mode == DDR_MODE)
 	{

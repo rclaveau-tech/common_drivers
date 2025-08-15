@@ -334,13 +334,13 @@ static int adlak_malloc_share_through_dma(struct adlak_mem *mm, struct adlak_mem
     return ERR(NONE);
 }
 
-static void inline adlak_cma_claim_dev(void) {
+inline static void adlak_cma_claim_dev(void) {
     AML_LOG_DEBUG("%s[+]", __func__);
     adlak_os_mutex_lock(&ptr_mm_cma->mutex);
     AML_LOG_DEBUG("%s[-]", __func__);
 }
 
-static void inline adlak_cma_release_dev(void) {
+inline static void adlak_cma_release_dev(void) {
     AML_LOG_DEBUG("%s[+]", __func__);
     adlak_os_mutex_unlock(&ptr_mm_cma->mutex);
     AML_LOG_DEBUG("%s[-]", __func__);

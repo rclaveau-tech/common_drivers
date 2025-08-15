@@ -39,6 +39,8 @@ struct audiolocker {
 /*#define AUDIOLOCKER_TEST*/
 
 struct audiolocker *s_locker;
+void audio_locker_set(int enable);
+int audio_locker_get(void);
 
 static int audiolocker_pll_config(struct audiolocker *p_audiolocker)
 {
@@ -337,15 +339,19 @@ static struct platform_driver audiolocker_platform_driver = {
 };
 
 #ifdef MODULE
-int __init audio_locker_init(void)
+static int __init audio_locker_init(void)
 {
 	return platform_driver_register(&(audiolocker_platform_driver));
 }
 
-void __exit audio_locker_exit(void)
+static void __exit audio_locker_exit(void)
 {
 	platform_driver_unregister(&audiolocker_platform_driver);
 }
+
+EXPORT_SYMBOL(audio_locker_init);
+EXPORT_SYMBOL(audio_locker_exit);
+
 #else
 module_platform_driver(audiolocker_platform_driver);
 #endif

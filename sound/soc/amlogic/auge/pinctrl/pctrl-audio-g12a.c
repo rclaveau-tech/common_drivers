@@ -260,15 +260,18 @@ static struct platform_driver g12a_audio_pinctrl_driver = {
 	.probe  = g12a_audio_pinctrl_probe,
 };
 
-int __init g12a_audio_pinctrl_init(void)
+static int __init g12a_audio_pinctrl_init(void)
 {
 	return platform_driver_register(&g12a_audio_pinctrl_driver);
 }
 
-void __exit g12a_audio_pinctrl_exit(void)
+static void __exit g12a_audio_pinctrl_exit(void)
 {
 	platform_driver_unregister(&g12a_audio_pinctrl_driver);
 }
+
+EXPORT_SYMBOL(g12a_audio_pinctrl_init);
+EXPORT_SYMBOL(g12a_audio_pinctrl_exit);
 
 #ifndef MODULE
 module_init(g12a_audio_pinctrl_init);

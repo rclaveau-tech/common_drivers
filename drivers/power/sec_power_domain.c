@@ -1006,12 +1006,15 @@ static struct platform_driver sec_pd_driver = {
 	},
 };
 
-int __init sec_power_domain_init(void)
+static int __init sec_power_domain_init(void)
 {
 	return platform_driver_register(&sec_pd_driver);
 }
 
-void __exit sec_power_domain_exit(void)
+static void __exit sec_power_domain_exit(void)
 {
 	platform_driver_unregister(&sec_pd_driver);
 }
+
+EXPORT_SYMBOL(sec_power_domain_init);
+EXPORT_SYMBOL(sec_power_domain_exit);

@@ -363,8 +363,7 @@ static int imx290_get_fmt(struct v4l2_subdev *sd,
 	mutex_lock(&imx290->lock);
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		framefmt = v4l2_subdev_get_try_format(&imx290->sd, cfg,
-											  fmt->pad);
+		framefmt = v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 	else
 		framefmt = &imx290->current_format;
 
@@ -444,7 +443,7 @@ static int imx290_set_fmt(struct v4l2_subdev *sd,
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
 		dev_info(imx290->dev, "try format \n");
-		format = v4l2_subdev_get_try_format(sd, cfg, fmt->pad);
+		format = v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 		mutex_unlock(&imx290->lock);
 		return 0;
 	} else {
@@ -498,7 +497,7 @@ static int imx290_set_fmt(struct v4l2_subdev *sd,
 }
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
-int imx290_get_selection(struct v4l2_subdev *sd,
+static int imx290_get_selection(struct v4l2_subdev *sd,
 						 struct v4l2_subdev_state *cfg,
 						 struct v4l2_subdev_selection *sel)
 #else
@@ -658,13 +657,13 @@ static int imx290_log_status(struct v4l2_subdev *sd)
 	return 0;
 }
 
-int imx290_sbdev_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
+static int imx290_sbdev_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 {
 	struct imx290 *imx290 = to_imx290(sd);
 	imx290_power_on(imx290->dev, imx290->gpio);
 	return 0;
 }
-int imx290_sbdev_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
+static int imx290_sbdev_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 {
 	struct imx290 *imx290 = to_imx290(sd);
 	imx290_set_stream(sd, 0);
@@ -684,7 +683,7 @@ static const struct v4l2_subdev_video_ops imx290_video_ops = {
 };
 
 static const struct v4l2_subdev_pad_ops imx290_pad_ops = {
-	.init_cfg = imx290_entity_init_cfg,
+	//.init_cfg = imx290_entity_init_cfg,
 	.enum_mbus_code = imx290_enum_mbus_code,
 	.enum_frame_size = imx290_enum_frame_size,
 	.get_selection = imx290_get_selection,
@@ -743,7 +742,7 @@ static struct v4l2_ctrl_config nlane_cfg = {
 	.def = 4,
 };
 
-int imx290_ctrls_init(struct imx290 *imx290)
+static int imx290_ctrls_init(struct imx290 *imx290)
 {
 	int rtn = 0;
 
@@ -788,7 +787,7 @@ int imx290_ctrls_init(struct imx290 *imx290)
 	return rtn;
 }
 
-int imx290_register_subdev(void *sensor)
+static int imx290_register_subdev(void *sensor)
 {
 	int rtn = 0;
 	struct imx290 *imx290 = (struct imx290 *)sensor;

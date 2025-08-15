@@ -780,6 +780,7 @@ static LookupTable calibration_pf_correction = {.ptr = _calibration_pf_correctio
 static LookupTable calibration_fc_correction = {.ptr = _calibration_fc_correction, .rows = sizeof(_calibration_fc_correction) / sizeof(_calibration_fc_correction[0]), .cols = 4, .width = sizeof(_calibration_fc_correction[0][0])};
 static LookupTable calibration_daynight_detect = {.ptr = _calibration_daynight_detect, .rows = 1, .cols = sizeof(_calibration_daynight_detect) / sizeof(_calibration_daynight_detect[0]), .width = sizeof(_calibration_daynight_detect[0])};
 
+uint32_t get_calibrations_dynamic_linear_sc4238_night( ACameraCalibrations *c );
 uint32_t get_calibrations_dynamic_linear_sc4238_night( ACameraCalibrations *c )
 {
     uint32_t result = 0;

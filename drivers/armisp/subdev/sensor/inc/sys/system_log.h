@@ -29,7 +29,7 @@
 #include "system_stdlib.h" //system_memcpy
 //#include "asm/string.h"
 //#include <stdio.h>
-#include <stdarg.h>
+#include <linux/stdarg.h>
 #include <linux/string.h>
 
 //int printk(const char*, ...);

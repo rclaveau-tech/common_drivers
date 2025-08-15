@@ -326,6 +326,7 @@ static LookupTable calibration_ca_correction = {.ptr = _calibration_ca_correctio
 static LookupTable calibration_ca_correction_mem = {.ptr = _calibration_ca_correction_mem, .cols = 10, .rows = sizeof( _calibration_ca_correction_mem ) / sizeof( _calibration_ca_correction_mem[0] ), .width = sizeof( _calibration_ca_correction_mem[0][0] )};
 static LookupTable calibration_lut3d_mem = {.ptr = _calibration_lut3d_mem, .rows = 1, .cols = sizeof( _calibration_lut3d_mem ) / sizeof( _calibration_lut3d_mem[0] ), .width = sizeof( _calibration_lut3d_mem[0] )};
 
+uint32_t get_calibrations_static_linear_sc8238cs_tv( ACameraCalibrations *c );
 uint32_t get_calibrations_static_linear_sc8238cs_tv( ACameraCalibrations *c )
 {
     uint32_t result = 0;

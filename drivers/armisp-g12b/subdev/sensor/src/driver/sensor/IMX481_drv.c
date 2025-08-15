@@ -366,7 +366,7 @@ static void sensor_test_pattern( void *ctx, uint8_t mode )
 {
 }
 
-void sensor_deinit_imx481( void *ctx )
+static void sensor_deinit_imx481( void *ctx )
 {
     sensor_context_t *t_ctx = ctx;
 
@@ -448,7 +448,7 @@ static sensor_context_t *sensor_global_parameter(void* sbp)
 }
 
 //--------------------Initialization------------------------------------------------------------
-void sensor_init_imx481( void **ctx, sensor_control_t *ctrl, void* sbp)
+static void sensor_init_imx481( void **ctx, sensor_control_t *ctrl, void* sbp)
 {
     *ctx = sensor_global_parameter(sbp);
 
@@ -476,7 +476,7 @@ void sensor_init_imx481( void **ctx, sensor_control_t *ctrl, void* sbp)
     LOG(LOG_ERR, "%s: Success subdev init\n", __func__);
 }
 
-int sensor_detect_imx481( void* sbp)
+static int sensor_detect_imx481( void* sbp)
 {
     int ret = 0;
     sensor_bringup_t* sensor_bp = (sensor_bringup_t*) sbp;
@@ -514,5 +514,9 @@ int sensor_detect_imx481( void* sbp)
     reset_am_disable(sensor_bp);
     return ret;
 }
+
+EXPORT_SYMBOL(sensor_init_imx481);
+EXPORT_SYMBOL(sensor_deinit_imx481);
+EXPORT_SYMBOL(sensor_detect_imx481);
 
 //*************************************************************************************

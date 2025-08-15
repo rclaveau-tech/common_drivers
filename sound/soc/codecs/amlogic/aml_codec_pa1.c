@@ -188,7 +188,7 @@ static int pa1_mixer_aed_set_mute(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-void pa1_get_mixer_gain_value(struct snd_soc_component *component, int addr, unsigned int *value)
+static void pa1_get_mixer_gain_value(struct snd_soc_component *component, int addr, unsigned int *value)
 {
 	dsp_conversion_to_top(component);
 	snd_soc_component_update_bits(component, PA1_DSP_MISC0, (0x1 << 6) | (0x1 << 0),
@@ -205,7 +205,7 @@ void pa1_get_mixer_gain_value(struct snd_soc_component *component, int addr, uns
 	snd_soc_component_update_bits(component, PA1_DSP_MISC0, 0x1 << 6, 0x1 << 6);
 }
 
-void pa1_set_mixer_gain_value(struct snd_soc_component *component, int addr,
+static void pa1_set_mixer_gain_value(struct snd_soc_component *component, int addr,
 						unsigned int value, bool ctrl_flag)
 {
 	unsigned int another_val = 0;
@@ -317,7 +317,7 @@ static int pa1_str2int(char *str, unsigned int *data, int size)
 	return num;
 }
 
-void pa1_aed_set_volume(struct snd_soc_component *component, unsigned int master_vol,
+static void pa1_aed_set_volume(struct snd_soc_component *component, unsigned int master_vol,
 			unsigned int lch_vol, unsigned int rch_vol)
 {
 	top_conversion_to_dsp(component);
@@ -338,7 +338,7 @@ void pa1_aed_set_volume(struct snd_soc_component *component, unsigned int master
 	pa1_acodec_mute(component, 0);
 }
 
-void pa1_aed_eq_taps(struct snd_soc_component *component, unsigned int eq_taps)
+static void pa1_aed_eq_taps(struct snd_soc_component *component, unsigned int eq_taps)
 {
 	if (eq_taps > 15) {
 		pr_err("Error EQ1_Tap = %d\n", eq_taps);
@@ -349,7 +349,7 @@ void pa1_aed_eq_taps(struct snd_soc_component *component, unsigned int eq_taps)
 	snd_soc_component_update_bits(component, PA1_AED_STATUS_CTRL, 0x1f << 8, eq_taps << 8);
 }
 
-void pa1_aed_get_ram_coeff(struct snd_soc_component *component, int add,
+static void pa1_aed_get_ram_coeff(struct snd_soc_component *component, int add,
 				int len, unsigned int *params)
 {
 	int i;
@@ -361,7 +361,7 @@ void pa1_aed_get_ram_coeff(struct snd_soc_component *component, int add,
 		*p = snd_soc_component_read(component, PA1_AEQ_COEF_DATA);
 }
 
-void pa1_aed_set_ram_coeff(struct snd_soc_component *component, int add,
+static void pa1_aed_set_ram_coeff(struct snd_soc_component *component, int add,
 				int len, unsigned int *params)
 {
 	int i;
@@ -373,7 +373,7 @@ void pa1_aed_set_ram_coeff(struct snd_soc_component *component, int add,
 		snd_soc_component_write(component, PA1_AEQ_COEF_DATA, *p);
 }
 
-void pa1_aed_set_fullband_drc_coeff(struct snd_soc_component *component, unsigned int *params)
+static void pa1_aed_set_fullband_drc_coeff(struct snd_soc_component *component, unsigned int *params)
 {
 	unsigned int *p = params;
 	int i;
@@ -384,7 +384,7 @@ void pa1_aed_set_fullband_drc_coeff(struct snd_soc_component *component, unsigne
 		snd_soc_component_write(component, PA1_AEQ_COEF_DATA, *p);
 }
 
-void pa1_aed_set_mixer_params(struct snd_soc_component *component)
+static void pa1_aed_set_mixer_params(struct snd_soc_component *component)
 {
 	unsigned int *p = &PA1_MIXER_PARAM[0];
 
@@ -432,7 +432,7 @@ static void pa1_aed_set_filter_data(struct snd_soc_component *component)
 	}
 }
 
-void pa1_aed_set_multiband_drc_coeff(struct snd_soc_component *component, int band)
+static void pa1_aed_set_multiband_drc_coeff(struct snd_soc_component *component, int band)
 {
 	int i, ctrl_v;
 	unsigned int *p = &PA1_MULTIBAND_DRC_COEFF[0];
@@ -457,7 +457,7 @@ void pa1_aed_set_multiband_drc_coeff(struct snd_soc_component *component, int ba
 		snd_soc_component_write(component, PA1_AEQ_COEF_DATA, *p);
 }
 
-void pa1_aed_get_multiband_drc_coeff(struct snd_soc_component *component,
+static void pa1_aed_get_multiband_drc_coeff(struct snd_soc_component *component,
 				int band, unsigned int *params)
 {
 	int i, ctrl_v;
@@ -480,7 +480,7 @@ void pa1_aed_get_multiband_drc_coeff(struct snd_soc_component *component,
 		*p = snd_soc_component_read(component, PA1_AEQ_COEF_DATA);
 }
 
-void pa1_aed_set_multiband_drc_param(struct snd_soc_component *component)
+static void pa1_aed_set_multiband_drc_param(struct snd_soc_component *component)
 {
 	int i;
 
@@ -1301,8 +1301,7 @@ static int pa1_acodec_parse_dt(struct pa1_acodec_priv *pa1_acodec,
 	return ret;
 }
 
-static int pa1_acodec_i2c_probe(struct i2c_client *i2c,
-			      const struct i2c_device_id *id)
+static int pa1_acodec_i2c_probe(struct i2c_client *i2c)
 {
 	struct regmap *regmap;
 	struct regmap_config config = pa1_acodec_regmap;
@@ -1346,10 +1345,9 @@ static int pa1_acodec_i2c_probe(struct i2c_client *i2c,
 	return ret;
 }
 
-static int pa1_acodec_i2c_remove(struct i2c_client *i2c)
+static void pa1_acodec_i2c_remove(struct i2c_client *i2c)
 {
 	devm_kfree(&i2c->dev, i2c_get_clientdata(i2c));
-	return 0;
 }
 
 static void pa1_acodec_i2c_shutdown(struct i2c_client *i2c)

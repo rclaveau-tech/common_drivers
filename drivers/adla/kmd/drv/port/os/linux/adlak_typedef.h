@@ -24,7 +24,7 @@
 /***************************** Include Files *********************************/
 
 #include <linux/types.h>
-#include <stddef.h>
+//#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

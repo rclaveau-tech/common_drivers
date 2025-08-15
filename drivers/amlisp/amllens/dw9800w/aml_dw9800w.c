@@ -241,14 +241,12 @@ err_cleanup:
 	return ret;
 }
 
-static int dw9800w_remove(struct i2c_client *client)
+static void dw9800w_remove(struct i2c_client *client)
 {
 	struct v4l2_subdev *sd = i2c_get_clientdata(client);
 	struct dw9800w_device *dw9800w_dev = sd_to_dw9800w_vcm(sd);
 
 	dw9800w_subdev_cleanup(dw9800w_dev);
-
-	return 0;
 }
 
 static int __maybe_unused dw9800w_vcm_suspend(struct device *dev)
@@ -322,7 +320,7 @@ static struct i2c_driver dw9800w_i2c_driver = {
 		.pm = &dw9800w_pm_ops,
 		.of_match_table = dw9800w_of_table,
 	},
-	.probe_new = dw9800w_probe,
+	.probe = dw9800w_probe,
 	.remove = dw9800w_remove,
 };
 

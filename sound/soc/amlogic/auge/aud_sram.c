@@ -80,15 +80,18 @@ struct platform_driver aud_sram_iomap_platform_driver = {
 	.probe	 = aud_sram_iomap_probe,
 };
 
-int __init aud_sram_init(void)
+static int __init aud_sram_init(void)
 {
 	return platform_driver_register(&aud_sram_iomap_platform_driver);
 }
 
-void __exit aud_sram_exit(void)
+static void __exit aud_sram_exit(void)
 {
 	platform_driver_unregister(&aud_sram_iomap_platform_driver);
 }
+
+EXPORT_SYMBOL(aud_sram_init);
+EXPORT_SYMBOL(aud_sram_exit);
 
 #ifndef MODULE
 module_init(aud_sram_init);

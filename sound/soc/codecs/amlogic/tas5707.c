@@ -224,7 +224,7 @@ static int tas5707_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 static int tas5707_set_dai_fmt(struct snd_soc_dai *codec_dai, unsigned int fmt)
 {
 	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
-	case SND_SOC_DAIFMT_CBS_CFS:
+	case SND_SOC_DAIFMT_CBC_CFC:
 		break;
 	default:
 		return 0;//-EINVAL;
@@ -804,8 +804,7 @@ static int tas5707_parse_dt(struct tas5707_priv *tas5707,
 	return ret;
 }
 
-static int tas5707_i2c_probe(struct i2c_client *i2c,
-			     const struct i2c_device_id *id)
+static int tas5707_i2c_probe(struct i2c_client *i2c)
 {
 	struct tas5707_priv *tas5707;
 	struct tas57xx_platform_data *pdata;
@@ -857,11 +856,9 @@ static int tas5707_i2c_probe(struct i2c_client *i2c,
 	return ret;
 }
 
-static int tas5707_i2c_remove(struct i2c_client *client)
+static void tas5707_i2c_remove(struct i2c_client *client)
 {
 	snd_soc_unregister_component(&client->dev);
-
-	return 0;
 }
 
 static const struct i2c_device_id tas5707_i2c_id[] = {

@@ -414,7 +414,7 @@ static int imx577_get_pad_format(struct v4l2_subdev *sd,
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
 		struct v4l2_mbus_framefmt *framefmt;
 
-		framefmt = v4l2_subdev_get_try_format(sd, cfg, fmt->pad);
+		framefmt = v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 		fmt->format = *framefmt;
 	} else {
 		imx577_fill_pad_format(imx577, imx577->current_mode, fmt);
@@ -457,7 +457,7 @@ static int imx577_set_pad_format(struct v4l2_subdev *sd,
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
 		struct v4l2_mbus_framefmt *framefmt;
 
-		framefmt = v4l2_subdev_get_try_format(sd, cfg, fmt->pad);
+		framefmt = v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 		*framefmt = fmt->format;
 	} else {
 		imx577->current_mode = mode;
@@ -657,13 +657,13 @@ static int imx577_log_status(struct v4l2_subdev *sd)
 	return 0;
 }
 
-int imx577_sbdev_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
+static int imx577_sbdev_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
 	struct imx577 *imx577 = to_imx577(sd);
 	imx577_power_on(imx577->dev, imx577->gpio);
 	return 0;
 }
 
-int imx577_sbdev_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
+static int imx577_sbdev_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
 	struct imx577 *imx577 = to_imx577(sd);
 
 	imx577_stop_streaming(imx577);
@@ -685,7 +685,7 @@ static const struct v4l2_subdev_video_ops imx577_video_ops = {
 };
 
 static const struct v4l2_subdev_pad_ops imx577_pad_ops = {
-	.init_cfg = imx577_init_pad_cfg,
+	//.init_cfg = imx577_init_pad_cfg,
 	.enum_mbus_code = imx577_enum_mbus_code,
 	.enum_frame_size = imx577_enum_frame_size,
 	.get_fmt = imx577_get_pad_format,

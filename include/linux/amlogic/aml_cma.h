@@ -52,7 +52,7 @@ struct page *get_compact_page(struct page *migratepage,
 
 void aml_cma_free(unsigned long pfn, unsigned int nr_pages, int update);
 
-void show_page(struct page *page);
+void show_page(struct folio *folio);
 
 struct page *compaction_cma_alloc(struct page *migratepage,
 				  unsigned long data,

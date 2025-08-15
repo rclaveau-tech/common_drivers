@@ -1022,7 +1022,7 @@ err_thermal:
 	return ret;
 }
 
-static int meson_tsensor_remove(struct platform_device *pdev)
+static void meson_tsensor_remove(struct platform_device *pdev)
 {
 	struct meson_tsensor_data *data = platform_get_drvdata(pdev);
 	struct thermal_zone_device *tzd = data->tzd;
@@ -1031,7 +1031,6 @@ static int meson_tsensor_remove(struct platform_device *pdev)
 	meson_tsensor_control(pdev, false);
 	clk_unprepare(data->clk);
 	devm_kfree(&pdev->dev, data);
-	return 0;
 }
 
 static int __maybe_unused meson_tsensor_hw_resume(struct device *dev)

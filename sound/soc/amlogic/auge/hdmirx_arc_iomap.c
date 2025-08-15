@@ -20,13 +20,13 @@
 
 struct regmap *hdmirx_arc_map;
 
-void hdmirx_arc_write_reg(int reg, int value)
+static void hdmirx_arc_write_reg(int reg, int value)
 {
 	pr_info("%s reg 0x%x, value 0x%x\n", __func__, reg, value);
 	mmio_write(hdmirx_arc_map, reg, value);
 }
 
-void hdmirx_arc_update_reg(int reg, int mask, int value)
+static void hdmirx_arc_update_reg(int reg, int mask, int value)
 {
 	pr_info("%s reg 0x%x, mask 0x%x, value 0x%x\n", __func__, reg, mask, value);
 	mmio_update_bits(hdmirx_arc_map, reg, mask, value);
@@ -59,15 +59,20 @@ static  struct platform_driver hdmirx_arc_iomap_platform_driver = {
 	},
 };
 
-int __init auge_hdmirx_arc_iomap_init(void)
+static int __init auge_hdmirx_arc_iomap_init(void)
 {
 	return platform_driver_register(&hdmirx_arc_iomap_platform_driver);
 }
 
-void __exit auge_hdmirx_arc_iomap_exit(void)
+static void __exit auge_hdmirx_arc_iomap_exit(void)
 {
 	platform_driver_unregister(&hdmirx_arc_iomap_platform_driver);
 }
+
+EXPORT_SYMBOL(auge_hdmirx_arc_iomap_init);
+EXPORT_SYMBOL(auge_hdmirx_arc_iomap_exit);
+EXPORT_SYMBOL(hdmirx_arc_write_reg);
+EXPORT_SYMBOL(hdmirx_arc_update_reg);
 
 #ifndef MODULE
 core_initcall(auge_hdmirx_arc_iomap_init);

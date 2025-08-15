@@ -1774,7 +1774,7 @@ int isp_v4l2_stream_enum_format( isp_v4l2_stream_t *pstream, struct v4l2_fmtdesc
     f->flags = 0;
 
     /* copy description */
-    strlcpy( f->description, fmt->name, desc_size );
+    strncpy( f->description, fmt->name, desc_size );
 
     /* copy format code */
     f->pixelformat = fmt->fourcc;

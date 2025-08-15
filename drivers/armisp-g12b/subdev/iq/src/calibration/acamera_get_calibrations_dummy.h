@@ -129,3 +129,31 @@ extern uint32_t get_calibrations_static_linear_os04a10_tv( ACameraCalibrations *
 extern uint32_t get_calibrations_dynamic_linear_os04a10_tv( ACameraCalibrations *c );
 extern uint32_t get_calibrations_static_fs_lin_os04a10_tv( ACameraCalibrations *c );
 extern uint32_t get_calibrations_dynamic_fs_lin_os04a10_tv( ACameraCalibrations *c );
+
+
+uint32_t get_calibrations_imx224( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_imx227( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_imx290( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+
+uint32_t get_calibrations_imx335( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_imx415( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+
+uint32_t get_calibrations_imx290_lens_8mm( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_imx290_slt( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_imx290_lens_4mm( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_os08a10_ipc( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_os08a10_slt( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_os04a10_tv( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+
+uint32_t get_calibrations_os08a10_tv( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_os08a10_panel( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_imx481( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_imx307_demo( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_imx307( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_ov13858( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_sc2232h( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_sc4238( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_sc2335( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_imx334( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_cs8328cs_tv( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );
+uint32_t get_calibrations_ov2718( uint32_t ctx_id, void *sensor_arg, ACameraCalibrations *c );

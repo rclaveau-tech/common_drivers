@@ -283,8 +283,7 @@ static int imx415_get_fmt(struct v4l2_subdev *sd,
 	mutex_lock(&imx415->lock);
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		framefmt = v4l2_subdev_get_try_format(&imx415->sd, cfg,
-						      fmt->pad);
+		framefmt = v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 	else
 		framefmt = &imx415->current_format;
 
@@ -362,7 +361,7 @@ static int imx415_set_fmt(struct v4l2_subdev *sd,
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
 		dev_info(imx415->dev, "try format \n");
-		format = v4l2_subdev_get_try_format(sd, cfg, fmt->pad);
+		format = v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 		mutex_unlock(&imx415->lock);
 		return 0;
 	} else {
@@ -411,7 +410,7 @@ static int imx415_set_fmt(struct v4l2_subdev *sd,
 }
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
-int imx415_get_selection(struct v4l2_subdev *sd,
+static int imx415_get_selection(struct v4l2_subdev *sd,
 			     struct v4l2_subdev_state *cfg,
 			     struct v4l2_subdev_selection *sel)
 #else
@@ -569,7 +568,7 @@ static int imx415_log_status(struct v4l2_subdev *sd)
 	return 0;
 }
 
-int imx415_sbdev_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
+static int imx415_sbdev_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
 	struct imx415 *imx415 = to_imx415(sd);
 
 	imx415_power_on(imx415->dev, imx415->gpio);
@@ -577,7 +576,7 @@ int imx415_sbdev_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
 	return 0;
 }
 
-int imx415_sbdev_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
+static int imx415_sbdev_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh) {
 	struct imx415 *imx415 = to_imx415(sd);
 
 	imx415_stop_streaming(imx415);
@@ -599,7 +598,7 @@ static const struct v4l2_subdev_video_ops imx415_video_ops = {
 };
 
 static const struct v4l2_subdev_pad_ops imx415_pad_ops = {
-	.init_cfg = imx415_entity_init_cfg,
+	//.init_cfg = imx415_entity_init_cfg,
 	.enum_mbus_code = imx415_enum_mbus_code,
 	.enum_frame_size = imx415_enum_frame_size,
 	.get_selection = imx415_get_selection,

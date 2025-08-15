@@ -269,10 +269,10 @@ static int aml_T9015_set_dai_fmt(struct snd_soc_dai *dai, unsigned int fmt)
 	pr_debug("%s, format:%x, codec = %p\n", __func__, fmt, component);
 
 	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
-	case SND_SOC_DAIFMT_CBM_CFM:
+	case SND_SOC_DAIFMT_CBP_CFP:
 		val |= (0x1 << I2S_MODE);
 		break;
-	case SND_SOC_DAIFMT_CBS_CFS:
+	case SND_SOC_DAIFMT_CBC_CFC:
 		val &= ~(0x1 << I2S_MODE);
 		break;
 	default:

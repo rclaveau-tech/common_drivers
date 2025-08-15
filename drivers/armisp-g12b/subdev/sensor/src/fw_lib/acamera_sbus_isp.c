@@ -56,8 +56,10 @@ static void isp_io_write_sample( acamera_sbus_t *p_bus, uintptr_t addr, uint32_t
     }
 }
 
-void acamera_sbus_isp_init( acamera_sbus_t *p_bus )
+static void acamera_sbus_isp_init( acamera_sbus_t *p_bus )
 {
     p_bus->read_sample = isp_io_read_sample;
     p_bus->write_sample = isp_io_write_sample;
 }
+
+EXPORT_SYMBOL(acamera_sbus_isp_init);

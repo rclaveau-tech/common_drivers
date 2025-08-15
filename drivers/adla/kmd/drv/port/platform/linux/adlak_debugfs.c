@@ -545,6 +545,7 @@ static int adlak_get_utilization(struct adlak_device *padlak, char *buf, size_t 
         case 0x00000200 :
         case 0x00000300 :
             dev_macc_count = 2048 * cur_freq; //Mops
+            break;
         case 0x00000301 :
             dev_macc_count = 2048 * s6_hw_info.max_frq; //Mops
             break;
@@ -658,7 +659,7 @@ void adlak_destroy_sysfs(void *adlak_device) {
     sysfs_remove_groups(&padlak->dev->kobj, adlak_attr_groups);
 }
 
-static ssize_t loglevel_show(struct class *class, struct class_attribute *attr, char *buf) {
+static ssize_t loglevel_show(const struct class *class, const struct class_attribute *attr, char *buf) {
     ssize_t len = 0;
     len += sprintf(buf,
                    "Usage:\n"
@@ -672,7 +673,7 @@ static ssize_t loglevel_show(struct class *class, struct class_attribute *attr, 
     return len;
 }
 
-static ssize_t loglevel_store(struct class *class, struct class_attribute *attr, const char *buf,
+static ssize_t loglevel_store(const struct class *class, const struct class_attribute *attr, const char *buf,
                               size_t count) {
     int res = 0;
     int ret = 0;

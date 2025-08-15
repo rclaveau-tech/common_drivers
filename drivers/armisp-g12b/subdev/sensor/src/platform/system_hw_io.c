@@ -28,10 +28,10 @@
 #define JUNO_DDR_REG_OFFSET 0x00100CC0
 #define JUNO_DDR_REG_MSB_VALUE 0x19
 
-static void *p_hw_base = NULL;
-static sys_spinlock reg_lock;
+//static void *p_hw_base = NULL;
+//static sys_spinlock reg_lock;
 
-int32_t init_hw_io( void )
+/*static int32_t init_hw_io( void )
 {
     int32_t result = 0;
 
@@ -54,7 +54,7 @@ int32_t init_hw_io( void )
     return result;
 }
 
-int32_t close_hw_io( void )
+static int32_t close_hw_io( void )
 {
     int32_t result = 0;
     LOG( LOG_DEBUG, "IO functionality has been closed" );
@@ -63,7 +63,7 @@ int32_t close_hw_io( void )
     return result;
 }
 
-uint32_t system_hw_read_32( uintptr_t addr )
+static uint32_t system_hw_read_32( uintptr_t addr )
 {
     uint32_t result = 0;
     if ( p_hw_base != NULL ) {
@@ -77,7 +77,7 @@ uint32_t system_hw_read_32( uintptr_t addr )
     return result;
 }
 
-uint16_t system_hw_read_16( uintptr_t addr )
+static uint16_t system_hw_read_16( uintptr_t addr )
 {
     uint16_t result = 0;
     if ( p_hw_base != NULL ) {
@@ -91,7 +91,7 @@ uint16_t system_hw_read_16( uintptr_t addr )
     return result;
 }
 
-uint8_t system_hw_read_8( uintptr_t addr )
+static uint8_t system_hw_read_8( uintptr_t addr )
 {
     uint8_t result = 0;
     if ( p_hw_base != NULL ) {
@@ -103,11 +103,11 @@ uint8_t system_hw_read_8( uintptr_t addr )
         LOG( LOG_ERR, "Failed to read memory from address %d. Base pointer is null ", addr );
     }
     return result;
-}
+}*/
 
 uint32_t check_offset = 16;
 
-void system_hw_write_32( uintptr_t addr, uint32_t data )
+/*static void system_hw_write_32( uintptr_t addr, uint32_t data )
 {
     if ( p_hw_base != NULL ) {
         void *ptr = (void *)( p_hw_base + addr );
@@ -120,7 +120,7 @@ void system_hw_write_32( uintptr_t addr, uint32_t data )
     }
 }
 
-void system_hw_write_16( uintptr_t addr, uint16_t data )
+static void system_hw_write_16( uintptr_t addr, uint16_t data )
 {
     if ( p_hw_base != NULL ) {
         void *ptr = (void *)( p_hw_base + addr );
@@ -133,7 +133,7 @@ void system_hw_write_16( uintptr_t addr, uint16_t data )
     }
 }
 
-void system_hw_write_8( uintptr_t addr, uint8_t data )
+static void system_hw_write_8( uintptr_t addr, uint8_t data )
 {
     if ( p_hw_base != NULL ) {
         void *ptr = (void *)( p_hw_base + addr );
@@ -144,4 +144,4 @@ void system_hw_write_8( uintptr_t addr, uint8_t data )
     } else {
         LOG( LOG_ERR, "Failed to write value %d to memory with offset %d. Base pointer is null ", data, addr );
     }
-}
+}*/

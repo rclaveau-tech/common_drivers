@@ -57,8 +57,7 @@ static const struct of_device_id otp_i2c_dt_match[] = {
 	{}
 };
 
-static int otp_i2c_probe(struct i2c_client *client,
-									const struct i2c_device_id *dev_id)
+static int otp_i2c_probe(struct i2c_client *client)
 {
 	int rtn = 0;
 	struct arm_i2c_sensor_ctrl *sensor_ctrl = NULL;
@@ -120,7 +119,7 @@ error:
 }
 
 
-static int otp_i2c_remove(struct i2c_client *client)
+static void otp_i2c_remove(struct i2c_client *client)
 {
 	struct arm_i2c_sensor_ctrl *s_ctrl = NULL;
 
@@ -128,7 +127,7 @@ static int otp_i2c_remove(struct i2c_client *client)
 
 	if (s_ctrl == NULL) {
 		pr_err("%s: Error client data is NULL\n", __func__);
-		return -EINVAL;
+		return;
 	}
 
 	kfree(s_ctrl);
@@ -136,8 +135,6 @@ static int otp_i2c_remove(struct i2c_client *client)
 	g_sensor_ctrl = s_ctrl;
 
 	pr_info("%s: remove i2c sensor\n", __func__);
-
-	return 0;
 }
 
 

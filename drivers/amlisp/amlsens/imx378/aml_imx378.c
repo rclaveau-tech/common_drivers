@@ -276,7 +276,7 @@ static int imx378_get_fmt(struct v4l2_subdev *sd,
 	mutex_lock(&imx378->lock);
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		framefmt = v4l2_subdev_get_try_format(&imx378->sd, cfg, fmt->pad);
+		framefmt = v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 	else
 		framefmt = &imx378->current_format;
 
@@ -353,7 +353,7 @@ static int imx378_set_fmt(struct v4l2_subdev *sd,
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
 		dev_info(imx378->dev, "try format \n");
-		format = v4l2_subdev_get_try_format(sd, cfg, fmt->pad);
+		format = v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 		mutex_unlock(&imx378->lock);
 
 		return 0;
@@ -385,7 +385,7 @@ static int imx378_set_fmt(struct v4l2_subdev *sd,
 }
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
-int imx378_get_selection(struct v4l2_subdev *sd,
+static int imx378_get_selection(struct v4l2_subdev *sd,
 			 struct v4l2_subdev_state *cfg,
 			 struct v4l2_subdev_selection *sel)
 #else
@@ -563,7 +563,7 @@ static const struct v4l2_subdev_video_ops imx378_video_ops = {
 };
 
 static const struct v4l2_subdev_pad_ops imx378_pad_ops = {
-	.init_cfg = imx378_entity_init_cfg,
+	//.init_cfg = imx378_entity_init_cfg,
 	.enum_mbus_code = imx378_enum_mbus_code,
 	.enum_frame_size = imx378_enum_frame_size,
 	.get_selection = imx378_get_selection,

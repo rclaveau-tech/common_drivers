@@ -109,7 +109,7 @@ static struct iio_chan_spec meson_m8_sar_adc_and_temp_iio_channels[] = {
 };
 #endif
 
-void meson_m8_sar_adc_disable_ring(struct meson_sar_adc_priv *priv)
+static void meson_m8_sar_adc_disable_ring(struct meson_sar_adc_priv *priv)
 {
 	int regval;
 
@@ -182,7 +182,7 @@ static int meson_m8_sar_adc_extra_init(struct iio_dev *indio_dev)
 	return 0;
 }
 
-void meson_m8_sar_adc_set_test_input(struct iio_dev *indio_dev,
+static void meson_m8_sar_adc_set_test_input(struct iio_dev *indio_dev,
 				     enum meson_sar_adc_test_input_sel sel)
 {
 	unsigned int regval;
@@ -197,7 +197,7 @@ void meson_m8_sar_adc_set_test_input(struct iio_dev *indio_dev,
 	usleep_range(10, 20);
 }
 
-int meson_m8_sar_adc_read_fifo(struct iio_dev *indio_dev,
+static int meson_m8_sar_adc_read_fifo(struct iio_dev *indio_dev,
 			       const struct iio_chan_spec *chan,
 			       bool chk_channel)
 {
@@ -221,7 +221,7 @@ int meson_m8_sar_adc_read_fifo(struct iio_dev *indio_dev,
 }
 
 /* enable chnl regs which save the sampling value for individual channel */
-void meson_m8_sar_adc_enable_chnl(struct iio_dev *indio_dev, bool en)
+static void meson_m8_sar_adc_enable_chnl(struct iio_dev *indio_dev, bool en)
 {
 	struct meson_sar_adc_priv *priv = iio_priv(indio_dev);
 
@@ -230,7 +230,7 @@ void meson_m8_sar_adc_enable_chnl(struct iio_dev *indio_dev, bool en)
 			   en ? MESON_SAR_ADC_REG11_CHNL_REGS_EN : 0);
 }
 
-int meson_m8_sar_adc_read_chnl(struct iio_dev *indio_dev,
+static int meson_m8_sar_adc_read_chnl(struct iio_dev *indio_dev,
 			       const struct iio_chan_spec *chan)
 {
 	int grp_off;

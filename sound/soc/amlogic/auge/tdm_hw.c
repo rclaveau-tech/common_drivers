@@ -365,12 +365,12 @@ void aml_tdm_set_format(struct aml_audio_controller *actrl,
 	finv = 0;
 
 	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
-	case SND_SOC_DAIFMT_CBM_CFM:
+	case SND_SOC_DAIFMT_CBP_CFP:
 		valb = SLAVE_A + clk_sel;
 		valf = SLAVE_A + clk_sel;
 		master_mode = 0;
 		break;
-	case SND_SOC_DAIFMT_CBS_CFS:
+	case SND_SOC_DAIFMT_CBC_CFC:
 		if (use_vadtop) {
 			valb = MASTER_A;
 			valf = MASTER_A;

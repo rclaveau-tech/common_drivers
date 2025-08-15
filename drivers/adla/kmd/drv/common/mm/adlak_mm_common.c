@@ -206,7 +206,7 @@ void adlak_set_bitmap_pool(struct adlak_mm_pool_priv *pool, dma_addr_t addr_offs
  *
  */
 
-signed long adlak_bitmap_find_next_zero_area_reverse(void *map, signed long pool_size,
+static signed long adlak_bitmap_find_next_zero_area_reverse(void *map, signed long pool_size,
                                                      signed long bits, signed long offset,
                                                      signed long nr) {
     signed long    consecutive_zeros       = 0;

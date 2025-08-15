@@ -22,9 +22,9 @@
 #include "acamera_sbus_api.h"
 
 
-void init_sensor_interface( sensor_ACameraDefault_iface_ptr_t p_iface )
+/*static void init_sensor_interface( sensor_ACameraDefault_iface_ptr_t p_iface )
 {
-}
+}*/
 
 void reset_sensor_interface( sensor_ACameraDefault_iface_ptr_t p_iface )
 {

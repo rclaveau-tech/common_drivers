@@ -507,7 +507,7 @@ static void stop_streaming( void *ctx )
     sensor_iface_disable(p_ctx);
 }
 
-uint32_t write2_reg(uint32_t val, unsigned long addr)
+/*static uint32_t write2_reg(uint32_t val, unsigned long addr)
 {
     void __iomem *io_addr;
     io_addr = ioremap(addr, 8);
@@ -518,7 +518,7 @@ uint32_t write2_reg(uint32_t val, unsigned long addr)
     __raw_writel(val, io_addr);
     iounmap(io_addr);
     return 0;
-}
+}*/
 
 static void start_streaming( void *ctx )
 {
@@ -551,7 +551,7 @@ static void sensor_dcam_mode( void *ctx, int32_t mode )
 }
 
 
-void sensor_deinit_imx290( void *ctx )
+static void sensor_deinit_imx290( void *ctx )
 {
     sensor_context_t *t_ctx = ctx;
     reset_sensor_bus_counter();
@@ -673,7 +673,7 @@ static sensor_context_t *sensor_global_parameter(void* sbp)
 }
 
 //--------------------Initialization------------------------------------------------------------
-void sensor_init_imx290( void **ctx, sensor_control_t *ctrl, void* sbp)
+static void sensor_init_imx290( void **ctx, sensor_control_t *ctrl, void* sbp)
 {
     *ctx = sensor_global_parameter(sbp);
 
@@ -701,7 +701,7 @@ void sensor_init_imx290( void **ctx, sensor_control_t *ctrl, void* sbp)
     system_timer_usleep( 1000 );
 }
 
-int sensor_detect_imx290( void* sbp)
+static int sensor_detect_imx290( void* sbp)
 {
     int ret = 0;
     sensor_bringup_t* sensor_bp = (sensor_bringup_t*) sbp;
@@ -738,6 +738,10 @@ int sensor_detect_imx290( void* sbp)
 
     return ret;
 }
+
+EXPORT_SYMBOL(sensor_init_imx290);
+EXPORT_SYMBOL(sensor_deinit_imx290);
+EXPORT_SYMBOL(sensor_detect_imx290);
 
 //********************CONSTANT SECTION END*********************************************
 //*************************************************************************************

@@ -417,7 +417,7 @@ static int32_t soc_iq_probe( struct platform_device *pdev )
 
     soc_iq.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
 
-    snprintf( soc_iq.name, V4L2_SUBDEV_NAME_SIZE, "%s", V4L2_SOC_IQ_NAME );
+    snprintf( soc_iq.name, sizeof(soc_iq.name), "%s", V4L2_SOC_IQ_NAME );
 
     soc_iq.dev = &pdev->dev;
     rc = v4l2_async_register_subdev( &soc_iq );
@@ -430,10 +430,9 @@ static int32_t soc_iq_probe( struct platform_device *pdev )
     return rc;
 }
 
-static int soc_iq_remove( struct platform_device *pdev )
+static void soc_iq_remove( struct platform_device *pdev )
 {
     v4l2_async_unregister_subdev( &soc_iq );
-    return 0;
 }
 
 static struct platform_device *soc_iq_dev;
@@ -452,7 +451,7 @@ static struct platform_driver soc_iq_driver = {
     },
 };
 
-int __init acamera_iq_iq_init( void )
+static int __init acamera_iq_iq_init( void )
 {
     LOG( LOG_INFO, "IQ subdevice init" );
 
@@ -462,7 +461,7 @@ int __init acamera_iq_iq_init( void )
 }
 
 
-void __exit acamera_iq_iq_exit( void )
+static void __exit acamera_iq_iq_exit( void )
 {
     LOG( LOG_INFO, "IQ subdevice exit" );
 

@@ -626,7 +626,7 @@ static void sensor_test_pattern(void *ctx, uint8_t mode)
     sensor_load_sequence(p_sbus, p_ctx->seq_width, p_sensor_data, SENSOR_IMX335_SEQUENCE_DEFAULT_TEST_PATTERN);
 }
 
-void sensor_deinit_imx335(void *ctx)
+static void sensor_deinit_imx335(void *ctx)
 {
     sensor_context_t *t_ctx = ctx;
     reset_sensor_bus_counter();
@@ -729,7 +729,7 @@ static sensor_context_t *sensor_global_parameter(void *sbp)
 }
 
 //--------------------Initialization------------------------------------------------------------
-void sensor_init_imx335(void **ctx, sensor_control_t *ctrl, void *sbp)
+static void sensor_init_imx335(void **ctx, sensor_control_t *ctrl, void *sbp)
 {
     *ctx = sensor_global_parameter(sbp);
 
@@ -756,7 +756,7 @@ void sensor_init_imx335(void **ctx, sensor_control_t *ctrl, void *sbp)
     system_timer_usleep(1000);
 }
 
-int sensor_detect_imx335(void *sbp)
+static int sensor_detect_imx335(void *sbp)
 {
     int ret = 0;
     sensor_bringup_t *sensor_bp = (sensor_bringup_t *)sbp;
@@ -790,6 +790,10 @@ int sensor_detect_imx335(void *sbp)
     acamera_sbus_deinit(&sensor_ctx.sbus, sbus_i2c);
     return ret;
 }
+
+EXPORT_SYMBOL(sensor_init_imx335);
+EXPORT_SYMBOL(sensor_deinit_imx335);
+EXPORT_SYMBOL(sensor_detect_imx335);
 
 //********************CONSTANT SECTION END*********************************************
 //*************************************************************************************

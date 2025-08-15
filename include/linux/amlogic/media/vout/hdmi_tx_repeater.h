@@ -40,6 +40,7 @@ __weak void rx_set_receive_hdcp(unsigned char *data, int len,
 {
 }
 
+bool get_rx_active_sts(void);
 __weak bool get_rx_active_sts(void)
 {
 	return false;

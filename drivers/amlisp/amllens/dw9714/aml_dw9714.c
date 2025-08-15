@@ -301,15 +301,12 @@ err_cleanup:
 
 	return ret;
 }
-static int dw9714_remove(struct i2c_client *client)
+static void dw9714_remove(struct i2c_client *client)
 {
 	struct v4l2_subdev *sd = i2c_get_clientdata(client);
 	struct dw9714_device *dw9714_dev = sd_to_dw9714_vcm(sd);
 
 	dw9714_subdev_cleanup(dw9714_dev);
-
-	return 0;
-
 }
 
 static int __maybe_unused dw9714_vcm_suspend(struct device *dev)
@@ -341,7 +338,7 @@ static struct i2c_driver dw9714_i2c_driver = {
 		.pm = &dw9714_pm_ops,
 		.of_match_table = dw9714_of_table,
 	},
-	.probe_new = dw9714_probe,
+	.probe = dw9714_probe,
 	.remove = dw9714_remove,
 };
 

@@ -2,7 +2,7 @@
 
 obj-y					+= tty/
 obj-$(CONFIG_AMLOGIC_GKI_TOOL)		+= gki_tool/
-obj-y					+= debug/
+obj-n					+= debug/
 obj-$(CONFIG_AMLOGIC_MEMORY_DEBUG)	+= memory_debug/
 obj-$(CONFIG_AMLOGIC_SECMON)		+= secmon/
 obj-y					+= clk/
@@ -60,10 +60,10 @@ obj-$(CONFIG_AMLOGIC_LED)		+= led/
 obj-y              			+= firmware/
 obj-$(CONFIG_AMLOGIC_SOC_TIMESTAMP)	+= timestamp/
 obj-$(CONFIG_AMLOGIC_SECKEY)		+= seckey/
-obj-y                       += media_modules/
+obj-$(CONFIG_AMLOGIC_MEDIA_MODULE)	+= media_modules/
 obj-y                       += amlisp/
 obj-y                       += armisp/
-obj-y                       += armisp-g12b/
+obj-n                       += armisp-g12b/
 obj-$(CONFIG_AMLOGIC_NPU) += npu/
 obj-y                       += adla/
 obj-$(CONFIG_AMLOGIC_USBCAM)		+= dvb_usbci/

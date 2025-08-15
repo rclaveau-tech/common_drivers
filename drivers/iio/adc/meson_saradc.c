@@ -14,6 +14,7 @@
 #include <linux/delay.h>
 #include <linux/io.h>
 #include <linux/iio/iio.h>
+#include <linux/iio/iio-opaque.h>
 #include <linux/module.h>
 #include <linux/nvmem-consumer.h>
 #include <linux/interrupt.h>
@@ -336,10 +337,11 @@ static void meson_sar_adc_stop_sample_engine(struct iio_dev *indio_dev)
 
 static int meson_sar_adc_lock(struct iio_dev *indio_dev)
 {
+	struct iio_dev_opaque *iio_dev_opaque = to_iio_dev_opaque(indio_dev);
 	struct meson_sar_adc_priv *priv = iio_priv(indio_dev);
 	int val, timeout = 10000;
 
-	mutex_lock(&indio_dev->mlock);
+	mutex_lock(&iio_dev_opaque->mlock);
 
 	if (priv->param->has_bl30_integration) {
 again:
@@ -352,7 +354,7 @@ again:
 		} while (val & MESON_SAR_ADC_DELAY_BL30_BUSY && timeout--);
 
 		if (timeout < 0) {
-			mutex_unlock(&indio_dev->mlock);
+			mutex_unlock(&iio_dev_opaque->mlock);
 			return -ETIMEDOUT;
 		}
 		/* prevent BL30 from using the SAR ADC while we are using it */
@@ -373,6 +375,7 @@ again:
 static void meson_sar_adc_unlock(struct iio_dev *indio_dev)
 {
 	struct meson_sar_adc_priv *priv = iio_priv(indio_dev);
+	struct iio_dev_opaque *iio_dev_opaque = to_iio_dev_opaque(indio_dev);
 
 	if (priv->param->has_bl30_integration) {
 		/* allow BL30 to use the SAR ADC again */
@@ -383,7 +386,7 @@ static void meson_sar_adc_unlock(struct iio_dev *indio_dev)
 		udelay(5);
 	}
 
-	mutex_unlock(&indio_dev->mlock);
+	mutex_unlock(&iio_dev_opaque->mlock);
 }
 
 static void meson_sar_adc_clear_fifo(struct iio_dev *indio_dev)
@@ -1628,7 +1631,7 @@ err:
 	return ret;
 }
 
-static int meson_sar_adc_remove(struct platform_device *pdev)
+static void meson_sar_adc_remove(struct platform_device *pdev)
 {
 	struct iio_dev *indio_dev = platform_get_drvdata(pdev);
 #if defined(CONFIG_IIO_KFIFO_BUF)
@@ -1651,7 +1654,7 @@ static int meson_sar_adc_remove(struct platform_device *pdev)
 
 	meson_sar_adc_hw_disable(indio_dev);
 
-	return meson_sar_adc_uninit(indio_dev);
+	meson_sar_adc_uninit(indio_dev);
 }
 
 static int __maybe_unused meson_sar_adc_suspend(struct device *dev)
@@ -1748,16 +1751,18 @@ static struct platform_driver meson_sar_adc_driver = {
 	},
 };
 
-int __init meson_sar_adc_driver_init(void)
+static int __init meson_sar_adc_driver_init(void)
 {
 	return platform_driver_register(&meson_sar_adc_driver);
 }
 
-void __exit meson_sar_adc_driver_exit(void)
+static void __exit meson_sar_adc_driver_exit(void)
 {
 	platform_driver_unregister(&meson_sar_adc_driver);
 }
 
+EXPORT_SYMBOL(meson_sar_adc_driver_init);
+EXPORT_SYMBOL(meson_sar_adc_driver_exit);
 MODULE_AUTHOR("Martin Blumenstingl <martin.blumenstingl@googlemail.com>");
 MODULE_DESCRIPTION("Amlogic Meson SAR ADC driver");
 MODULE_LICENSE("GPL v2");

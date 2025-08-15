@@ -41,7 +41,7 @@
 
 static struct csiphy_dev_t *g_csiphy_dev[4];
 
-struct csiphy_dev_t *csiphy_get_dev(int idx)
+static struct csiphy_dev_t *csiphy_get_dev(int idx)
 {
 	return g_csiphy_dev[idx];
 }
@@ -88,7 +88,7 @@ static void csiphy_of_parse_ports_clock_mod(struct csiphy_dev_t *csiphy_dev) {
 	u32 clock_mode = 0;
 	struct v4l2_async_notifier *notifier = csiphy_dev->notifier;
 	struct device *dev = csiphy_dev->dev;
-	v4l2_async_notifier_init(notifier);
+	v4l2_async_nf_init(notifier, csiphy_dev->v4l2_dev);
 	for_each_endpoint_of_node(dev->of_node, node) {
 		if (!of_device_is_available(node))
 			continue;
@@ -106,13 +106,13 @@ static int csiphy_of_parse_ports(struct csiphy_dev_t *csiphy_dev)
 	struct device_node *node = NULL;
 	struct device_node *remote = NULL;
 	struct csiphy_async_subdev *c_asd = NULL;
-	struct v4l2_async_subdev *asd = NULL;
+	struct v4l2_async_connection *asc = NULL;
 	struct v4l2_async_notifier *notifier = csiphy_dev->notifier;
 	struct device *dev = csiphy_dev->dev;
 #ifdef SENSOR_SEARCH
 	struct device *sensor_dev = NULL;
 #endif
-	v4l2_async_notifier_init(notifier);
+	v4l2_async_nf_init(notifier, csiphy_dev->v4l2_dev);
 
 	for_each_endpoint_of_node(dev->of_node, node) {
 		if (!of_device_is_available(node))
@@ -131,22 +131,16 @@ static int csiphy_of_parse_ports(struct csiphy_dev_t *csiphy_dev)
 		} else
 			continue;
 #endif
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
-		asd = __v4l2_async_notifier_add_fwnode_subdev(notifier,
+		asc = __v4l2_async_nf_add_fwnode(notifier,
 				of_fwnode_handle(remote),
 				sizeof(struct csiphy_async_subdev));
-#else
-		asd = v4l2_async_notifier_add_fwnode_subdev(notifier,
-				of_fwnode_handle(remote),
-				sizeof(*c_asd));
-#endif
-		if (IS_ERR(asd)) {
+		if (IS_ERR(asc)) {
 			dev_err(dev, "Failed to add subdev\n");
 			of_node_put(node);
 			return -EINVAL;
 		}
 
-		c_asd = container_of(asd, struct csiphy_async_subdev, asd);
+		c_asd = container_of(asc, struct csiphy_async_subdev, asc);
 
 		rtn = csiphy_of_parse_endpoint_node(node, c_asd);
 		if (rtn < 0) {
@@ -172,7 +166,7 @@ static void csiphy_notifier_cleanup(void *c_dev)
 	csiphy_dev = c_dev;
 	notifier = csiphy_dev->notifier;
 
-	v4l2_async_notifier_cleanup(notifier);
+	v4l2_async_nf_cleanup(notifier);
 }
 
 static void __iomem *csiphy_ioremap_resource(void *c_dev, char *name)
@@ -298,7 +292,7 @@ static struct media_entity *csiphy_subdev_get_sensor_entity(struct media_entity 
 	if (!(pad->flags & MEDIA_PAD_FL_SINK))
 		return NULL;
 
-	r_pad = media_entity_remote_pad(pad);
+	r_pad = media_pad_remote_pad_first(pad);
 	if (!r_pad || !is_media_entity_v4l2_subdev(r_pad->entity))
 		return NULL;
 
@@ -571,7 +565,7 @@ static int csiphy_proc_show(struct seq_file *proc_entry, void *arg ) {
 
 static int csiphy_debug_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, csiphy_proc_show, PDE_DATA(inode));
+	return single_open(file, csiphy_proc_show, pde_data(inode));
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)

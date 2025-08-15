@@ -698,13 +698,13 @@ err:
 	return ret;
 }
 
-static int amlogic_saradc_remove(struct platform_device *pdev)
+static void amlogic_saradc_remove(struct platform_device *pdev)
 {
 	struct iio_dev *indio_dev = platform_get_drvdata(pdev);
 
 	iio_device_unregister(indio_dev);
 
-	return amlogic_saradc_hw_disable(indio_dev);
+	amlogic_saradc_hw_disable(indio_dev);
 }
 
 static int __maybe_unused amlogic_saradc_suspend(struct device *dev)
@@ -734,16 +734,18 @@ static struct platform_driver amlogic_saradc_driver = {
 	},
 };
 
-int __init amlogic_saradc_driver_init(void)
+static int __init amlogic_saradc_driver_init(void)
 {
 	return platform_driver_register(&amlogic_saradc_driver);
 }
 
-void __exit amlogic_saradc_driver_exit(void)
+static void __exit amlogic_saradc_driver_exit(void)
 {
 	platform_driver_unregister(&amlogic_saradc_driver);
 }
 
+EXPORT_SYMBOL(amlogic_saradc_driver_init);
+EXPORT_SYMBOL(amlogic_saradc_driver_exit);
 MODULE_AUTHOR("Huqiang Qin <huqiang.qin@amlogic.com>");
 MODULE_DESCRIPTION("Amlogic SAR ADC driver");
 MODULE_LICENSE("GPL v2");

@@ -29,7 +29,6 @@
 #include <linux/mtd/partitions.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
-#include <linux/genhd.h>
 #include <linux/blkdev.h>
 #include <linux/scatterlist.h>
 #include <linux/cdev.h>
@@ -169,7 +168,7 @@ static int update_key_info(struct mmc_card *mmc, unsigned char *addr)
 	return valid_flag;
 }
 
-int32_t emmc_write_one_key(void *buffer, int valid_flag)
+static int32_t emmc_write_one_key(void *buffer, int valid_flag)
 {
 	int ret;
 	u64 blk, cnt, key_glb_offset;
@@ -217,7 +216,7 @@ exit_err:
 		return ret;
 }
 
-int32_t emmc_read_valid_key(void *buffer, int valid_flag)
+static int32_t emmc_read_valid_key(void *buffer, int valid_flag)
 {
 	int ret;
 	u64  addr = 0;
@@ -344,7 +343,7 @@ static int write_invalid_key(void *addr, int valid_flag)
 	return ret;
 }
 
-int update_old_key(struct mmc_card *mmc, void *addr)
+static int update_old_key(struct mmc_card *mmc, void *addr)
 {
 	int ret = 0;
 	int valid_flag;

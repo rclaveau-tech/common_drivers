@@ -681,6 +681,7 @@ static LookupTable calibration_dp_devthreshold = {.ptr = _calibration_dp_devthre
 static LookupTable calibration_pf_correction = {.ptr = _calibration_pf_correction, .rows = sizeof(_calibration_pf_correction) / sizeof(_calibration_pf_correction[0]), .cols = 6, .width = sizeof(_calibration_pf_correction[0][0])};
 static LookupTable calibration_fc_correction = {.ptr = _calibration_fc_correction, .rows = sizeof(_calibration_fc_correction) / sizeof(_calibration_fc_correction[0]), .cols = 4, .width = sizeof(_calibration_fc_correction[0][0])};
 
+uint32_t get_calibrations_dynamic_linear_imx290_lens_8mm( ACameraCalibrations *c );
 uint32_t get_calibrations_dynamic_linear_imx290_lens_8mm( ACameraCalibrations *c )
 {
     uint32_t result = 0;

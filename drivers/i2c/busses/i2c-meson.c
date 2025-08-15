@@ -555,7 +555,7 @@ static ssize_t speed_store(struct device *child,
 
 static DEVICE_ATTR_RW(speed);
 
-int meson_i2c_speed_debug(struct device *dev)
+static int meson_i2c_speed_debug(struct device *dev)
 {
 	return sysfs_create_file(&dev->kobj, &dev_attr_speed.attr);
 }
@@ -695,22 +695,20 @@ static int meson_i2c_probe(struct platform_device *pdev)
 }
 
 #ifdef CONFIG_AMLOGIC_MODIFY
-static int meson_i2c_remove(struct platform_device *pdev)
+static void meson_i2c_remove(struct platform_device *pdev)
 {
 	struct meson_i2c *i2c = platform_get_drvdata(pdev);
 	int ret;
 
 	ret = pm_runtime_get_sync(&pdev->dev);
 	if (ret < 0)
-		return ret;
+		return;
 
 	i2c_del_adapter(&i2c->adap);
 
 	pm_runtime_dont_use_autosuspend(&pdev->dev);
 	pm_runtime_put_sync(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
-
-	return 0;
 }
 #else
 static int meson_i2c_remove(struct platform_device *pdev)

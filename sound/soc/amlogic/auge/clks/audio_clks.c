@@ -183,16 +183,18 @@ static struct platform_driver audio_clocks_driver = {
 	.probe  = audio_clocks_probe,
 };
 
-int __init audio_clocks_init(void)
+static int __init audio_clocks_init(void)
 {
 	return platform_driver_register(&audio_clocks_driver);
 }
 
-void __exit audio_clocks_exit(void)
+static void __exit audio_clocks_exit(void)
 {
 	platform_driver_unregister(&audio_clocks_driver);
 }
 
+EXPORT_SYMBOL(audio_clocks_init);
+EXPORT_SYMBOL(audio_clocks_exit);
 #ifndef MODULE
 core_initcall(audio_clocks_init);
 module_exit(audio_clocks_exit);

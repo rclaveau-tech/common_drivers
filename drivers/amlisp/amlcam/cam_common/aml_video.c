@@ -446,7 +446,7 @@ static int video_start_streaming(struct vb2_queue *queue, unsigned int count)
 		return 0;
 	}
 
-	rtn = media_pipeline_start(entity, video->pipe);
+	rtn = media_pipeline_start(pad, video->pipe);
 	if (rtn) {
 		dev_err(video->dev, "Failed to start pipeline: %d\n", rtn);
 		goto error_return;
@@ -457,7 +457,7 @@ static int video_start_streaming(struct vb2_queue *queue, unsigned int count)
 
 	while (1) {
 		pad = &entity->pads[0];
-		pad = media_entity_remote_pad(pad);
+		pad = media_pad_remote_pad_first(pad);
 		if (!pad || !is_media_entity_v4l2_subdev(pad->entity))
 			break;
 
@@ -468,15 +468,15 @@ static int video_start_streaming(struct vb2_queue *queue, unsigned int count)
 
 		video_get_sensor_fps(entity, video);
 
-		if (entity->stream_count > 1)
-			continue;
+		/*if (entity->stream_count > 1)
+			continue;*/
 
 		subdev = media_entity_to_v4l2_subdev(entity);
 
 		rtn = v4l2_subdev_call(subdev, video, s_stream, 1);
 		if (rtn < 0 && rtn != -ENOIOCTLCMD) {
 			entity = &video->vdev.entity;
-			media_pipeline_stop(entity);
+			media_pipeline_stop(pad);
 			goto error_return;
 		}
 	}
@@ -500,11 +500,11 @@ static void video_stop_streaming(struct vb2_queue *queue)
 		return;
 	}
 
-	media_pipeline_stop(entity);
+	media_pipeline_stop(&video->pad);
 
 	while (1) {
 		pad = &entity->pads[0];
-		pad = media_entity_remote_pad(pad);
+		pad = media_pad_remote_pad_first(pad);
 		if (!pad || !is_media_entity_v4l2_subdev(pad->entity))
 			break;
 
@@ -512,8 +512,8 @@ static void video_stop_streaming(struct vb2_queue *queue)
 			break;
 
 		entity = pad->entity;
-		if (entity->stream_count)
-			continue;
+		/*if (entity->stream_count)
+			continue;*/
 
 		subdev = media_entity_to_v4l2_subdev(entity);
 	}
@@ -525,7 +525,7 @@ static void video_stop_streaming(struct vb2_queue *queue)
 	entity = &video->vdev.entity;
 	while (1) {
 		pad = &entity->pads[0];
-		pad = media_entity_remote_pad(pad);
+		pad = media_pad_remote_pad_first(pad);
 		if (!pad || !is_media_entity_v4l2_subdev(pad->entity))
 			break;
 
@@ -533,8 +533,8 @@ static void video_stop_streaming(struct vb2_queue *queue)
 			break;
 
 		entity = pad->entity;
-		if (entity->stream_count)
-			continue;
+		/*if (entity->stream_count)
+			continue;*/
 
 		subdev = media_entity_to_v4l2_subdev(entity);
 		v4l2_subdev_call(subdev, video, s_stream, 0);
@@ -605,7 +605,7 @@ int aml_video_register(struct aml_video *video)
 	vb2_q->buf_struct_size = sizeof(struct aml_buffer);
 	vb2_q->dev = video->dev;
 	vb2_q->lock = &video->q_lock;
-	vb2_q->min_buffers_needed = video->min_buffer_count;
+	vb2_q->min_queued_buffers = video->min_buffer_count;
 	rtn = vb2_queue_init(vb2_q);
 	if (rtn < 0) {
 		dev_err(video->dev, "Failed to init vb2 queue: %d\n", rtn);

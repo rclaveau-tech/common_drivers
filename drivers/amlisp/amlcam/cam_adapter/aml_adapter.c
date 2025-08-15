@@ -838,7 +838,7 @@ static int adapter_proc_show(struct seq_file *proc_entry, void *arg ) {
 
 static int adapter_debug_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, adapter_proc_show, PDE_DATA(inode));
+	return single_open(file, adapter_proc_show, pde_data(inode));
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)

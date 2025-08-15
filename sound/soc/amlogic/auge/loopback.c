@@ -10,6 +10,7 @@
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/of_device.h>
+#include <linux/of_platform.h>
 #include <linux/platform_device.h>
 #include <linux/clk.h>
 #include <linux/clk-provider.h>
@@ -207,7 +208,7 @@ static irqreturn_t loopback_ddr_isr(int irq, void *data)
 	struct snd_pcm_substream *ss = (struct snd_pcm_substream *)data;
 	struct snd_soc_pcm_runtime *rtd = ss->private_data;
 	struct loopback *p_loopback = (struct loopback *)
-		snd_soc_dai_get_drvdata(asoc_rtd_to_cpu(rtd, 0));
+		snd_soc_dai_get_drvdata(snd_soc_rtd_to_cpu(rtd, 0));
 	unsigned int status;
 	bool vad_running = vad_lb_is_running(p_loopback->id);
 
@@ -238,7 +239,7 @@ static int loopback_open(struct snd_soc_component *component, struct snd_pcm_sub
 	struct snd_pcm_runtime *runtime = ss->runtime;
 	struct snd_soc_pcm_runtime *rtd = ss->private_data;
 	struct loopback *p_loopback = (struct loopback *)
-		snd_soc_dai_get_drvdata(asoc_rtd_to_cpu(rtd, 0));
+		snd_soc_dai_get_drvdata(snd_soc_rtd_to_cpu(rtd, 0));
 	int ret = 0;
 	struct device *dev = p_loopback->dev;
 
@@ -1084,7 +1085,7 @@ static int loopback_dai_hw_params(struct snd_pcm_substream *ss,
 	return ret;
 }
 
-int loopback_dai_hw_free(struct snd_pcm_substream *ss,
+static int loopback_dai_hw_free(struct snd_pcm_substream *ss,
 	struct snd_soc_dai *dai)
 {
 	struct loopback *p_loopback = snd_soc_dai_get_drvdata(dai);
@@ -1923,15 +1924,18 @@ static struct platform_driver loopback_platform_driver = {
 	.shutdown = loopback_platform_shutdown,
 };
 
-int __init loopback_init(void)
+static int __init loopback_init(void)
 {
 	return platform_driver_register(&(loopback_platform_driver));
 }
 
-void __exit loopback_exit(void)
+static void __exit loopback_exit(void)
 {
 	platform_driver_unregister(&loopback_platform_driver);
 }
+
+EXPORT_SYMBOL(loopback_init);
+EXPORT_SYMBOL(loopback_exit);
 
 #ifndef MODULE
 module_init(loopback_init);

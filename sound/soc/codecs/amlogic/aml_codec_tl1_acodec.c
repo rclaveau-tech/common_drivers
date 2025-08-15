@@ -607,10 +607,10 @@ static int tl1_acodec_dai_set_fmt(struct snd_soc_dai *dai, unsigned int fmt)
 	pr_debug("%s, format:%x, codec = %p\n", __func__, fmt, component);
 
 	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
-	case SND_SOC_DAIFMT_CBM_CFM:
+	case SND_SOC_DAIFMT_CBP_CFP:
 		val |= (0x1 << I2S_MODE);
 		break;
-	case SND_SOC_DAIFMT_CBS_CFS:
+	case SND_SOC_DAIFMT_CBC_CFC:
 		val &= ~(0x1 << I2S_MODE);
 		break;
 	default:
@@ -898,7 +898,7 @@ static int tl1_acodec_resume(struct snd_soc_component *component)
 	return 0;
 }
 
-const static struct snd_soc_component_driver soc_codec_dev_tl1_acodec = {
+static const struct snd_soc_component_driver soc_codec_dev_tl1_acodec = {
 	.probe = tl1_acodec_probe,
 	.remove = tl1_acodec_remove,
 	.suspend = tl1_acodec_suspend,
@@ -1123,7 +1123,7 @@ static int aml_tl1_acodec_probe(struct platform_device *pdev)
 	return ret;
 }
 
-static int aml_tl1_acodec_remove(struct platform_device *pdev)
+static void aml_tl1_acodec_remove(struct platform_device *pdev)
 {
 	struct tl1_acodec_priv *aml_acodec;
 
@@ -1133,8 +1133,6 @@ static int aml_tl1_acodec_remove(struct platform_device *pdev)
 		clk_disable_unprepare(aml_acodec->acodec_clk);
 
 	snd_soc_unregister_component(&pdev->dev);
-
-	return 0;
 }
 
 static void aml_tl1_acodec_shutdown(struct platform_device *pdev)

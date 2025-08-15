@@ -32,6 +32,8 @@ EXTRA_CFLAGS := -I$(M_PATH)/app -I$(M_PATH)/inc -I$(M_PATH)/app/control \
                 -I$(M_PATH)/src/fw_lib -I$(M_PATH)/src/calibration \
                 -I$(M_PATH)/src/driver/sensor -I$(M_PATH)/src/driver/lens
 
+ccflags-y += $(EXTRA_CFLAGS)
+
 EXTRA_CFLAGS += -Wno-declaration-after-statement -Idrivers/staging/android/ -Wno-unused-parameter
 
 ccflags-y += -DCONFIG_G12B

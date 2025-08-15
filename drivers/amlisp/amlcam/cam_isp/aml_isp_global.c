@@ -50,7 +50,7 @@ static int isp_global_reg_buf_alloc(struct isp_dev_t *isp_dev)
 	rsize = 128 * 1024;
 
 	virtaddr = dma_alloc_coherent(isp_dev->dev, rsize, &paddr, GFP_KERNEL);
-	vmaddr = vmalloc(rsize);
+	vmaddr = kvmalloc(rsize, GFP_KERNEL);
 
 	g_info->rreg_buff.nplanes = 1;
 	g_info->rreg_buff.addr[AML_PLANE_A] = paddr;
@@ -78,7 +78,7 @@ static int isp_global_reg_buf_free(struct isp_dev_t *isp_dev)
 
 	vaddr = g_info->rreg_buff.vmaddr[AML_PLANE_A];
 	if (vaddr)
-		vfree(vaddr);
+		kvfree(vaddr);
 
 	g_info->rreg_buff.addr[AML_PLANE_A] = 0x0000;
 	g_info->rreg_buff.vaddr[AML_PLANE_A] = NULL;
@@ -89,7 +89,7 @@ static int isp_global_reg_buf_free(struct isp_dev_t *isp_dev)
 	return 0;
 }
 
-void isp_global_mode(int mode)
+static void isp_global_mode(int mode)
 {
 	struct isp_global_info *g_info = isp_global_get_info();
 

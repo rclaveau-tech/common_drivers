@@ -556,7 +556,7 @@ static void sensor_dcam_mode( void *ctx, int32_t mode )
     p_ctx->dcam_mode = 0;
 }
 
-void sensor_deinit_imx415( void *ctx )
+static void sensor_deinit_imx415( void *ctx )
 {
     sensor_context_t *t_ctx = ctx;
     reset_sensor_bus_counter();
@@ -651,7 +651,7 @@ static sensor_context_t *sensor_global_parameter(void* sbp)
 }
 
 //--------------------Initialization------------------------------------------------------------
-void sensor_init_imx415( void **ctx, sensor_control_t *ctrl, void* sbp)
+static void sensor_init_imx415( void **ctx, sensor_control_t *ctrl, void* sbp)
 {
     *ctx = sensor_global_parameter(sbp);
 
@@ -679,7 +679,7 @@ void sensor_init_imx415( void **ctx, sensor_control_t *ctrl, void* sbp)
     system_timer_usleep( 1000 );
 }
 
-int sensor_detect_imx415( void* sbp)
+static int sensor_detect_imx415( void* sbp)
 {
     int ret = 0;
     sensor_ctx.sbp = sbp;
@@ -720,6 +720,10 @@ int sensor_detect_imx415( void* sbp)
     reset_am_disable(sensor_bp);
     return ret;
 }
+
+EXPORT_SYMBOL(sensor_init_imx415);
+EXPORT_SYMBOL(sensor_deinit_imx415);
+EXPORT_SYMBOL(sensor_detect_imx415);
 
 //********************CONSTANT SECTION END*********************************************
 //*************************************************************************************

@@ -40,7 +40,6 @@
 #include <linux/debugfs.h>
 #include "mmc_key.h"
 #include "mmc_dtb.h"
-#include <trace/hooks/mmc.h>
 #include <linux/moduleparam.h>
 #include <linux/amlogic/gki_module.h>
 
@@ -1457,7 +1456,7 @@ static void aml_sd_emmc_check_sdio_irq(struct mmc_host *mmc)
 	}
 }
 
-void aml_config_pinmux(struct mmc_host *mmc)
+static void aml_config_pinmux(struct mmc_host *mmc)
 {
 	struct amlsd_platform *pdata = mmc_priv(mmc);
 	struct meson_host *host = pdata->host;
@@ -1465,7 +1464,7 @@ void aml_config_pinmux(struct mmc_host *mmc)
 	pinctrl_select_state(host->pinctrl, pdata->pins_default);
 }
 
-int aml_config_mmc_clk(struct mmc_host *mmc)
+static int aml_config_mmc_clk(struct mmc_host *mmc)
 {
 	struct amlsd_platform *pdata = mmc_priv(mmc);
 	struct meson_host *host = pdata->host;
@@ -1493,7 +1492,7 @@ int aml_config_mmc_clk(struct mmc_host *mmc)
 	return ret;
 }
 
-int aml_save_parameter(struct mmc_host *mmc)
+static int aml_save_parameter(struct mmc_host *mmc)
 {
 	struct amlsd_platform *pdata = mmc_priv(mmc);
 	struct meson_host *host = pdata->host;
@@ -2788,7 +2787,7 @@ free_host:
 	return ret;
 }
 
-static int g12a_mmc_remove(struct platform_device *pdev)
+static void g12a_mmc_remove(struct platform_device *pdev)
 {
 	struct meson_host *host = dev_get_drvdata(&pdev->dev);
 
@@ -2810,7 +2809,6 @@ static int g12a_mmc_remove(struct platform_device *pdev)
 
 	devm_kfree(host->dev, host->adj_win);
 	mmc_free_host(host->mmc);
-	return 0;
 }
 
 static const struct meson_mmc_data meson_g12a_data = {
@@ -2835,17 +2833,19 @@ static struct platform_driver g12a_mmc_driver = {
 	},
 };
 
-int __init g12a_mmc_init(void)
+static int __init g12a_mmc_init(void)
 {
 	return platform_driver_register(&g12a_mmc_driver);
 }
 
-void __exit g12a_mmc_exit(void)
+static void __exit g12a_mmc_exit(void)
 {
 	platform_driver_unregister(&g12a_mmc_driver);
 }
 
 //module_platform_driver(g12a_mmc_driver);
+EXPORT_SYMBOL(g12a_mmc_init);
+EXPORT_SYMBOL(g12a_mmc_exit);
 
 //MODULE_DESCRIPTION("Amlogic G12a SD/eMMC driver");
 //MODULE_AUTHOR("Kevin Hilman <khilman@baylibre.com>");

@@ -27,7 +27,7 @@
 #include "acamera_firmware_config.h"
 #include "system_timer.h"  //system_timer_timestamp
 #include "system_stdlib.h" //system_memcpy
-#include <stdarg.h>
+#include <linux/stdarg.h>
 #include <linux/string.h>
 
 //int printk(const char*, ...);

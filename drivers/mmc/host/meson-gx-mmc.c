@@ -40,7 +40,6 @@
 #include <linux/debugfs.h>
 #include "mmc_key.h"
 #include "mmc_dtb.h"
-#include <trace/hooks/mmc.h>
 #include <linux/moduleparam.h>
 #include <linux/amlogic/gki_module.h>
 
@@ -101,7 +100,7 @@ static inline u32 aml_mv_dly2_nocmd(u32 x)
 	return (x) | ((x) << 6) | ((x) << 12);
 }
 
-int amlogic_of_parse(struct mmc_host *host)
+static int amlogic_of_parse(struct mmc_host *host)
 {
 	struct device *dev = host->parent;
 	struct meson_host *mmc = mmc_priv(host);
@@ -267,7 +266,7 @@ static void mmc_prepare_mrq(struct mmc_card *card,
 	mmc_set_data_timeout(mrq->data, card);
 }
 
-unsigned int mmc_capacity(struct mmc_card *card)
+static unsigned int mmc_capacity(struct mmc_card *card)
 {
 	if (!mmc_card_sd(card) && mmc_card_is_blockaddr(card))
 		return card->ext_csd.sectors;
@@ -337,7 +336,7 @@ static int mmc_transfer(struct mmc_card *card, unsigned int dev_addr,
 	return ret;
 }
 
-int aml_disable_mmc_cqe(struct mmc_card *card)
+/*static int aml_disable_mmc_cqe(struct mmc_card *card)
 {
 	int ret = 0;
 
@@ -348,9 +347,9 @@ int aml_disable_mmc_cqe(struct mmc_card *card)
 			pr_err("[%s] disable cqe mode failed\n", __func__);
 	}
 	return ret;
-}
+}*/
 
-int aml_enable_mmc_cqe(struct mmc_card *card)
+/*static int aml_enable_mmc_cqe(struct mmc_card *card)
 {
 	int ret = 0;
 
@@ -361,15 +360,15 @@ int aml_enable_mmc_cqe(struct mmc_card *card)
 			pr_err("[%s] reenable cqe mode failed\n", __func__);
 	}
 	return ret;
-}
+}*/
 
-int mmc_read_internal(struct mmc_card *card, unsigned int dev_addr,
+/*static int mmc_read_internal(struct mmc_card *card, unsigned int dev_addr,
 			unsigned int blocks, void *buf)
 {
 	return mmc_transfer(card, dev_addr, blocks, buf, 0);
-}
+}*/
 
-int mmc_write_internal(struct mmc_card *card, unsigned int dev_addr,
+static int mmc_write_internal(struct mmc_card *card, unsigned int dev_addr,
 			unsigned int blocks, void *buf)
 {
 	return mmc_transfer(card, dev_addr, blocks, buf, 1);
@@ -868,7 +867,7 @@ static int meson_mmc_set_adjust(struct mmc_host *mmc, u32 value)
 	return 0;
 }
 
-int meson_mmc_tuning_transfer(struct mmc_host *mmc, u32 opcode)
+static int meson_mmc_tuning_transfer(struct mmc_host *mmc, u32 opcode)
 {
 	int tuning_err = 0;
 	int n, nmatch;
@@ -1271,7 +1270,7 @@ tuning:
 //	host->card = card;
 //}
 
-int sdio_get_device(void)
+static int sdio_get_device(void)
 {
 	unsigned int i, device = 0;
 
@@ -2110,7 +2109,7 @@ static u32 scan_emmc_cmd_win(struct mmc_host *mmc,
 	return cmd_delay;
 }
 
-ssize_t emmc_scan_cmd_win(struct device *dev,
+/*static ssize_t emmc_scan_cmd_win(struct device *dev,
 			  struct device_attribute *attr, char *buf)
 {
 	struct meson_host *host = dev_get_drvdata(dev);
@@ -2120,7 +2119,7 @@ ssize_t emmc_scan_cmd_win(struct device *dev,
 	scan_emmc_cmd_win(mmc, 1, NULL);
 	mmc_release_host(mmc);
 	return sprintf(buf, "%s\n", "Emmc scan command window.\n");
-}
+}*/
 
 static void update_all_line_eyetest(struct mmc_host *mmc)
 {
@@ -2133,7 +2132,7 @@ static void update_all_line_eyetest(struct mmc_host *mmc)
 	}
 }
 
-int emmc_clktest(struct mmc_host *mmc)
+static int emmc_clktest(struct mmc_host *mmc)
 {
 	struct meson_host *host = mmc_priv(mmc);
 	u32 intf3 = readl(host->regs + SD_EMMC_INTF3);
@@ -2199,7 +2198,7 @@ static unsigned int tl1_emmc_line_timing(struct mmc_host *mmc)
 	return 0;
 }
 
-static int single_read_cmd_for_scan(struct mmc_host *mmc,
+/*static int single_read_cmd_for_scan(struct mmc_host *mmc,
 		 u8 opcode, u8 *blk_test, u32 blksz, u32 blocks, u32 offset)
 {
 	struct mmc_request mrq = {NULL};
@@ -2224,7 +2223,7 @@ static int single_read_cmd_for_scan(struct mmc_host *mmc,
 	mrq.data = &data;
 	mmc_wait_for_req(mmc, &mrq);
 	return data.error | cmd.error;
-}
+}*/
 
 static int emmc_test_bus(struct mmc_host *mmc)
 {
@@ -2470,7 +2469,7 @@ static long long _para_checksum_calc(struct aml_tuning_para *para)
  * read tuning para from reserved partition
  * and copy it to pdata->para
  */
-int aml_read_tuning_para(struct mmc_host *mmc)
+/*static int aml_read_tuning_para(struct mmc_host *mmc)
 {
 	int off, blk;
 	int ret;
@@ -2495,7 +2494,7 @@ int aml_read_tuning_para(struct mmc_host *mmc)
 
 	memcpy(&host->para, host->blk_test, para_size);
 	return ret;
-}
+}*/
 
 /*set para on controller register*/
 static void aml_set_tuning_para(struct mmc_host *mmc)
@@ -3202,7 +3201,7 @@ static int meson_mmc_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
 }
 
 #ifndef CONFIG_AMLOGIC_REMOVE_OLD
-int __maybe_unused aml_emmc_hs200_tl1(struct mmc_host *mmc)
+static int __maybe_unused aml_emmc_hs200_tl1(struct mmc_host *mmc)
 {
 	struct meson_host *host = mmc_priv(mmc);
 	u32 vclkc = readl(host->regs + SD_EMMC_CLOCK);
@@ -3427,7 +3426,7 @@ static void sdio_rescan(struct mmc_host *mmc)
 
 static void sdio_reset_comm(struct mmc_card *card)
 {
-	struct mmc_host *host = card->host;
+	//struct mmc_host *host = card->host;
 	int i = 0, err = 0;
 
 	while (i < SDIO_MAX_FUNCS && !card->sdio_func[i])
@@ -3435,7 +3434,7 @@ static void sdio_reset_comm(struct mmc_card *card)
 	if (WARN_ON(i == SDIO_MAX_FUNCS))
 		return;
 	sdio_claim_host(card->sdio_func[i]);
-	err = mmc_sw_reset(host);
+	err = mmc_sw_reset(card);
 	sdio_release_host(card->sdio_func[i]);
 	if (err)
 		pr_info("%s Failed, error = %d\n", __func__, err);
@@ -3462,7 +3461,7 @@ void sdio_reinit(void)
 }
 EXPORT_SYMBOL(sdio_reinit);
 
-void sdio_clk_always_on(bool clk_aws_on)
+static void sdio_clk_always_on(bool clk_aws_on)
 {
 	struct meson_host *host = NULL;
 	u32 conf = 0;
@@ -3486,7 +3485,7 @@ void sdio_clk_always_on(bool clk_aws_on)
 }
 EXPORT_SYMBOL(sdio_clk_always_on);
 
-void sdio_set_max_regs(unsigned int size)
+static void sdio_set_max_regs(unsigned int size)
 {
 	if (sdio_host) {
 		sdio_host->max_req_size = size;
@@ -3521,7 +3520,7 @@ int sdio_get_vendor(void)
 }
 EXPORT_SYMBOL(sdio_get_vendor);
 
-static struct pinctrl * __must_check aml_pinctrl_select(struct meson_host *host,
+/*static struct pinctrl * __must_check aml_pinctrl_select(struct meson_host *host,
 							const char *name)
 {
 	struct pinctrl *p = host->pinctrl;
@@ -3547,9 +3546,9 @@ static struct pinctrl * __must_check aml_pinctrl_select(struct meson_host *host,
 		return ERR_PTR(ret);
 	}
 	return p;
-}
+}*/
 
-static int aml_uart_switch(struct meson_host *host, bool on)
+/*static int aml_uart_switch(struct meson_host *host, bool on)
 {
 	struct pinctrl *pc;
 	char *name[2] = {
@@ -3559,9 +3558,9 @@ static int aml_uart_switch(struct meson_host *host, bool on)
 
 	pc = aml_pinctrl_select(host, name[on]);
 	return on;
-}
+}*/
 
-static int aml_is_sduart(struct meson_host *host)
+/*static int aml_is_sduart(struct meson_host *host)
 {
 	int in = 0, i;
 	int high_cnt = 0, low_cnt = 0;
@@ -3595,9 +3594,9 @@ static int aml_is_sduart(struct meson_host *host)
 	if (low_cnt > 100)
 		in = 1;
 	return in;
-}
+}*/
 
-static int aml_is_card_insert(struct mmc_gpio *ctx)
+/*static int aml_is_card_insert(struct mmc_gpio *ctx)
 {
 	int ret = 0, in_count = 0, out_count = 0, i;
 
@@ -3616,12 +3615,12 @@ static int aml_is_card_insert(struct mmc_gpio *ctx)
 			ret = 0;
 	}
 //        if (ctx->override_cd_active_level)
-  //              ret = !ret; /* reverse, so ---- 0: no inserted  1: inserted */
+  //              ret = !ret; *//* reverse, so ---- 0: no inserted  1: inserted */
 
-	return ret;
-}
+/*	return ret;
+}*/
 
-int meson_mmc_cd_detect(struct mmc_host *mmc)
+/*static int meson_mmc_cd_detect(struct mmc_host *mmc)
 {
 	int gpio_val, val, ret;
 	struct meson_host *host = mmc_priv(mmc);
@@ -3665,7 +3664,7 @@ int meson_mmc_cd_detect(struct mmc_host *mmc)
 	if (!host->is_uart)
 		mmc_detect_change(mmc, msecs_to_jiffies(200));
 	return 0;
-}
+}*/
 
 static void scan_emmc_tx_win(struct mmc_host *mmc)
 {
@@ -3720,7 +3719,7 @@ static void scan_emmc_tx_win(struct mmc_host *mmc)
 	emmc_show_cmd_window(str, repeat_times);
 }
 
-void emmc_eyetestlog(struct mmc_host *mmc)
+static void emmc_eyetestlog(struct mmc_host *mmc)
 {
 	struct meson_host *host = mmc_priv(mmc);
 	u32 dly, dly1_bak, dly2_bak;
@@ -3892,7 +3891,7 @@ static int erase_count_show(struct seq_file *s, void *data)
 }
 DEFINE_SHOW_ATTRIBUTE(erase_count);
 
-void add_dtbkey(struct work_struct *work)
+static void add_dtbkey(struct work_struct *work)
 {
 	int ret;
 	struct meson_host *host =
@@ -4237,7 +4236,7 @@ free_host:
 	return ret;
 }
 
-static int meson_mmc_remove(struct platform_device *pdev)
+static void meson_mmc_remove(struct platform_device *pdev)
 {
 	struct meson_host *host = dev_get_drvdata(&pdev->dev);
 
@@ -4259,7 +4258,6 @@ static int meson_mmc_remove(struct platform_device *pdev)
 
 	devm_kfree(host->dev, host->adj_win);
 	mmc_free_host(host->mmc);
-	return 0;
 }
 
 #ifndef CONFIG_AMLOGIC_REMOVE_OLD
@@ -4307,18 +4305,22 @@ static int caps2_setup(char *p)
 
 __setup("meson-gx-mmc.caps2_quirks=", caps2_setup);
 
-int __init meson_mmc_init(void)
+static int __init meson_mmc_init(void)
 {
 	return platform_driver_register(&meson_mmc_driver);
 }
 
-void __exit meson_mmc_exit(void)
+static void __exit meson_mmc_exit(void)
 {
 	platform_driver_unregister(&meson_mmc_driver);
 }
 
 //module_param(caps2_quirks, charp, 0444);
 //MODULE_PARM_DESC(caps2_quirks, "Force certain caps2.");
+
+//module_platform_driver(meson_mmc_driver);
+EXPORT_SYMBOL(meson_mmc_init);
+EXPORT_SYMBOL(meson_mmc_exit);
 
 //MODULE_DESCRIPTION("Amlogic S905*/GX*/AXG SD/eMMC driver");
 //MODULE_AUTHOR("Kevin Hilman <khilman@baylibre.com>");

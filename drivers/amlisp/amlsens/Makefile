@@ -14,6 +14,8 @@ amlsens-objs := $(DRV_SRC_OBJ)
 
 LOCAL_INCLUDES := -I$(M_PATH)/ -I$(M_PATH)/include/
 
+ccflags-y += $(LOCAL_INCLUDES)
+
 EXTRA_CFLAGS += $(LOCAL_INCLUDES)
 
 ifeq ($(O),)

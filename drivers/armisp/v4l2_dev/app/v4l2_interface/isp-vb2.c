@@ -64,8 +64,8 @@ static int isp_vb2_queue_setup( struct vb2_queue *vq, const struct v4l2_format *
              fmt, fmt->fmt.pix.width, fmt->fmt.pix.height, fmt->fmt.pix.sizeimage );
 #endif
 
-    if ( vq->num_buffers + *nbuffers < 3 )
-        *nbuffers = 3 - vq->num_buffers;
+    if ( vq->max_num_buffers + *nbuffers < 3 )
+        *nbuffers = 3 - vq->max_num_buffers;
 
     if ( vfmt.type == V4L2_BUF_TYPE_VIDEO_CAPTURE ) {
         *nplanes = 1;
@@ -545,7 +545,7 @@ int isp_vb2_queue_init( struct vb2_queue *q, struct mutex *mlock, isp_v4l2_strea
 
     q->ops = &isp_vb2_ops;
     q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC;
-    q->min_buffers_needed = 3;
+    q->min_queued_buffers = 3;
     q->lock = mlock;
 #if ( LINUX_VERSION_CODE >= KERNEL_VERSION( 4, 8, 0 ) )
     q->dev = dev;

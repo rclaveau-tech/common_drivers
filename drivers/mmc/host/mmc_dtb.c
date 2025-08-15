@@ -30,7 +30,6 @@
 #include <linux/mtd/partitions.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
-#include <linux/genhd.h>
 #include <linux/blkdev.h>
 #include <linux/scatterlist.h>
 #include <linux/cdev.h>
@@ -40,7 +39,7 @@
 #include <linux/amlogic/aml_sd.h>
 #include "mmc_common.h"
 
-static dev_t amlmmc_dtb_no;
+//static dev_t amlmmc_dtb_no;
 struct cdev amlmmc_dtb;
 struct device *dtb_dev;
 struct class *amlmmc_dtb_class;
@@ -85,9 +84,9 @@ struct aml_dtb_rsv {
 	unsigned int checksum;
 };
 
-static CLASS_ATTR_STRING(emmcdtb, 0644, NULL);
+//static CLASS_ATTR_STRING(emmcdtb, 0644, NULL);
 
-int mmc_dtb_open(struct inode *node, struct file *file)
+static int mmc_dtb_open(struct inode *node, struct file *file)
 {
 	return 0;
 }
@@ -107,7 +106,7 @@ static unsigned int _calc_dtb_checksum(struct aml_dtb_rsv *dtb)
 	return checksum;
 }
 
-static int _verify_dtb_checksum(struct aml_dtb_rsv *dtb)
+/*static int _verify_dtb_checksum(struct aml_dtb_rsv *dtb)
 {
 	unsigned int checksum;
 
@@ -115,7 +114,7 @@ static int _verify_dtb_checksum(struct aml_dtb_rsv *dtb)
 	pr_debug("calc %x, store %x\n", checksum, dtb->checksum);
 
 	return !(checksum == dtb->checksum);
-}
+}*/
 
 static int _amlmmc_read(struct mmc_card *mmc, int blk, unsigned char *buf, int cnt)
 {
@@ -191,7 +190,7 @@ static int _amlmmc_write(struct mmc_card *mmc, int blk, unsigned char *buf, int 
 	return ret;
 }
 
-static int _dtb_init(struct mmc_card *mmc)
+/*static int _dtb_init(struct mmc_card *mmc)
 {
 	int ret = 0;
 	struct aml_dtb_rsv *dtb;
@@ -205,8 +204,8 @@ static int _dtb_init(struct mmc_card *mmc)
 	if (!dtb)
 		return -ENOMEM;
 
-	/* read dtb2 1st, for compatibility without checksum. */
-	while (cpy >= 0) {
+	*//* read dtb2 1st, for compatibility without checksum. */
+	/*while (cpy >= 0) {
 		blk = ((get_reserve_partition_off_from_tbl()
 		       + DTB_RESERVE_OFFSET) >> bit)
 		       + cpy * DTB_BLK_CNT;
@@ -228,9 +227,9 @@ static int _dtb_init(struct mmc_card *mmc)
 	vfree(dtb);
 
 	return ret;
-}
+}*/
 
-int amlmmc_dtb_write(struct mmc_card *mmc, unsigned char *buf, int len)
+static int amlmmc_dtb_write(struct mmc_card *mmc, unsigned char *buf, int len)
 {
 	int ret = 0, blk;
 	int bit = mmc->csd.read_blkbits;
@@ -279,7 +278,7 @@ int amlmmc_dtb_write(struct mmc_card *mmc, unsigned char *buf, int len)
 	return ret;
 }
 
-int amlmmc_dtb_read(struct mmc_card *card, unsigned char *buf, int len)
+static int amlmmc_dtb_read(struct mmc_card *card, unsigned char *buf, int len)
 {
 	int ret = 0, start_blk, blk_cnt;
 	int bit = card->csd.read_blkbits;
@@ -321,7 +320,7 @@ int amlmmc_dtb_read(struct mmc_card *card, unsigned char *buf, int len)
 	return ret;
 }
 
-ssize_t mmc_dtb_read(struct file *file, char __user *buf,
+static ssize_t mmc_dtb_read(struct file *file, char __user *buf,
 		     size_t count, loff_t *ppos)
 {
 	unsigned char *dtb_ptr = NULL;
@@ -368,7 +367,7 @@ exit:
 	return read_size;
 }
 
-ssize_t mmc_dtb_write(struct file *file,
+static ssize_t mmc_dtb_write(struct file *file,
 			const char __user *buf, size_t count, loff_t *ppos)
 {
 	unsigned char *dtb_ptr = NULL;
@@ -417,7 +416,7 @@ exit:
 	return write_size;
 }
 
-long mmc_dtb_ioctl(struct file *file, unsigned int cmd, unsigned long args)
+static long mmc_dtb_ioctl(struct file *file, unsigned int cmd, unsigned long args)
 {
 	return 0;
 }
@@ -434,7 +433,7 @@ int get_reserve_partition_off_from_tbl(void)
 	return 0x2400000;
 }
 
-void amlmmc_dtb_init(struct mmc_card *card, int *retp)
+/*static void amlmmc_dtb_init(struct mmc_card *card, int *retp)
 {
 	*retp = 0;
 	mmc_claim_host(card->host);
@@ -493,5 +492,5 @@ exit_err1:
 	unregister_chrdev_region(amlmmc_dtb_no, 1);
 exit:
 	mmc_release_host(card->host);
-}
+}*/
 

@@ -100,18 +100,12 @@ static int subdev_set_selection(struct v4l2_subdev *sd,
 	return 0;
 }
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
 static struct v4l2_mbus_framefmt *subdev_get_padfmt(struct aml_subdev *subdev,
 				struct v4l2_subdev_state *cfg,
 				struct v4l2_subdev_format *fmt)
-#else
-static struct v4l2_mbus_framefmt *subdev_get_padfmt(struct aml_subdev *subdev,
-				struct v4l2_subdev_pad_config *cfg,
-				struct v4l2_subdev_format *fmt)
-#endif
 {
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		return v4l2_subdev_get_try_format(subdev->sd, cfg, fmt->pad);
+		return v4l2_subdev_state_get_format(cfg, fmt->pad, fmt->stream);
 
 	return &subdev->pfmt[fmt->pad];
 }
@@ -340,7 +334,7 @@ void * aml_subdev_map_vaddr(u32 phys_addr, u32 length)
 	tmp = page;
 	array_size = sizeof(struct page *) * pagesnr;
 
-	pages = vmalloc(array_size);
+	pages = kvmalloc(array_size, GFP_KERNEL);
 	if (pages == NULL) {
 		pr_info("0x%x vmalloc failed.\n", array_size);
 		return NULL;
@@ -351,14 +345,15 @@ void * aml_subdev_map_vaddr(u32 phys_addr, u32 length)
 		tmp++;
 	}
 
-	vaddr = vmap(pages, pagesnr, VM_MAP, prot);
-	vfree(pages);
+	//vaddr = kmap(pages, pagesnr, VM_MAP, prot);
+	vaddr = kmap(page);
+	kvfree(pages);
 
 	return vaddr;
 }
 
 void aml_subdev_unmap_vaddr(void *vaddr)
 {
-	vunmap(vaddr);
+	kunmap(vaddr);
 }
 

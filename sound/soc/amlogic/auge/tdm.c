@@ -582,7 +582,7 @@ static int aml_set_tdm_mclk(struct aml_tdm *p_tdm, unsigned int freq, bool tune)
 	return ret;
 }
 
-int aml_tdm_set_fmt(struct aml_tdm *p_tdm, unsigned int fmt, bool capture_active)
+static int aml_tdm_set_fmt(struct aml_tdm *p_tdm, unsigned int fmt, bool capture_active)
 {
 	bool tdmin_src_hdmirx = false;
 	bool tdmin_src_hdmirxb = false;
@@ -647,16 +647,16 @@ int aml_tdm_set_fmt(struct aml_tdm *p_tdm, unsigned int fmt, bool capture_active
 	return 0;
 }
 
-void aml_tdm_trigger(struct aml_tdm *p_tdm, int stream, bool enable)
+/*static void aml_tdm_trigger(struct aml_tdm *p_tdm, int stream, bool enable)
 {
 	if (!p_tdm)
 		return;
 
 	aml_tdm_enable(p_tdm->actrl, stream, p_tdm->id, enable, p_tdm->tdm_fade_out_enable,
 		       p_tdm->chipinfo->use_vadtop);
-}
+}*/
 
-int aml_tdm_hw_setting_init(struct aml_tdm *p_tdm,
+static int aml_tdm_hw_setting_init(struct aml_tdm *p_tdm,
 		       unsigned int rate,
 		       unsigned int channels,
 		       int stream)
@@ -710,7 +710,7 @@ int aml_tdm_hw_setting_init(struct aml_tdm *p_tdm,
 	return 0;
 }
 
-void aml_tdm_hw_setting_free(struct aml_tdm *p_tdm, int stream)
+static void aml_tdm_hw_setting_free(struct aml_tdm *p_tdm, int stream)
 {
 	int i;
 
@@ -730,7 +730,7 @@ void aml_tdm_hw_setting_free(struct aml_tdm *p_tdm, int stream)
 	}
 }
 
-unsigned int get_tdmin_src(struct src_table *table, const char *src)
+static unsigned int get_tdmin_src(struct src_table *table, const char *src)
 {
 	for (; table->name[0]; table++) {
 		if (strncmp(table->name, src, strlen(src)) == 0)
@@ -740,7 +740,7 @@ unsigned int get_tdmin_src(struct src_table *table, const char *src)
 	return 0;
 }
 
-void aml_tdmin_set_src(struct aml_tdm *p_tdm)
+static void aml_tdmin_set_src(struct aml_tdm *p_tdm)
 {
 	int src_val;
 
@@ -776,7 +776,7 @@ void aml_tdmin_set_src(struct aml_tdm *p_tdm)
 	aml_update_tdmin_src(p_tdm->actrl, p_tdm->id, src_val, p_tdm->chipinfo->use_vadtop);
 }
 
-void tdm_mute_capture(struct aml_tdm *p_tdm, bool mute)
+static void tdm_mute_capture(struct aml_tdm *p_tdm, bool mute)
 {
 	if (!p_tdm)
 		return;
@@ -1134,7 +1134,7 @@ static irqreturn_t aml_tdm_ddr_isr(int irq, void *devid)
 	struct snd_pcm_substream *substream = (struct snd_pcm_substream *)devid;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
 	struct aml_tdm *p_tdm =
-		(struct aml_tdm *)snd_soc_dai_get_drvdata(asoc_rtd_to_cpu(rtd, 0));
+		(struct aml_tdm *)snd_soc_dai_get_drvdata(snd_soc_rtd_to_cpu(rtd, 0));
 
 	if (!snd_pcm_running(substream))
 		return IRQ_HANDLED;
@@ -1343,9 +1343,9 @@ static int aml_tdm_open(struct snd_soc_component *component, struct snd_pcm_subs
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct device *dev = asoc_rtd_to_cpu(rtd, 0)->dev;
+	struct device *dev = snd_soc_rtd_to_cpu(rtd, 0)->dev;
 	struct aml_tdm *p_tdm =
-		(struct aml_tdm *)snd_soc_dai_get_drvdata(asoc_rtd_to_cpu(rtd, 0));
+		(struct aml_tdm *)snd_soc_dai_get_drvdata(snd_soc_rtd_to_cpu(rtd, 0));
 	int ret = 0;
 
 	snd_soc_set_runtime_hwparams(substream, &aml_tdm_hardware);
@@ -2086,7 +2086,7 @@ static int aml_dai_set_tdm_fmt(struct snd_soc_dai *cpu_dai, unsigned int fmt)
 {
 	struct aml_tdm *p_tdm = snd_soc_dai_get_drvdata(cpu_dai);
 
-	return aml_tdm_set_fmt(p_tdm, fmt, cpu_dai->stream_active[1]);
+	return aml_tdm_set_fmt(p_tdm, fmt, cpu_dai->stream[1].active);
 }
 
 static int aml_dai_set_bclk_ratio(struct snd_soc_dai *cpu_dai,
@@ -2267,7 +2267,7 @@ static int aml_set_default_tdm_clk(struct aml_tdm *p_tdm)
 	char *clk_name;
 
 	/*set default i2s  timing sequence*/
-	int fmt = SND_SOC_DAIFMT_CBS_CFS | SND_SOC_DAIFMT_I2S
+	int fmt = SND_SOC_DAIFMT_CBC_CFC | SND_SOC_DAIFMT_I2S
 	| SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CONT;
 
 	aml_tdm_set_fmt(p_tdm, fmt, 1);
@@ -2314,6 +2314,7 @@ static struct snd_soc_dai_ops aml_dai_tdm_ops = {
 	.set_clkdiv = aml_dai_set_clkdiv,
 	.set_tdm_slot = aml_dai_set_tdm_slot,
 	.mute_stream = aml_dai_tdm_mute_stream,
+	.probe = aml_dai_tdm_probe,
 };
 
 #define AML_DAI_TDM_RATES		(SNDRV_PCM_RATE_8000_192000)
@@ -2324,7 +2325,6 @@ static struct snd_soc_dai_driver aml_tdm_dai[] = {
 	{
 		.name = "TDM-A",
 		.id = 1,
-		.probe = aml_dai_tdm_probe,
 		.playback = {
 		      .channels_min = 1,
 		      .channels_max = 32,
@@ -2343,7 +2343,6 @@ static struct snd_soc_dai_driver aml_tdm_dai[] = {
 	{
 		.name = "TDM-B",
 		.id = 2,
-		.probe = aml_dai_tdm_probe,
 		.playback = {
 		      .channels_min = 1,
 		      .channels_max = 32,
@@ -2362,7 +2361,6 @@ static struct snd_soc_dai_driver aml_tdm_dai[] = {
 	{
 		.name = "TDM-C",
 		.id = 3,
-		.probe = aml_dai_tdm_probe,
 		.playback = {
 		      .channels_min = 1,
 		      .channels_max = 8,
@@ -2381,7 +2379,6 @@ static struct snd_soc_dai_driver aml_tdm_dai[] = {
 	{
 		.name = "TDM-D",
 		.id = 4,
-		.probe = aml_dai_tdm_probe,
 		.playback = {
 		      .channels_min = 1,
 		      .channels_max = 32,
@@ -3050,15 +3047,18 @@ struct platform_driver aml_tdm_driver = {
 	.shutdown = aml_tdm_platform_shutdown,
 };
 
-int __init tdm_init(void)
+static int __init tdm_init(void)
 {
 	return platform_driver_register(&aml_tdm_driver);
 }
 
-void __exit tdm_exit(void)
+static void __exit tdm_exit(void)
 {
 	platform_driver_unregister(&aml_tdm_driver);
 }
+
+EXPORT_SYMBOL(tdm_init);
+EXPORT_SYMBOL(tdm_exit);
 
 #ifndef MODULE
 module_init(tdm_init);

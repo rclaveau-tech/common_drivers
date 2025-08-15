@@ -231,7 +231,7 @@ return_err:
 	return ret;
 }
 
-static int sensor_remove(struct i2c_client *client)
+static void sensor_remove(struct i2c_client *client)
 {
 	struct amlsens *sensor = sensor_get_ptr(client);
 
@@ -239,8 +239,6 @@ static int sensor_remove(struct i2c_client *client)
 		sensor->sd_sdrv->sensor_deinit(client);
 		sensor = NULL;
 	}
-
-	return 0;
 }
 
 static const struct of_device_id sensor_of_match[] = {
@@ -249,7 +247,7 @@ static const struct of_device_id sensor_of_match[] = {
 MODULE_DEVICE_TABLE(of, sensor_of_match);
 
 static struct i2c_driver sensor_i2c_driver = {
-	.probe_new = sensor_probe,
+	.probe = sensor_probe,
 	.remove = sensor_remove,
 	.driver = {
 		.name = "amlsens",
