@@ -39,7 +39,9 @@
 #include <linux/amlogic/aml_sd.h>
 #include "mmc_common.h"
 
-//static dev_t amlmmc_dtb_no;
+#include "mmc_dtb.h"
+
+static dev_t amlmmc_dtb_no;
 struct cdev amlmmc_dtb;
 struct device *dtb_dev;
 struct class *amlmmc_dtb_class;
@@ -84,7 +86,7 @@ struct aml_dtb_rsv {
 	unsigned int checksum;
 };
 
-//static CLASS_ATTR_STRING(emmcdtb, 0644, NULL);
+static CLASS_ATTR_STRING(emmcdtb, 0644, NULL);
 
 static int mmc_dtb_open(struct inode *node, struct file *file)
 {
@@ -106,7 +108,7 @@ static unsigned int _calc_dtb_checksum(struct aml_dtb_rsv *dtb)
 	return checksum;
 }
 
-/*static int _verify_dtb_checksum(struct aml_dtb_rsv *dtb)
+static int _verify_dtb_checksum(struct aml_dtb_rsv *dtb)
 {
 	unsigned int checksum;
 
@@ -114,7 +116,7 @@ static unsigned int _calc_dtb_checksum(struct aml_dtb_rsv *dtb)
 	pr_debug("calc %x, store %x\n", checksum, dtb->checksum);
 
 	return !(checksum == dtb->checksum);
-}*/
+}
 
 static int _amlmmc_read(struct mmc_card *mmc, int blk, unsigned char *buf, int cnt)
 {
@@ -190,7 +192,7 @@ static int _amlmmc_write(struct mmc_card *mmc, int blk, unsigned char *buf, int 
 	return ret;
 }
 
-/*static int _dtb_init(struct mmc_card *mmc)
+static int _dtb_init(struct mmc_card *mmc)
 {
 	int ret = 0;
 	struct aml_dtb_rsv *dtb;
@@ -204,8 +206,8 @@ static int _amlmmc_write(struct mmc_card *mmc, int blk, unsigned char *buf, int 
 	if (!dtb)
 		return -ENOMEM;
 
-	*//* read dtb2 1st, for compatibility without checksum. */
-	/*while (cpy >= 0) {
+	/* read dtb2 1st, for compatibility without checksum. */
+	while (cpy >= 0) {
 		blk = ((get_reserve_partition_off_from_tbl()
 		       + DTB_RESERVE_OFFSET) >> bit)
 		       + cpy * DTB_BLK_CNT;
@@ -227,7 +229,7 @@ static int _amlmmc_write(struct mmc_card *mmc, int blk, unsigned char *buf, int 
 	vfree(dtb);
 
 	return ret;
-}*/
+}
 
 static int amlmmc_dtb_write(struct mmc_card *mmc, unsigned char *buf, int len)
 {
@@ -433,7 +435,7 @@ int get_reserve_partition_off_from_tbl(void)
 	return 0x2400000;
 }
 
-/*static void amlmmc_dtb_init(struct mmc_card *card, int *retp)
+void amlmmc_dtb_init(struct mmc_card *card, int *retp)
 {
 	*retp = 0;
 	mmc_claim_host(card->host);
@@ -459,7 +461,7 @@ int get_reserve_partition_off_from_tbl(void)
 		goto exit_err1;
 	}
 
-	amlmmc_dtb_class = class_create(THIS_MODULE, DTB_NAME);
+	amlmmc_dtb_class = class_create(DTB_NAME);
 	if (IS_ERR(amlmmc_dtb_class)) {
 		pr_err("dtb dev add failed");
 		*retp = -1;
@@ -492,5 +494,4 @@ exit_err1:
 	unregister_chrdev_region(amlmmc_dtb_no, 1);
 exit:
 	mmc_release_host(card->host);
-}*/
-
+}

@@ -238,14 +238,14 @@ exit:
 	return ret_value;
 }
 
-static ssize_t version_show(struct class *cla,
-			    struct class_attribute *attr, char *buf)
+static ssize_t version_show(const struct class *cla,
+			    const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "version:2.00\n");
 }
 
-static ssize_t secure_check_show(struct class *cla,
-				 struct class_attribute *attr, char *buf)
+static ssize_t secure_check_show(const struct class *cla,
+				 const struct class_attribute *attr, char *buf)
 {
 	ssize_t n = 0;
 	int ret;
@@ -265,20 +265,20 @@ static ssize_t secure_check_show(struct class *cla,
 	return n;
 }
 
-static ssize_t secure_verify_show(struct class *cla,
-				  struct class_attribute *attr, char *buf)
+static ssize_t secure_verify_show(const struct class *cla,
+				  const struct class_attribute *attr, char *buf)
 {
 	return 0;
 }
 
-static ssize_t decrypt_dtb_show(struct class *cla,
-				struct class_attribute *attr, char *buf)
+static ssize_t decrypt_dtb_show(const struct class *cla,
+				const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "%d\n", defendkey_type.decrypt_dtb);
 }
 
-static ssize_t decrypt_dtb_store(struct class *cla,
-				 struct class_attribute *attr,
+static ssize_t decrypt_dtb_store(const struct class *cla,
+				 const struct class_attribute *attr,
 				 const char *buf, size_t count)
 {
 	unsigned int len;
@@ -402,7 +402,7 @@ static int defendkey_probe(struct platform_device *pdev)
 
 	defendkey_dev->reg_base = reg_base;
 	defendkey_dev->cls.name = DEFENDKEY_CLASS_NAME;
-	defendkey_dev->cls.owner = THIS_MODULE;
+	//defendkey_dev->cls.owner = THIS_MODULE;
 	defendkey_dev->cls.class_groups = defendkey_class_groups;
 
 	ret = class_register(&defendkey_dev->cls);
@@ -443,7 +443,7 @@ out:
 	return ret;
 }
 
-static int defendkey_remove(struct platform_device *pdev)
+static void defendkey_remove(struct platform_device *pdev)
 {
 	struct aml_defendkey_dev *defendkey_dev = platform_get_drvdata(pdev);
 
@@ -452,8 +452,6 @@ static int defendkey_remove(struct platform_device *pdev)
 	cdev_del(&defendkey_dev->cdev);
 	class_unregister(&defendkey_dev->cls);
 	platform_set_drvdata(pdev, NULL);
-
-	return 0;
 }
 
 static const struct of_device_id defendkey_dt_match[] = {

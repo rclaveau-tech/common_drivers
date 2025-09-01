@@ -431,7 +431,7 @@ _NonContiguous1MPagesAlloc(
         {
             int order = get_order(gcd1M_PAGE_SIZE);
 
-            if (order >= MAX_ORDER)
+            if (order >= MAX_PAGE_ORDER)
             {
                 gcmkONERROR(gcvSTATUS_OUT_OF_MEMORY);
             }
@@ -551,7 +551,7 @@ _GFPAlloc(
         {
             int order = get_order(bytes);
 
-            if (order >= MAX_ORDER)
+            if (order >= MAX_PAGE_ORDER)
             {
                 status = gcvSTATUS_OUT_OF_MEMORY;
                 goto OnError;
@@ -907,7 +907,7 @@ _GFPMmap(
 
     gcmkHEADER_ARG("Allocator=%p Mdl=%p vma=%p", Allocator, Mdl, vma);
 
-    vma->vm_flags |= gcdVM_FLAGS;
+    vm_flags_set(vma, gcdVM_FLAGS);
 
     if (Cacheable == gcvFALSE)
     {
@@ -1352,6 +1352,12 @@ _GFPAlloctorInit(
     IN gckOS Os,
     IN gcsDEBUGFS_DIR *Parent,
     OUT gckALLOCATOR * Allocator
+    );
+gceSTATUS
+_GFPAlloctorInit(
+    IN gckOS Os,
+    IN gcsDEBUGFS_DIR *Parent,
+    OUT gckALLOCATOR * Allocator
     )
 {
     gceSTATUS status;
@@ -1409,4 +1415,3 @@ OnError:
     }
     return status;
 }
-

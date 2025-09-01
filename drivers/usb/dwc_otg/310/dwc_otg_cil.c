@@ -817,7 +817,7 @@ int dwc_otg_save_global_regs(dwc_otg_core_if_t *core_if)
 }
 
 /** Saves GINTMSK register before setting the msk bits. */
-int dwc_otg_save_gintmsk_reg(dwc_otg_core_if_t *core_if)
+static int dwc_otg_save_gintmsk_reg(dwc_otg_core_if_t *core_if)
 {
 	struct dwc_otg_global_regs_backup *gr;
 
@@ -836,6 +836,8 @@ int dwc_otg_save_gintmsk_reg(dwc_otg_core_if_t *core_if)
 
 	return 0;
 }
+
+EXPORT_SYMBOL(dwc_otg_save_gintmsk_reg);
 
 int dwc_otg_save_dev_regs(dwc_otg_core_if_t *core_if)
 {
@@ -2761,7 +2763,7 @@ void ep_xfer_timeout(void *ptr)
 
 }
 
-void set_pid_isoc(dwc_hc_t *hc)
+static void set_pid_isoc(dwc_hc_t *hc)
 {
 	/* Set up the initial PID for the transfer. */
 	if (hc->speed == DWC_OTG_EP_SPEED_HIGH) {
@@ -4505,7 +4507,7 @@ void dwc_otg_ep0_continue_transfer(dwc_otg_core_if_t *core_if, dwc_ep_t *ep)
 }
 
 #ifdef DEBUG
-void dump_msg(const u8 *buf, unsigned int length)
+static void dump_msg(const u8 *buf, unsigned int length)
 {
 	unsigned int start, num, i;
 	char line[52], *p;
@@ -4529,6 +4531,8 @@ void dump_msg(const u8 *buf, unsigned int length)
 		length -= num;
 	}
 }
+
+EXPORT_SYMBOL(dump_msg);
 #else
 static inline void dump_msg(const u8 *buf, unsigned int length)
 {
@@ -6357,7 +6361,7 @@ int dwc_otg_set_param_thr_ctl(dwc_otg_core_if_t *core_if, int32_t val)
 	return retval;
 }
 
-int32_t dwc_otg_get_param_thr_ctl(dwc_otg_core_if_t *core_if)
+static int32_t dwc_otg_get_param_thr_ctl(dwc_otg_core_if_t *core_if)
 {
 	return core_if->core_params->thr_ctl;
 }
@@ -6464,7 +6468,7 @@ int dwc_otg_set_param_tx_thr_length(dwc_otg_core_if_t *core_if, int32_t val)
 	return 0;
 }
 
-int32_t dwc_otg_get_param_tx_thr_length(dwc_otg_core_if_t *core_if)
+static int32_t dwc_otg_get_param_tx_thr_length(dwc_otg_core_if_t *core_if)
 {
 	return core_if->core_params->tx_thr_length;
 }
@@ -6481,10 +6485,12 @@ int dwc_otg_set_param_rx_thr_length(dwc_otg_core_if_t *core_if, int32_t val)
 	return 0;
 }
 
-int32_t dwc_otg_get_param_rx_thr_length(dwc_otg_core_if_t *core_if)
+static int32_t dwc_otg_get_param_rx_thr_length(dwc_otg_core_if_t *core_if)
 {
 	return core_if->core_params->rx_thr_length;
 }
+
+EXPORT_SYMBOL(dwc_otg_get_param_rx_thr_length);
 
 int dwc_otg_set_param_dma_burst_size(dwc_otg_core_if_t *core_if, int32_t val)
 {
@@ -7287,10 +7293,11 @@ uint32_t dwc_otg_get_hptxfsiz(dwc_otg_core_if_t *core_if)
 	return DWC_READ_REG32(&core_if->core_global_regs->hptxfsiz);
 }
 
-uint16_t dwc_otg_get_otg_version(dwc_otg_core_if_t *core_if)
+static uint16_t dwc_otg_get_otg_version(dwc_otg_core_if_t *core_if)
 {
 	return (core_if->otg_ver == 1) ? (uint16_t)0x0200 : (uint16_t)0x0103;
 }
+EXPORT_SYMBOL(dwc_otg_get_otg_version);
 
 /**
  * Start the SRP timer to detect when the SRP does not complete within
@@ -7298,7 +7305,7 @@ uint16_t dwc_otg_get_otg_version(dwc_otg_core_if_t *core_if)
  *
  * @param core_if the pointer to core_if structure.
  */
-void dwc_otg_pcd_start_srp_timer(dwc_otg_core_if_t *core_if)
+static void dwc_otg_pcd_start_srp_timer(dwc_otg_core_if_t *core_if)
 {
 	core_if->srp_timer_started = 1;
 	DWC_TIMER_SCHEDULE(core_if->srp_timer, 6000);

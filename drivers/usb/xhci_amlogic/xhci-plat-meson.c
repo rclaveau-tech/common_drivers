@@ -23,7 +23,6 @@
 #include "xhci-meson.h"
 #include "xhci-plat-meson.h"
 #include "xhci-mvebu.h"
-#include "xhci-rcar.h"
 
 static struct hc_driver __read_mostly xhci_plat_hc_driver;
 
@@ -121,17 +120,18 @@ static const struct aml_xhci_plat_priv xhci_plat_marvell_armada = {
 };
 
 static const struct aml_xhci_plat_priv xhci_plat_marvell_armada3700 = {
-	.plat_setup = xhci_mvebu_a3700_plat_setup,
-	.init_quirk = xhci_mvebu_a3700_init_quirk,
+	//.plat_setup = xhci_mvebu_a3700_plat_setup,
+	//.init_quirk = xhci_mvebu_a3700_init_quirk,
+	.quirks = XHCI_RESET_ON_RESUME,
 };
 
-static const struct aml_xhci_plat_priv xhci_plat_renesas_rcar_gen2 = {
+/*static const struct aml_xhci_plat_priv xhci_plat_renesas_rcar_gen2 = {
 	SET_XHCI_PLAT_PRIV_FOR_RCAR(XHCI_RCAR_FIRMWARE_NAME_V1)
 };
 
 static const struct aml_xhci_plat_priv xhci_plat_renesas_rcar_gen3 = {
 	SET_XHCI_PLAT_PRIV_FOR_RCAR(XHCI_RCAR_FIRMWARE_NAME_V3)
-};
+};*/
 
 static const struct aml_xhci_plat_priv xhci_plat_brcm = {
 	.quirks = XHCI_RESET_ON_RESUME | XHCI_SUSPEND_RESUME_CLKS,
@@ -151,7 +151,7 @@ static const struct of_device_id usb_xhci_of_match[] = {
 	}, {
 		.compatible = "marvell,armada3700-xhci",
 		.data = &xhci_plat_marvell_armada3700,
-	}, {
+	}, /*{
 		.compatible = "renesas,xhci-r8a7790",
 		.data = &xhci_plat_renesas_rcar_gen2,
 	}, {
@@ -172,7 +172,7 @@ static const struct of_device_id usb_xhci_of_match[] = {
 	}, {
 		.compatible = "renesas,rcar-gen3-xhci",
 		.data = &xhci_plat_renesas_rcar_gen3,
-	}, {
+	},*/ {
 		.compatible = "brcm,xhci-brcm-v2",
 		.data = &xhci_plat_brcm,
 	}, {
@@ -434,7 +434,7 @@ disable_runtime:
 	return ret;
 }
 
-static int xhci_plat_remove(struct platform_device *dev)
+static void xhci_plat_remove(struct platform_device *dev)
 {
 	struct usb_hcd	*hcd = platform_get_drvdata(dev);
 	struct aml_xhci_hcd	*xhci = hcd_to_xhci(hcd);
@@ -459,8 +459,6 @@ static int xhci_plat_remove(struct platform_device *dev)
 	pm_runtime_disable(&dev->dev);
 	pm_runtime_put_noidle(&dev->dev);
 	pm_runtime_set_suspended(&dev->dev);
-
-	return 0;
 }
 
 static int __maybe_unused xhci_plat_suspend(struct device *dev)
@@ -568,17 +566,20 @@ static struct platform_driver usb_xhci_driver = {
 };
 //MODULE_ALIAS("platform:xhci-hcd");
 
-int __init aml_xhci_plat_init(void)
+static int __init aml_xhci_plat_init(void)
 {
 	aml_xhci_init_driver(&xhci_plat_hc_driver, &xhci_plat_overrides);
 	return platform_driver_register(&usb_xhci_driver);
 }
 //module_init(xhci_plat_init);
 
-void __exit aml_xhci_plat_exit(void)
+static void __exit aml_xhci_plat_exit(void)
 {
 	platform_driver_unregister(&usb_xhci_driver);
 }
+
+EXPORT_SYMBOL(aml_xhci_plat_init);
+EXPORT_SYMBOL(aml_xhci_plat_exit);
 //module_exit(xhci_plat_exit);
 
 //MODULE_DESCRIPTION("xHCI Platform Host Controller Driver");

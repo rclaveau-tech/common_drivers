@@ -989,11 +989,13 @@ static struct platform_driver meson_gpio_irq_driver = {
 	},
 };
 
+int __init meson_gpio_irq_init(void);
 int __init meson_gpio_irq_init(void)
 {
 	return platform_driver_register(&meson_gpio_irq_driver);
 }
 
+void __exit meson_gpio_irq_exit(void);
 void __exit meson_gpio_irq_exit(void)
 {
 	platform_driver_unregister(&meson_gpio_irq_driver);

@@ -29,5 +29,9 @@ int aml_disable_mmc_cqe(struct mmc_card *card);
 
 int aml_enable_mmc_cqe(struct mmc_card *card);
 
+void sdio_clk_always_on(bool clk_aws_on);
+
+void sdio_set_max_regs(unsigned int size);
+
 #endif
 

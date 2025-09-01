@@ -16,6 +16,8 @@
 #include <linux/of_device.h>
 #include <linux/module.h>
 
+#include "main.h"
+
 #define BITS_PER_REG	32
 
 struct meson_reset_param {

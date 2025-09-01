@@ -22,7 +22,7 @@
 #include <linux/debugfs.h>
 #include <linux/wait.h>
 #include <linux/workqueue.h>
-#include <linux/android_kabi.h>
+//#include <linux/android_kabi.h>
 
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
@@ -663,7 +663,7 @@ struct aml_dwc3_event_buffer {
 
 	struct aml_dwc3		*dwc;
 
-	ANDROID_KABI_RESERVE(1);
+	//ANDROID_KABI_RESERVE(1);
 };
 
 #define DWC3_EP_FLAG_STALLED	BIT(0)
@@ -760,8 +760,8 @@ struct aml_dwc3_ep {
 	u8			combo_num;
 	int			start_cmd_status;
 
-	ANDROID_KABI_RESERVE(1);
-	ANDROID_KABI_RESERVE(2);
+	//ANDROID_KABI_RESERVE(1);
+	//ANDROID_KABI_RESERVE(2);
 };
 
 enum aml_dwc3_phy {
@@ -874,8 +874,8 @@ struct aml_dwc3_hwparams {
 	u32	hwparams8;
 	u32	hwparams9;
 
-	ANDROID_KABI_RESERVE(1);
-	ANDROID_KABI_RESERVE(2);
+	//ANDROID_KABI_RESERVE(1);
+	//ANDROID_KABI_RESERVE(2);
 };
 
 /* HWPARAMS0 */
@@ -945,8 +945,8 @@ struct aml_dwc3_request {
 	unsigned int		direction:1;
 	unsigned int		mapped:1;
 
-	ANDROID_KABI_RESERVE(1);
-	ANDROID_KABI_RESERVE(2);
+	//ANDROID_KABI_RESERVE(1);
+	//ANDROID_KABI_RESERVE(2);
 };
 
 /*
@@ -1319,12 +1319,12 @@ struct aml_dwc3 {
 	int			last_fifo_depth;
 	int			num_ep_resized;
 
-	ANDROID_KABI_USE(1, struct{ u8 clear_stall_protocol; u8 padding1;
+	/*ANDROID_KABI_USE(1, struct{ u8 clear_stall_protocol; u8 padding1;
 				u8 padding2; u8 padding3; u8 padding4; u8 padding5;
 				u8 padding6; u8 padding7; });
 	ANDROID_KABI_USE(2, struct dentry *debug_root);
 	ANDROID_KABI_RESERVE(3);
-	ANDROID_KABI_RESERVE(4);
+	ANDROID_KABI_RESERVE(4);*/
 };
 
 /**

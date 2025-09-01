@@ -30,6 +30,7 @@
 static int init_done;
 static unsigned char cpuinfo_chip_id[CHIPID_LEN];
 static int cpu_id_from_media;
+static const char *machine_name;
 
 int get_cpu_type_from_media(void)
 {
@@ -61,8 +62,6 @@ unsigned char get_meson_cpu_version(int level)
 }
 EXPORT_SYMBOL(get_meson_cpu_version);
 
-extern const char *machine_model;
-
 void cpuinfo_get_chipid(unsigned char *cid, unsigned int size)
 {
 	if (!init_done) {
@@ -84,7 +83,7 @@ static int cpu_chipid_show(struct seq_file *m, void *arg)
 	for (i = 0; i < CHIPID_LEN; i++)
 		seq_printf(m, "%02x", cpuinfo_chip_id[i]);
 	seq_puts(m, "\n");
-	seq_printf(m, "Hardware:\t %s\n", machine_model);
+	seq_printf(m, "Hardware:\t %s\n", machine_name);
 
 	return 0;
 }
@@ -188,6 +187,7 @@ static  struct platform_driver cpuinfo_platform_driver = {
 
 static int __init meson_cpuinfo_init(void)
 {
+	machine_name = of_flat_dt_get_machine_name();
 	pr_notice("build info: %s, common_drivers: %s\n", BUILD_TIME, COMMON_DRIVER_RELEASE);
 	pr_notice("kernel upgrade info: <%d> <%s> <%s-%s>\n",
 		  AML_KERNEL_VERSION, MERGE_DATE, UPSTREAM_VERSION, AML_PATCH_VERSION);

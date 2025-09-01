@@ -16,7 +16,7 @@
 #include "../dmx_log.h"
 #else
 #include <assert.h>
-#include <stdarg.h>
+#include <linux/stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #endif

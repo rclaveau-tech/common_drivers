@@ -91,7 +91,7 @@ static gctUINT32 powerStatus = 0;
 static struct clk *npu_axi_clk = NULL;
 static struct clk *npu_core_clk = NULL;
 
-gceSTATUS _InitDtsRegValue(IN gcsPLATFORM *Platform)
+static gceSTATUS _InitDtsRegValue(IN gcsPLATFORM *Platform)
 {
     int ret = 0;
     struct platform_device *pdev = Platform->device;
@@ -101,7 +101,7 @@ gceSTATUS _InitDtsRegValue(IN gcsPLATFORM *Platform)
     return gcvSTATUS_OK;
 }
 
-gceSTATUS _AdjustParam(IN gcsPLATFORM *Platform,OUT gcsMODULE_PARAMETERS *Args)
+static gceSTATUS _AdjustParam(IN gcsPLATFORM *Platform,OUT gcsMODULE_PARAMETERS *Args)
 {
     struct resource *res = NULL;
     struct platform_device *pdev = Platform->device;
@@ -147,7 +147,7 @@ gceSTATUS _AdjustParam(IN gcsPLATFORM *Platform,OUT gcsMODULE_PARAMETERS *Args)
     return gcvSTATUS_OK;
 }
 
-gceSTATUS _RegWrite(uint32_t reg, uint32_t writeval)
+static gceSTATUS _RegWrite(uint32_t reg, uint32_t writeval)
 {
     void __iomem *vaddr = NULL;
     reg = round_down(reg, 0x3);
@@ -159,7 +159,7 @@ gceSTATUS _RegWrite(uint32_t reg, uint32_t writeval)
     return gcvSTATUS_OK;
 }
 
-gceSTATUS _RegRead(uint32_t reg,uint32_t *readval)
+static gceSTATUS _RegRead(uint32_t reg,uint32_t *readval)
 {
     void __iomem *vaddr = NULL;
     reg = round_down(reg, 0x3);
@@ -191,6 +191,7 @@ gceSTATUS get_nna_status(struct platform_device *dev)
     }
 }
 //us
+void delay(uint32_t time);
 void delay(uint32_t time)
 {
     int i = 0,j = 0;
@@ -280,7 +281,7 @@ static int clk_switch(int flag)
 }
 
 /* Getpower: enable the nna power for platform */
-void Getpower_88(struct platform_device *pdev)
+static void Getpower_88(struct platform_device *pdev)
 {
     uint32_t readReg = 0;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
@@ -334,7 +335,7 @@ void Getpower_88(struct platform_device *pdev)
     set_clock(pdev);
 #endif
 }
-void Getpower_99(struct platform_device *pdev)
+static void Getpower_99(struct platform_device *pdev)
 {
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(4, 10, 0))
     power_domain_switch(NN_PD_0X99,PWR_ON);
@@ -342,20 +343,20 @@ void Getpower_99(struct platform_device *pdev)
 
     set_clock(pdev);
 }
-void Getpower_a1(struct platform_device *pdev)
+static void Getpower_a1(struct platform_device *pdev)
 {
     /*C1 added power domain, it will get domain power when prob*/
     set_clock(pdev);
     return;
 }
-void Getpower_be(struct platform_device *pdev)
+static void Getpower_be(struct platform_device *pdev)
 {
     /*C2 added power domain, it will get domain power when prob*/
     set_clock(pdev);
     return;
 }
 
-void Getpower_0x1000000e(struct platform_device *pdev)
+static void Getpower_0x1000000e(struct platform_device *pdev)
 {
     /*A5 added power domain, it will get domain power when prob*/
     set_clock(pdev);
@@ -364,7 +365,7 @@ void Getpower_0x1000000e(struct platform_device *pdev)
 
 /* Downpower: disable nna power for platform */
 
-void Downpower_88(struct platform_device *pdev)
+static void Downpower_88(struct platform_device *pdev)
 {
     uint32_t readReg = 0;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
@@ -400,7 +401,7 @@ void Downpower_88(struct platform_device *pdev)
     put_clock(pdev);
 #endif
 }
-void Downpower_99(struct platform_device *pdev)
+static void Downpower_99(struct platform_device *pdev)
 {
 
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(4, 10, 0))
@@ -409,20 +410,20 @@ void Downpower_99(struct platform_device *pdev)
 
     put_clock(pdev);
 }
-void Downpower_a1(struct platform_device *pdev)
+static void Downpower_a1(struct platform_device *pdev)
 {
     /*C1 added power domain, it will down domain power when rmmod */
     put_clock(pdev);
     return;
 }
-void Downpower_be(struct platform_device *pdev)
+static void Downpower_be(struct platform_device *pdev)
 {
     /*C2 added power domain, it will down domain power when rmmod */
     put_clock(pdev);
     return;
 }
 
-void Downpower_0x1000000e(struct platform_device *pdev)
+static void Downpower_0x1000000e(struct platform_device *pdev)
 {
     /*A5 added power domain, it will down domain power when rmmod */
     put_clock(pdev);
@@ -430,7 +431,7 @@ void Downpower_0x1000000e(struct platform_device *pdev)
 }
 
 /* Runtime power manage */
-void Runtime_getpower_88(void)
+static void Runtime_getpower_88(void)
 {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
     clk_switch(1);
@@ -460,7 +461,7 @@ void Runtime_getpower_88(void)
 #endif
 
 }
-void Runtime_downpower_88(void)
+static void Runtime_downpower_88(void)
 {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
     clk_switch(0);
@@ -481,7 +482,7 @@ void Runtime_downpower_88(void)
     clk_switch(0);
 #endif
 }
-void Runtime_getpower_99(struct platform_device *pdev)
+static void Runtime_getpower_99(struct platform_device *pdev)
 {
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(4, 10, 0))
     power_domain_switch(NN_PD_0X99,PWR_ON);
@@ -494,7 +495,7 @@ void Runtime_getpower_99(struct platform_device *pdev)
 
     clk_switch(1);
 }
-void Runtime_downpower_99(struct platform_device *pdev)
+static void Runtime_downpower_99(struct platform_device *pdev)
 {
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(4, 10, 0))
     power_domain_switch(NN_PD_0X99,PWR_OFF);
@@ -505,7 +506,7 @@ void Runtime_downpower_99(struct platform_device *pdev)
 
     clk_switch(0);
 }
-void Runtime_getpower_a1(struct platform_device *pdev)
+static void Runtime_getpower_a1(struct platform_device *pdev)
 {
     int ret;
     pm_runtime_enable(&pdev->dev);
@@ -513,30 +514,14 @@ void Runtime_getpower_a1(struct platform_device *pdev)
     if (ret < 0) printk("===runtime getpower error===\n");
     clk_switch(1);
 }
-void Runtime_downpower_a1(struct platform_device *pdev)
+static void Runtime_downpower_a1(struct platform_device *pdev)
 {
     pm_runtime_put_sync(&pdev->dev);
     pm_runtime_disable(&pdev->dev);
     clk_switch(0);
 }
 
-void Runtime_getpower_be(struct platform_device *pdev)
-{
-    int ret;
-
-    pm_runtime_enable(&pdev->dev);
-    ret = pm_runtime_get_sync(&pdev->dev);
-    if (ret < 0) printk("===runtime getpower error===\n");
-    clk_switch(1);
-}
-void Runtime_downpower_be(struct platform_device *pdev)
-{
-
-    pm_runtime_put_sync(&pdev->dev);
-    pm_runtime_disable(&pdev->dev);
-    clk_switch(0);
-}
-void Runtime_getpower_0x1000000e(struct platform_device *pdev)
+static void Runtime_getpower_be(struct platform_device *pdev)
 {
     int ret;
 
@@ -545,14 +530,30 @@ void Runtime_getpower_0x1000000e(struct platform_device *pdev)
     if (ret < 0) printk("===runtime getpower error===\n");
     clk_switch(1);
 }
-void Runtime_downpower_0x1000000e(struct platform_device *pdev)
+static void Runtime_downpower_be(struct platform_device *pdev)
 {
 
     pm_runtime_put_sync(&pdev->dev);
     pm_runtime_disable(&pdev->dev);
     clk_switch(0);
 }
-gceSTATUS _GetPower(IN gcsPLATFORM *Platform)
+static void Runtime_getpower_0x1000000e(struct platform_device *pdev)
+{
+    int ret;
+
+    pm_runtime_enable(&pdev->dev);
+    ret = pm_runtime_get_sync(&pdev->dev);
+    if (ret < 0) printk("===runtime getpower error===\n");
+    clk_switch(1);
+}
+static void Runtime_downpower_0x1000000e(struct platform_device *pdev)
+{
+
+    pm_runtime_put_sync(&pdev->dev);
+    pm_runtime_disable(&pdev->dev);
+    clk_switch(0);
+}
+static gceSTATUS _GetPower(IN gcsPLATFORM *Platform)
 {
     struct platform_device *pdev = Platform->device;
     powerStatus = POWER_IDLE;
@@ -588,7 +589,7 @@ gceSTATUS _GetPower(IN gcsPLATFORM *Platform)
     return gcvSTATUS_OK;
 }
 
-gceSTATUS  _SetPower(IN gcsPLATFORM * Platform,IN gceCORE GPU,IN gctBOOL Enable)
+static gceSTATUS  _SetPower(IN gcsPLATFORM * Platform,IN gceCORE GPU,IN gctBOOL Enable)
 {
     struct platform_device *pdev = Platform->device;
     if (Enable == 0)
@@ -656,7 +657,7 @@ gceSTATUS  _SetPower(IN gcsPLATFORM * Platform,IN gceCORE GPU,IN gctBOOL Enable)
     return gcvSTATUS_OK;
 }
 
-gceSTATUS _Reset(IN gcsPLATFORM * Platform, IN gceCORE GPU)
+static gceSTATUS _Reset(IN gcsPLATFORM * Platform, IN gceCORE GPU)
 {
     struct platform_device *pdev = Platform->device;
     powerStatus = POWER_RESET;
@@ -708,7 +709,7 @@ gceSTATUS _Reset(IN gcsPLATFORM * Platform, IN gceCORE GPU)
     return gcvSTATUS_OK;
 }
 
-gceSTATUS _DownPower(IN gcsPLATFORM *Platform)
+static gceSTATUS _DownPower(IN gcsPLATFORM *Platform)
 {
     struct platform_device *pdev = Platform->device;
 
@@ -740,14 +741,14 @@ gceSTATUS _DownPower(IN gcsPLATFORM *Platform)
     return gcvSTATUS_OK;
 }
 
-gceSTATUS
+static gceSTATUS
 _GetPowerStatus(IN gcsPLATFORM *Platform,OUT gctUINT32_PTR  pstat)
 {
     *pstat = powerStatus;
     return gcvSTATUS_OK;
 }
 
-gceSTATUS _SetPolicy(IN gcsPLATFORM *Platform,IN gctUINT32  powerLevel)
+static gceSTATUS _SetPolicy(IN gcsPLATFORM *Platform,IN gctUINT32  powerLevel)
 {
     //printk("nn_power_version:%d\n",nn_power_version);
     switch (nn_power_version)

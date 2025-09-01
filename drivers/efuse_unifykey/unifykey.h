@@ -85,3 +85,17 @@ static void aml_unifykeys_exit(void)
 }
 #endif
 #endif
+
+void  *get_ukdev(void);
+int key_unify_write(struct aml_uk_dev *ukdev, char *name,
+		    unsigned char *data, unsigned int len);
+int key_unify_read(struct aml_uk_dev *ukdev, char *name,
+		   unsigned char *data, unsigned int len,
+		   unsigned int *real);
+int key_unify_size(struct aml_uk_dev *ukdev, char *name, unsigned int *real);
+int key_unify_query(struct aml_uk_dev *ukdev, char *name,
+		    unsigned int *state, unsigned int *perm);
+int key_unify_secure(struct aml_uk_dev *ukdev, char *name,
+		     unsigned int *secure);
+int key_unify_encrypt(struct aml_uk_dev *ukdev, char *name, unsigned int *enc);
+int key_unify_get_init_flag(void);

@@ -19,6 +19,8 @@
 #include <linux/regmap.h>
 #include <linux/mutex.h>
 
+#include "main.h"
+
 #define SARADC_REG0				0x00
 #define SARADC_REG0_SAMPLING_STOP		BIT(14)
 #define SARADC_REG0_ADC_EN			BIT(9)
@@ -734,18 +736,16 @@ static struct platform_driver amlogic_saradc_driver = {
 	},
 };
 
-static int __init amlogic_saradc_driver_init(void)
+int __init amlogic_saradc_driver_init(void)
 {
 	return platform_driver_register(&amlogic_saradc_driver);
 }
 
-static void __exit amlogic_saradc_driver_exit(void)
+void __exit amlogic_saradc_driver_exit(void)
 {
 	platform_driver_unregister(&amlogic_saradc_driver);
 }
 
-EXPORT_SYMBOL(amlogic_saradc_driver_init);
-EXPORT_SYMBOL(amlogic_saradc_driver_exit);
 MODULE_AUTHOR("Huqiang Qin <huqiang.qin@amlogic.com>");
 MODULE_DESCRIPTION("Amlogic SAR ADC driver");
 MODULE_LICENSE("GPL v2");

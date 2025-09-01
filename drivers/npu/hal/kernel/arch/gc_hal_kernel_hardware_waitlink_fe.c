@@ -337,6 +337,13 @@ gckWLFE_InvalidatePipe(
     IN gctPOINTER Logical,
     IN gctUINT32 Address,
     IN OUT gctUINT32 * Bytes
+    );
+gceSTATUS
+gckWLFE_InvalidatePipe(
+    IN gckHARDWARE Hardware,
+    IN gctPOINTER Logical,
+    IN gctUINT32 Address,
+    IN OUT gctUINT32 * Bytes
     )
 {
     gctUINT size;
@@ -682,6 +689,12 @@ OnError:
     return status;
 }
 
+EXPORT_SYMBOL(gckWLFE_InvalidatePipe);
+
+void
+gckWLFE_DoneInvalidatePipe(
+    gckHARDWARE Hardware
+    );
 void
 gckWLFE_DoneInvalidatePipe(
     gckHARDWARE Hardware
@@ -734,6 +747,8 @@ gckWLFE_DoneInvalidatePipe(
         bytes
         ));
 }
+
+EXPORT_SYMBOL(gckWLFE_DoneInvalidatePipe);
 
 /*******************************************************************************
 **

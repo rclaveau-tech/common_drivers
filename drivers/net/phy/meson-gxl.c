@@ -415,6 +415,7 @@ static int gxl_resume(struct phy_device *phydev)
 }
 
 #ifdef CONFIG_HIBERNATION
+int gxl_resume_internal_registers(struct phy_device *phydev);
 int gxl_resume_internal_registers(struct phy_device *phydev)
 {
 	return custom_internal_config(phydev);

@@ -30,6 +30,8 @@
 #endif
 #define MESON_SPICC_HW_IF
 
+#include "internals.h"
+
 /* Register Map */
 #define SPICC_REG_CFG_READY		0x00
 #define SPICC_REG_CFG_SPI		0x04
@@ -479,7 +481,7 @@ static struct spicc_descriptor *spicc_create_desc_table
 
 	list_for_each_entry(xfer, &msg->transfers, transfer_list) {
 		if (spicc_config_desc_one_transfer(spicc, desc, xfer,
-				msg->is_dma_mapped,
+				spicc->controller->can_dma,
 				cdata ? cdata->ccxfer_en : 0))
 			return NULL;
 		desc++;
@@ -518,7 +520,7 @@ static void spicc_destroy_desc_table(struct spicc_device *spicc,
 
 	if (!desc)
 		return;
-	if (msg->is_dma_mapped)
+	if (spicc->controller->can_dma)
 		goto end;
 
 	list_for_each_entry(xfer, &msg->transfers, transfer_list) {
@@ -575,7 +577,7 @@ static int spicc_xfer_desc(struct spicc_device *spicc,
 	spicc_writel(spicc, ((u64)paddr >> 32) | SPICC_DESC_PENDING,
 		     SPICC_REG_DESC_LIST_H);
 	ret = wait_for_completion_timeout(&spicc->completion,
-			spi_controller_is_slave(spicc->controller) ?
+			spi_controller_is_target(spicc->controller) ?
 			MAX_SCHEDULE_TIMEOUT : msecs_to_jiffies(ms));
 
 	return ret ? (spicc->status ? -EIO : 0) : -ETIMEDOUT;
@@ -690,7 +692,7 @@ static int meson_spicc_setup(struct spi_device *spi)
 	spicc_set_speed(spicc, spi->max_speed_hz);
 	spicc->bytes_per_word = spi->bits_per_word >> 3;
 	spicc->cfg_start.b.block_size = spicc->bytes_per_word & 0x7;
-	spicc->cfg_spi.b.ss = spi->chip_select;
+	spicc->cfg_spi.b.ss = *spi->chip_select;
 
 	spicc->cfg_bus.b.cpol = !!(spi->mode & SPI_CPOL);
 	spicc->cfg_bus.b.cpha = !!(spi->mode & SPI_CPHA);
@@ -707,7 +709,7 @@ static int meson_spicc_setup(struct spi_device *spi)
 		spicc->cfg_bus.b.tx_tuning = cdata->tx_tuning;
 		spicc->cfg_bus.b.rx_tuning = cdata->rx_tuning;
 		spicc->cfg_bus.b.dummy_ctl = cdata->dummy_ctl;
-	} else if (spi_controller_is_slave(spicc->controller)) {
+	} else if (spi_controller_is_target(spicc->controller)) {
 		spicc->cfg_bus.b.ss_leading_gap = 0;
 		spicc->config_ss_trailing_gap = 0;
 		spicc->cfg_bus.b.tx_tuning = 15; /* -1 SCLK */
@@ -961,11 +963,11 @@ static int meson_spicc_probe(struct platform_device *pdev)
 	ctlr->prepare_message = meson_spicc_prepare_message;
 	ctlr->unprepare_transfer_hardware = meson_spicc_unprepare_transfer;
 	ctlr->transfer_one_message = meson_spicc_transfer_one_message;
-	ctlr->slave_abort = meson_spicc_slave_abort;
+	ctlr->target_abort = meson_spicc_slave_abort;
 	ctlr->can_dma = meson_spicc_can_dma;
 	ctlr->max_dma_len = SPICC_BLOCK_MAX;
 	dma_set_max_seg_size(&pdev->dev, SPICC_BLOCK_MAX);
-	ret = devm_spi_register_master(&pdev->dev, ctlr);
+	ret = devm_spi_register_controller(&pdev->dev, ctlr);
 	if (ret) {
 		dev_err(&pdev->dev, "spi controller registration failed\n");
 		goto out_clk;
@@ -984,7 +986,7 @@ static int meson_spicc_probe(struct platform_device *pdev)
 
 	spicc->cfg_spi.b.flash_wp_pin_en = 1;
 	spicc->cfg_spi.b.flash_hold_pin_en = 1;
-	if (spi_controller_is_slave(ctlr))
+	if (spi_controller_is_target(ctlr))
 		spicc->cfg_spi.b.slave_en = true;
 	/* default pending */
 	spicc->cfg_start.b.pending = 1;
@@ -1001,7 +1003,7 @@ out_controller:
 	return ret;
 }
 
-static int meson_spicc_remove(struct platform_device *pdev)
+static void meson_spicc_remove(struct platform_device *pdev)
 {
 	struct spicc_device *spicc = platform_get_drvdata(pdev);
 
@@ -1012,7 +1014,6 @@ static int meson_spicc_remove(struct platform_device *pdev)
 	device_remove_file(&pdev->dev, &dev_attr_test);
 	device_remove_file(&pdev->dev, &dev_attr_testdev);
 #endif
-	return 0;
 }
 
 static void meson_spicc_shutdown(struct platform_device *pdev)

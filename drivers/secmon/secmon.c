@@ -25,6 +25,10 @@
 #include <linux/slab.h>
 #include <asm/page.h>
 
+#include <linux/amlogic/secmon.h>
+
+#include "main.h"
+
 static void __iomem *sharemem_in_base;
 static void __iomem *sharemem_out_base;
 static long phy_in_base;
@@ -78,7 +82,7 @@ static unsigned long reg_to_pfn(unsigned long reg)
 	if (reg < (unsigned long)PAGE_OFFSET)
 		return 0;
 	else if (reg <= (unsigned long)high_memory)
-		return virt_to_pfn(reg);
+		return virt_to_pfn((void *)reg);
 
 	page = vmalloc_to_page((const void *)reg);
 	if (page)
@@ -97,8 +101,8 @@ int within_secmon_region(unsigned long addr)
 	if (!addr_pfn)
 		return 0;
 
-	if (addr_pfn >= virt_to_pfn(secmon_start_virt) &&
-	    addr_pfn <= virt_to_pfn(secmon_start_virt + secmon_size))
+	if (addr_pfn >= virt_to_pfn((void *)secmon_start_virt) &&
+	    addr_pfn <= virt_to_pfn((void *)(secmon_start_virt + secmon_size)))
 		return 1;
 
 	return 0;

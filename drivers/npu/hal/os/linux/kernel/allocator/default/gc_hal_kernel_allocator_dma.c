@@ -640,6 +640,12 @@ _DmaAlloctorInit(
     IN gckOS Os,
     IN gcsDEBUGFS_DIR *Parent,
     OUT gckALLOCATOR * Allocator
+    );
+gceSTATUS
+_DmaAlloctorInit(
+    IN gckOS Os,
+    IN gcsDEBUGFS_DIR *Parent,
+    OUT gckALLOCATOR * Allocator
     )
 {
     gceSTATUS status;
@@ -694,4 +700,3 @@ OnError:
     }
     return status;
 }
-

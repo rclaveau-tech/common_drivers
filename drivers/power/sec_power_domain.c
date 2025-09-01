@@ -4,6 +4,7 @@
  */
 
 #include <linux/io.h>
+#include <linux/module.h>
 #include <linux/of_device.h>
 #include <linux/platform_device.h>
 #include <linux/pm_domain.h>
@@ -26,6 +27,8 @@
 #include <dt-bindings/power/s1a-pd.h>
 #include <dt-bindings/power/s7d-pd.h>
 #include <linux/kallsyms.h>
+
+#include "main.h"
 
 struct sec_pm_private_domain {
 	const char *name;
@@ -1006,15 +1009,14 @@ static struct platform_driver sec_pd_driver = {
 	},
 };
 
-static int __init sec_power_domain_init(void)
+int sec_power_domain_init(void)
 {
 	return platform_driver_register(&sec_pd_driver);
 }
 
-static void __exit sec_power_domain_exit(void)
+void __exit sec_power_domain_exit(void)
 {
 	platform_driver_unregister(&sec_pd_driver);
 }
 
 EXPORT_SYMBOL(sec_power_domain_init);
-EXPORT_SYMBOL(sec_power_domain_exit);

@@ -20,6 +20,8 @@
 #include <linux/leds.h>
 #include "leds-tlc59116.h"
 
+#include "main.h"
+
 #define MESON_TLC59116_I2C_NAME			"tlc59116_led"
 #define MESON_LEDS_CDEV_NAME			"i2c_leds"
 #define MESON_TLC59116_VERSION			"v2.0.0"
@@ -609,8 +611,7 @@ static int meson_tlc59116_parse_led_dt(struct meson_tlc59116 *tlc59116,
 	return ret;
 }
 
-static int meson_tlc59116_i2c_probe(struct i2c_client *i2c,
-				    const struct i2c_device_id *id)
+static int meson_tlc59116_i2c_probe(struct i2c_client *i2c)
 {
 	struct device_node *np = i2c->dev.of_node;
 	struct meson_tlc59116 *tlc59116;
@@ -691,15 +692,13 @@ static int meson_tlc59116_i2c_probe(struct i2c_client *i2c,
 	return 0;
 }
 
-static int meson_tlc59116_i2c_remove(struct i2c_client *i2c)
+static void meson_tlc59116_i2c_remove(struct i2c_client *i2c)
 {
 	struct meson_tlc59116 *tlc59116 = i2c_get_clientdata(i2c);
 
 	sysfs_remove_group(&tlc59116->cdev.dev->kobj,
 			   &tlc59116_attribute_group);
 	led_classdev_unregister(&tlc59116->cdev);
-
-	return 0;
 }
 
 static int meson_tlc59116_suspend(struct device *dev)
@@ -780,3 +779,5 @@ void __exit led_tlc59116_exit(void)
 {
 	return i2c_del_driver(&meson_tlc59116_driver);
 }
+
+EXPORT_SYMBOL(led_tlc59116_init);

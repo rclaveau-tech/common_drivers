@@ -42,7 +42,7 @@
 
 #include <linux/fs.h>
 #include <asm/uaccess.h>
-#include <asm/unaligned.h>
+#include <linux/unaligned.h>
 #include <linux/delay.h>
 #include "v4l2_interface/isp-v4l2.h"
 

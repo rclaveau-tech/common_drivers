@@ -3620,6 +3620,12 @@ _ValidCommandBuffer(
     IN gckCOMMAND Command,
     IN gctUINT32 ProcessId,
     IN gcsHAL_COMMAND_LOCATION *cmdLoc
+    );
+gceSTATUS
+_ValidCommandBuffer(
+    IN gckCOMMAND Command,
+    IN gctUINT32 ProcessId,
+    IN gcsHAL_COMMAND_LOCATION *cmdLoc
     )
 {
     gceSTATUS status;
@@ -3646,6 +3652,8 @@ OnError:
     gcmkFOOTER();
     return status;
 }
+
+EXPORT_SYMBOL(_ValidCommandBuffer);
 
 
 /*******************************************************************************

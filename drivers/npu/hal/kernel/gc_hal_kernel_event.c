@@ -548,7 +548,7 @@ Out:
     return gcvSTATUS_OK;
 }
 
-void
+static void
 _SubmitTimerFunction(
     gctPOINTER Data
     )

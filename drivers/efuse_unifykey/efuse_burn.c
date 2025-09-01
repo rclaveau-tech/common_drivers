@@ -162,8 +162,8 @@ static const struct file_operations efuse_burn_fops = {
 #endif
 };
 
-static ssize_t version_show(struct class *cla,
-			     struct class_attribute *attr, char *buf)
+static ssize_t version_show(const struct class *cla,
+			     const struct class_attribute *attr, char *buf)
 {
 	ssize_t n = 0;
 
@@ -171,8 +171,8 @@ static ssize_t version_show(struct class *cla,
 	return n;
 }
 
-static ssize_t version_store(struct class *cla,
-			      struct class_attribute *attr,
+static ssize_t version_store(const struct class *cla,
+			      const struct class_attribute *attr,
 			      const char *buf, size_t count)
 {
 	pr_notice("%s:%d,buf=0x%lx,count=%zu\n",
@@ -223,7 +223,7 @@ static int efuse_burn_probe(struct platform_device *pdev)
 	}
 
 	efuse_burn_dev->cls.name = EFUSE_BURN_CLASS_NAME;
-	efuse_burn_dev->cls.owner = THIS_MODULE;
+	//efuse_burn_dev->cls.owner = THIS_MODULE;
 	efuse_burn_dev->cls.class_groups = efuse_burn_class_groups;
 	ret = class_register(&efuse_burn_dev->cls);
 	if (ret)
@@ -263,7 +263,7 @@ out:
 	return ret;
 }
 
-static int efuse_burn_remove(struct platform_device *pdev)
+static void efuse_burn_remove(struct platform_device *pdev)
 {
 	struct aml_efuse_burn_dev *efuse_burn_dev;
 
@@ -274,7 +274,6 @@ static int efuse_burn_remove(struct platform_device *pdev)
 	class_unregister(&efuse_burn_dev->cls);
 	platform_set_drvdata(pdev, NULL);
 	devm_kfree(&pdev->dev, efuse_burn_dev);
-	return 0;
 }
 
 static const struct of_device_id efuse_burn_dt_match[] = {

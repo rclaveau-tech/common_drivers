@@ -15,6 +15,8 @@
 #include <linux/amlogic/media/registers/regs/dos_regs.h>
 #include <linux/module.h>
 
+#include "main.h"
+
 static const int reset_reg_addr[] = {
 	DOS_SW_RESET0,
 	DOS_SW_RESET1,
@@ -169,4 +171,3 @@ void __exit reset_exit(void)
 {
 	platform_driver_unregister(&meson_dos_reset_driver);
 }
-

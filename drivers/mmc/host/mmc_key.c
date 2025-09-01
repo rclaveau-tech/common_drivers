@@ -39,6 +39,7 @@
 
 #include <linux/amlogic/aml_sd.h>
 #include "mmc_common.h"
+#include <linux/amlogic/key_manage.h>
 
 struct task_struct      *thread_dtb_key_task;
 unsigned int    key_stamp;

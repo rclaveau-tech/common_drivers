@@ -33,6 +33,7 @@
 #include <linux/proc_fs.h>
 #include <linux/amlogic/gki_module.h>
 #include <linux/reboot.h>
+#include "main.h"
 
 #define CREATE_TRACE_POINTS
 /*whether use different tables or not*/
@@ -42,10 +43,10 @@ struct proc_dir_entry *cpufreq_proc;
 static int opp_table_index[MAX_CLUSTERS];
 static u32 dsu_voltage_vote_result[VOTER_NUM];
 static u32 dsu_freq_vote_result[VOTER_NUM];
-#define MAX(x1, x2) ({ \
+/*#define MAX(x1, x2) ({ \
 	typeof(x1) _x1 = x1; \
 	typeof(x2) _x2 = x2; \
-	(_x1 > _x2 ? _x1 : _x2); })
+	(_x1 > _x2 ? _x1 : _x2); })*/
 
 static unsigned int freqmax[MAX_CLUSTERS];
 static int freqmax0_param(char *buff)
@@ -88,13 +89,14 @@ static unsigned int get_cpufreq_table_index(u64 function_id,
 
 static unsigned int meson_cpufreq_get_rate(unsigned int cpu)
 {
-	struct cpufreq_policy policy;
+	struct cpufreq_policy *policy;
 	struct meson_cpufreq_driver_data *cpufreq_data;
 	u32 cur_cluster;
 	u32 rate = 0;
+	policy = cpufreq_cpu_get(cpu);
 
-	if (!cpufreq_get_policy(&policy, cpu)) {
-		cpufreq_data = policy.driver_data;
+	if (policy) {
+		cpufreq_data = policy->driver_data;
 		cur_cluster = cpufreq_data->clusterid;
 		rate = clk_get_rate(clk[cur_cluster]) / 1000;
 		pr_debug("%s: cpu: %d, cluster: %d, freq: %u\n",
@@ -714,7 +716,7 @@ static int opptable_show(struct seq_file *m, void *v)
 		list_for_each_entry(opp, &opp_table->opp_list, node) {
 			if (!opp->available)
 				continue;
-			seq_printf(m, "%lu %lu\n", opp->rate, opp->supplies[0].u_volt);
+			seq_printf(m, "%lu %lu\n", opp->rates[0], opp->supplies[0].u_volt);
 		}
 		dev_pm_opp_put_opp_table(opp_table);
 		mutex_unlock(&opp_table->lock);
@@ -744,7 +746,7 @@ static int get_index_from_freq(struct cpufreq_frequency_table *table, int freq)
 static ssize_t  meson_maxfreq_write(struct file *file, const char __user *userbuf,
 	size_t count, loff_t *ppos)
 {
-	struct cpufreq_policy *policy = PDE_DATA(file_inode(file));
+	struct cpufreq_policy *policy = pde_data(file_inode(file));
 	struct meson_cpufreq_driver_data *driver_data = policy->driver_data;
 	char buf[10] = {0};
 	int maxfreq, index;
@@ -766,12 +768,12 @@ static ssize_t  meson_maxfreq_write(struct file *file, const char __user *userbu
 
 static int meson_opptable_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, opptable_show, PDE_DATA(inode));
+	return single_open(file, opptable_show, pde_data(inode));
 }
 
 static int meson_maxfreq_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, maxfreq_show, PDE_DATA(inode));
+	return single_open(file, maxfreq_show, pde_data(inode));
 }
 
 static const struct proc_ops meson_opptable_fops = {
@@ -1112,7 +1114,7 @@ free_np:
 	return ret;
 }
 
-static int meson_cpufreq_exit(struct cpufreq_policy *policy)
+static void meson_cpufreq_exit(struct cpufreq_policy *policy)
 {
 	struct device *cpu_dev;
 	struct meson_cpufreq_driver_data *cpufreq_data;
@@ -1120,7 +1122,7 @@ static int meson_cpufreq_exit(struct cpufreq_policy *policy)
 
 	cpufreq_data = policy->driver_data;
 	if (!cpufreq_data)
-		return 0;
+		return;
 	cur_cluster = cpufreq_data->clusterid;
 	dsu_voltage_vote_result[cpufreq_data->clusterid] = 0;
 	dsu_freq_vote_result[cpufreq_data->clusterid] = 0;
@@ -1130,7 +1132,7 @@ static int meson_cpufreq_exit(struct cpufreq_policy *policy)
 	if (!cpu_dev) {
 		pr_err("%s: failed to get cpu%d device\n", __func__,
 		       policy->cpu);
-		return -ENODEV;
+		return;
 	}
 
 	if (policy->freq_table) {
@@ -1145,8 +1147,6 @@ static int meson_cpufreq_exit(struct cpufreq_policy *policy)
 		regulator_put(cpufreq_data->reg_dsu);
 	dev_dbg(cpu_dev, "%s: Exited, cpu: %d\n", __func__, policy->cpu);
 	kfree(cpufreq_data);
-
-	return 0;
 }
 
 static int meson_cpufreq_suspend(struct cpufreq_policy *policy)
@@ -1218,7 +1218,6 @@ static struct cpufreq_driver meson_cpufreq_driver = {
 	.get			= meson_cpufreq_get_rate,
 	.init			= meson_cpufreq_init,
 	.exit			= meson_cpufreq_exit,
-	.attr			= cpufreq_generic_attr,
 	.suspend		= meson_cpufreq_suspend,
 	.resume			= meson_cpufreq_resume,
 	.register_em	= meson_cpufreq_register_em,
@@ -1342,9 +1341,9 @@ static int meson_cpufreq_probe(struct platform_device *pdev)
 	return ret;
 }
 
-static int meson_cpufreq_remove(struct platform_device *pdev)
+static void meson_cpufreq_remove(struct platform_device *pdev)
 {
-	return cpufreq_unregister_driver(&meson_cpufreq_driver);
+	cpufreq_unregister_driver(&meson_cpufreq_driver);
 }
 
 static const struct of_device_id amlogic_cpufreq_meson_dt_match[] = {

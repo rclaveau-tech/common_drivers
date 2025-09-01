@@ -742,9 +742,8 @@ static int amlogic_new_usb3_v2_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int amlogic_new_usb3_remove(struct platform_device *pdev)
+static void amlogic_new_usb3_remove(struct platform_device *pdev)
 {
-	return 0;
 }
 
 #ifdef CONFIG_PM_RUNTIME
@@ -800,8 +799,10 @@ MODULE_AUTHOR("Amlogic Inc.");
 MODULE_DESCRIPTION("amlogic USB3 v2 phy driver");
 MODULE_LICENSE("GPL v2");
 #else
-int __init amlogic_new_usb3_v2_driver_init(void)
+static int __init amlogic_new_usb3_v2_driver_init(void)
 {
 	return platform_driver_register(&amlogic_new_usb3_v2_driver);
 }
+
+EXPORT_SYMBOL(amlogic_new_usb3_v2_driver_init);
 #endif

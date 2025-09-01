@@ -1232,7 +1232,7 @@ gckPPU_GetPixel(
     return pixel;
 }
 
-gceSTATUS
+static gceSTATUS
 gckPPU_SetEVIS(
     IN gctUINT32 Start,
     IN gctUINT32 End,
@@ -1556,7 +1556,7 @@ OnError:
     return status;
 }
 
-gceSTATUS
+static gceSTATUS
 gckPPU_SetTempReg(
     IN gctUINT32 Where,
     IN gctUINT32 Address,

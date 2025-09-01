@@ -13,6 +13,8 @@
 #include <linux/kallsyms.h>
 #include <linux/arm-smccc.h>
 
+#include "clk-common-init.h"
+
 static struct clk *debug_clk;
 
 static ssize_t parent_write(struct file *file, const char __user *buffer,
@@ -302,7 +304,7 @@ static const struct file_operations secure_file_ops = {
 	.write		= secure_reg_write,
 };
 
-static int __init clk_debug_init(void)
+int __init clk_debug_init(void)
 {
 	struct dentry *root;
 
@@ -316,8 +318,6 @@ static int __init clk_debug_init(void)
 
 	return 0;
 }
-
-EXPORT_SYMBOL(clk_debug_init);
 
 #ifndef MODULE
 late_initcall_sync(clk_debug_init);

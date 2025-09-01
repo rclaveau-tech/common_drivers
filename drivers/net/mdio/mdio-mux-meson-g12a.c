@@ -417,6 +417,7 @@ static int g12a_enable_internal_mdio(struct g12a_mdio_mux *priv)
 #if IS_ENABLED(CONFIG_AMLOGIC_ETH_PRIVE)
 #ifdef CONFIG_PM_SLEEP
 #ifdef CONFIG_HIBERNATION
+int g12a_resume_enable_internal_mdio(void);
 int g12a_resume_enable_internal_mdio(void)
 {
 	struct g12a_mdio_mux *priv = dev_get_drvdata(g12a_mdio_dev);
@@ -630,7 +631,7 @@ err:
 	return ret;
 }
 
-static int g12a_mdio_mux_remove(struct platform_device *pdev)
+static void g12a_mdio_mux_remove(struct platform_device *pdev)
 {
 	struct g12a_mdio_mux *priv = platform_get_drvdata(pdev);
 
@@ -640,8 +641,6 @@ static int g12a_mdio_mux_remove(struct platform_device *pdev)
 		clk_disable_unprepare(priv->pll);
 
 	clk_disable_unprepare(priv->pclk);
-
-	return 0;
 }
 
 static struct platform_driver g12a_mdio_mux_driver = {

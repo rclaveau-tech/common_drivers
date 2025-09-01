@@ -49,7 +49,7 @@ unsigned int db_wait;
 #endif
 
 #if IS_ENABLED(CONFIG_AMLOGIC_COMMON_USB)
-struct usb_hub *aml_xhci_usb_hub_to_struct_hub(struct usb_device *hdev)
+static struct usb_hub *aml_xhci_usb_hub_to_struct_hub(struct usb_device *hdev)
 {
 	if (!hdev || !hdev->actconfig || !hdev->maxchild)
 		return NULL;
@@ -504,7 +504,7 @@ static void compliance_mode_recovery(struct timer_list *t)
 	u32 temp;
 	int i;
 
-	xhci = from_timer(xhci, t, comp_mode_recovery_timer);
+	xhci = timer_container_of(xhci, t, comp_mode_recovery_timer);
 	rhub = &xhci->usb3_rhub;
 
 	for (i = 0; i < rhub->num_ports; i++) {
@@ -762,7 +762,7 @@ static void xhci_stop(struct usb_hcd *hcd)
 	/* Deleting Compliance Mode Recovery Timer */
 	if ((xhci->quirks & XHCI_COMP_MODE_QUIRK) &&
 			(!(xhci_all_ports_seen_u0(xhci)))) {
-		del_timer_sync(&xhci->comp_mode_recovery_timer);
+		timer_delete_sync(&xhci->comp_mode_recovery_timer);
 		aml_xhci_dbg_trace(xhci, trace_aml_xhci_dbg_quirks,
 				"%s: compliance mode recovery timer deleted",
 				__func__);
@@ -807,11 +807,11 @@ void aml_xhci_shutdown(struct usb_hcd *hcd)
 	aml_xhci_dbg(xhci, "%s: stopping usb%d port polling.\n",
 			__func__, hcd->self.busnum);
 	clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
-	del_timer_sync(&hcd->rh_timer);
+	timer_delete_sync(&hcd->rh_timer);
 
 	if (xhci->shared_hcd) {
 		clear_bit(HCD_FLAG_POLL_RH, &xhci->shared_hcd->flags);
-		del_timer_sync(&xhci->shared_hcd->rh_timer);
+		timer_delete_sync(&xhci->shared_hcd->rh_timer);
 	}
 
 	spin_lock_irq(&xhci->lock);
@@ -1050,9 +1050,9 @@ int aml_xhci_suspend(struct aml_xhci_hcd *xhci, bool do_wakeup)
 	aml_xhci_dbg(xhci, "%s: stopping usb%d port polling.\n",
 		 __func__, hcd->self.busnum);
 	clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
-	del_timer_sync(&hcd->rh_timer);
+	timer_delete_sync(&hcd->rh_timer);
 	clear_bit(HCD_FLAG_POLL_RH, &xhci->shared_hcd->flags);
-	del_timer_sync(&xhci->shared_hcd->rh_timer);
+	timer_delete_sync(&xhci->shared_hcd->rh_timer);
 
 	if (xhci->quirks & XHCI_SUSPEND_DELAY)
 		usleep_range(1000, 1500);
@@ -1117,7 +1117,7 @@ int aml_xhci_suspend(struct aml_xhci_hcd *xhci, bool do_wakeup)
 	 */
 	if ((xhci->quirks & XHCI_COMP_MODE_QUIRK) &&
 			(!(xhci_all_ports_seen_u0(xhci)))) {
-		del_timer_sync(&xhci->comp_mode_recovery_timer);
+		timer_delete_sync(&xhci->comp_mode_recovery_timer);
 		aml_xhci_dbg_trace(xhci, trace_aml_xhci_dbg_quirks,
 				"%s: compliance mode recovery timer deleted",
 				__func__);
@@ -1220,7 +1220,7 @@ int aml_xhci_resume(struct aml_xhci_hcd *xhci, bool hibernated)
 	if (reinit_xhc) {
 		if ((xhci->quirks & XHCI_COMP_MODE_QUIRK) &&
 				!(xhci_all_ports_seen_u0(xhci))) {
-			del_timer_sync(&xhci->comp_mode_recovery_timer);
+			timer_delete_sync(&xhci->comp_mode_recovery_timer);
 			aml_xhci_dbg_trace(xhci, trace_aml_xhci_dbg_quirks,
 				"Compliance Mode Recovery Timer deleted!");
 		}
@@ -4566,10 +4566,10 @@ static void xhci_free_dev(struct usb_hcd *hcd, struct usb_device *udev)
 					i, udev->slot_id);
 				msleep(20);
 			}
-			del_timer_sync(&virt_dev->eps[i].stop_cmd_queue_timer);
+			timer_delete_sync(&virt_dev->eps[i].stop_cmd_queue_timer);
 		}
 #endif
-		del_timer_sync(&virt_dev->eps[i].stop_cmd_timer);
+		timer_delete_sync(&virt_dev->eps[i].stop_cmd_timer);
 	}
 	virt_dev->udev = NULL;
 	aml_xhci_disable_slot(xhci, udev->slot_id);
@@ -4924,7 +4924,7 @@ out:
 	return ret;
 }
 
-static int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
+static int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev, unsigned int timeout_ms)
 {
 	return xhci_setup_device(hcd, udev, SETUP_CONTEXT_ADDRESS);
 }
@@ -6100,7 +6100,7 @@ EXPORT_SYMBOL_GPL(aml_xhci_init_driver);
 //MODULE_DESCRIPTION(DRIVER_DESC);
 //MODULE_AUTHOR(DRIVER_AUTHOR);
 //MODULE_LICENSE("GPL");
-int __init aml_xhci_hcd_init(void)
+static int __init aml_xhci_hcd_init(void)
 {
 	/*
 	 * Check the compiler generated sizes of structures that must be laid
@@ -6132,10 +6132,13 @@ int __init aml_xhci_hcd_init(void)
  * If an init function is provided, an exit function must also be provided
  * to allow module unload.
  */
-void __exit aml_xhci_hcd_fini(void)
+static void __exit aml_xhci_hcd_fini(void)
 {
 	aml_xhci_debugfs_remove_root();
 }
+
+EXPORT_SYMBOL(aml_xhci_hcd_init);
+EXPORT_SYMBOL(aml_xhci_hcd_fini);
 
 //module_init(xhci_hcd_init);
 //module_exit(xhci_hcd_fini);

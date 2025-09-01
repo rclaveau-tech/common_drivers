@@ -65,6 +65,7 @@
 #include <linux/dma-mapping.h>
 
 #include <linux/dma-buf.h>
+#include <linux/dma-resv.h>
 #include <linux/platform_device.h>
 
 #define _GC_OBJ_ZONE gcvZONE_OS
@@ -115,9 +116,10 @@ static int dma_buf_info_show(struct seq_file* m, void* data)
     seq_puts(m, "   pid     fd    pages     size   exporter attached-devices\n");
 
     list_for_each_entry(buf_desc, &priv->buf_list, list) {
-        struct dma_buf *buf_obj = buf_desc->dmabuf;
+	struct dma_buf *buf_obj = buf_desc->dmabuf;
+	struct dma_resv *resv = buf_desc->dmabuf->resv;
 
-        ret = mutex_lock_interruptible(&buf_obj->lock);
+        ret = dma_resv_lock(resv, NULL);
 
         if (ret) {
             seq_puts(m,
@@ -147,7 +149,7 @@ static int dma_buf_info_show(struct seq_file* m, void* data)
         size += buf_obj->size;
         npages += buf_desc->npages;
 
-        mutex_unlock(&buf_obj->lock);
+        dma_resv_unlock(resv);
     }
 
     seq_printf(m, "\nTotal %d objects, %d pages, %zu bytes\n", count, npages, size);
@@ -507,6 +509,12 @@ _DmabufAlloctorInit(
     IN gckOS Os,
     IN gcsDEBUGFS_DIR *Parent,
     OUT gckALLOCATOR * Allocator
+    );
+gceSTATUS
+_DmabufAlloctorInit(
+    IN gckOS Os,
+    IN gcsDEBUGFS_DIR *Parent,
+    OUT gckALLOCATOR * Allocator
     )
 {
     gceSTATUS status;
@@ -549,3 +557,6 @@ OnError:
     return status;
 }
 
+EXPORT_SYMBOL(_DmabufAlloctorInit);
+
+MODULE_IMPORT_NS("DMA_BUF");

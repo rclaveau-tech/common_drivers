@@ -1396,6 +1396,7 @@ static int __init s5_pmx_init(void)
 arch_initcall(s5_pmx_init);
 
 #else
+int __init meson_s5_pinctrl_init(void);
 int __init meson_s5_pinctrl_init(void)
 {
 	meson_s5_pinctrl_driver.driver.of_match_table =

@@ -19,7 +19,7 @@
 #include <watchdog_core.h>
 #include <linux/interrupt.h>
 #include <linux/debugfs.h>
-#include <linux/amlogic/gki_module.h>
+//#include <linux/amlogic/gki_module.h>
 
 #define DRIVER_NAME		"meson_gxbb_wdt"
 #endif
@@ -76,28 +76,28 @@ module_param(wdt_debug, int, 0644);
 
 #ifdef CONFIG_AMLOGIC_MODIFY
 static unsigned int watchdog_enabled = 1;
-static int get_watchdog_enabled_env(char *str)
+/*static int get_watchdog_enabled_env(char *str)
 {
 	return kstrtouint(str, 0, &watchdog_enabled);
 }
-__setup("watchdog_enabled=", get_watchdog_enabled_env);
+__setup("watchdog_enabled=", get_watchdog_enabled_env);*/
 
 static int stop_after_panic;
 module_param(stop_after_panic, int, 0644);
 MODULE_PARM_DESC(stop_after_panic, "Stop watchdog after panic (0=keep watching, 1=stop)");
-static int get_stop_after_panic_env(char *str)
+/*static int get_stop_after_panic_env(char *str)
 {
 	return kstrtoint(str, 0, &stop_after_panic);
 }
-__setup("wdt_stop_after_panic=", get_stop_after_panic_env);
+__setup("wdt_stop_after_panic=", get_stop_after_panic_env);*/
 
-static int wdt_panic_print_setup(char *str)
+/*static int wdt_panic_print_setup(char *str)
 {
 	stop_after_panic = 1;
 
 	return 1;
 }
-__setup("panic_print=", wdt_panic_print_setup);
+__setup("panic_print=", wdt_panic_print_setup);*/
 #endif
 
 static int meson_gxbb_wdt_start(struct watchdog_device *wdt_dev)

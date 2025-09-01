@@ -45,6 +45,10 @@
 
 #include "meson-cqhci.h"
 
+#include "mmc_common.h"
+
+#include "meson-mmc-main.h"
+
 struct mmc_gpio {
 	struct gpio_desc *ro_gpio;
 	struct gpio_desc *cd_gpio;
@@ -203,7 +207,7 @@ static int amlogic_of_parse(struct mmc_host *host)
 /*
  * Checks that a normal transfer didn't have any errors
  */
-static int mmc_check_result(struct mmc_request *mrq)
+int mmc_check_result(struct mmc_request *mrq)
 {
 	int ret;
 
@@ -227,7 +231,7 @@ static int mmc_check_result(struct mmc_request *mrq)
 	return ret;
 }
 
-static void mmc_prepare_mrq(struct mmc_card *card,
+void mmc_prepare_mrq(struct mmc_card *card,
 			    struct mmc_request *mrq, struct scatterlist *sg,
 			    unsigned int sg_len, unsigned int dev_addr,
 			    unsigned int blocks,
@@ -274,7 +278,7 @@ static unsigned int mmc_capacity(struct mmc_card *card)
 		return card->csd.capacity << (card->csd.read_blkbits - 9);
 }
 
-static int mmc_transfer(struct mmc_card *card, unsigned int dev_addr,
+int mmc_transfer(struct mmc_card *card, unsigned int dev_addr,
 			unsigned int blocks, void *buf, int write)
 {
 	u8 original_part_config;
@@ -336,7 +340,7 @@ static int mmc_transfer(struct mmc_card *card, unsigned int dev_addr,
 	return ret;
 }
 
-/*static int aml_disable_mmc_cqe(struct mmc_card *card)
+int aml_disable_mmc_cqe(struct mmc_card *card)
 {
 	int ret = 0;
 
@@ -347,9 +351,9 @@ static int mmc_transfer(struct mmc_card *card, unsigned int dev_addr,
 			pr_err("[%s] disable cqe mode failed\n", __func__);
 	}
 	return ret;
-}*/
+}
 
-/*static int aml_enable_mmc_cqe(struct mmc_card *card)
+int aml_enable_mmc_cqe(struct mmc_card *card)
 {
 	int ret = 0;
 
@@ -360,15 +364,15 @@ static int mmc_transfer(struct mmc_card *card, unsigned int dev_addr,
 			pr_err("[%s] reenable cqe mode failed\n", __func__);
 	}
 	return ret;
-}*/
+}
 
-/*static int mmc_read_internal(struct mmc_card *card, unsigned int dev_addr,
+int mmc_read_internal(struct mmc_card *card, unsigned int dev_addr,
 			unsigned int blocks, void *buf)
 {
 	return mmc_transfer(card, dev_addr, blocks, buf, 0);
-}*/
+}
 
-static int mmc_write_internal(struct mmc_card *card, unsigned int dev_addr,
+int mmc_write_internal(struct mmc_card *card, unsigned int dev_addr,
 			unsigned int blocks, void *buf)
 {
 	return mmc_transfer(card, dev_addr, blocks, buf, 1);
@@ -2109,7 +2113,7 @@ static u32 scan_emmc_cmd_win(struct mmc_host *mmc,
 	return cmd_delay;
 }
 
-/*static ssize_t emmc_scan_cmd_win(struct device *dev,
+/*ssize_t emmc_scan_cmd_win(struct device *dev,
 			  struct device_attribute *attr, char *buf)
 {
 	struct meson_host *host = dev_get_drvdata(dev);
@@ -3461,7 +3465,7 @@ void sdio_reinit(void)
 }
 EXPORT_SYMBOL(sdio_reinit);
 
-static void sdio_clk_always_on(bool clk_aws_on)
+void sdio_clk_always_on(bool clk_aws_on)
 {
 	struct meson_host *host = NULL;
 	u32 conf = 0;
@@ -3485,7 +3489,7 @@ static void sdio_clk_always_on(bool clk_aws_on)
 }
 EXPORT_SYMBOL(sdio_clk_always_on);
 
-static void sdio_set_max_regs(unsigned int size)
+void sdio_set_max_regs(unsigned int size)
 {
 	if (sdio_host) {
 		sdio_host->max_req_size = size;
@@ -4305,12 +4309,12 @@ static int caps2_setup(char *p)
 
 __setup("meson-gx-mmc.caps2_quirks=", caps2_setup);
 
-static int __init meson_mmc_init(void)
+int __init meson_mmc_init(void)
 {
 	return platform_driver_register(&meson_mmc_driver);
 }
 
-static void __exit meson_mmc_exit(void)
+void __exit meson_mmc_exit(void)
 {
 	platform_driver_unregister(&meson_mmc_driver);
 }
@@ -4319,8 +4323,6 @@ static void __exit meson_mmc_exit(void)
 //MODULE_PARM_DESC(caps2_quirks, "Force certain caps2.");
 
 //module_platform_driver(meson_mmc_driver);
-EXPORT_SYMBOL(meson_mmc_init);
-EXPORT_SYMBOL(meson_mmc_exit);
 
 //MODULE_DESCRIPTION("Amlogic S905*/GX*/AXG SD/eMMC driver");
 //MODULE_AUTHOR("Kevin Hilman <khilman@baylibre.com>");

@@ -83,11 +83,13 @@ int gpiod_set_pull(struct gpio_desc *desc, unsigned int value)
 }
 EXPORT_SYMBOL_GPL(gpiod_set_pull);
 
+int __init gpiolib_module_init(void);
 int __init gpiolib_module_init(void)
 {
 	return 0;
 }
 
+void __exit gpiolib_module_exit(void);
 void __exit gpiolib_module_exit(void)
 {
 }

@@ -1363,6 +1363,7 @@ static int __init sc2_pmx_init(void)
 arch_initcall(sc2_pmx_init);
 
 #else
+int __init meson_sc2_pinctrl_init(void);
 int __init meson_sc2_pinctrl_init(void)
 {
 	meson_sc2_pinctrl_driver.driver.of_match_table =

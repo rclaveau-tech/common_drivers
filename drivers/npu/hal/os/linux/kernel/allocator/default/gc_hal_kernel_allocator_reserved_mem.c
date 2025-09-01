@@ -270,7 +270,7 @@ reserved_mem_mmap(
         pfn = (res->start >> PAGE_SHIFT) + skipPages;
 
         /* Make this mapping non-cached. */
-        vma->vm_flags |= gcdVM_FLAGS;
+        vm_flags_set(vma, gcdVM_FLAGS);
 
 #if gcdENABLE_BUFFERABLE_VIDEO_MEMORY
         vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
@@ -595,6 +595,12 @@ _ReservedMemoryAllocatorInit(
     IN gckOS Os,
     IN gcsDEBUGFS_DIR *Parent,
     OUT gckALLOCATOR * Allocator
+    );
+gceSTATUS
+_ReservedMemoryAllocatorInit(
+    IN gckOS Os,
+    IN gcsDEBUGFS_DIR *Parent,
+    OUT gckALLOCATOR * Allocator
     )
 {
     gceSTATUS status;
@@ -638,3 +644,4 @@ OnError:
     return status;
 }
 
+EXPORT_SYMBOL(_ReservedMemoryAllocatorInit);

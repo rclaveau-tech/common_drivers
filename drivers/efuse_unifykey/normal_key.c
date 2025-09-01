@@ -11,7 +11,7 @@
 #include <linux/io.h>
 #include <linux/mm.h>
 #include <crypto/hash.h>
-#include <crypto/sha256_base.h>
+#include <crypto/sha2.h>
 #include "normal_key.h"
 
 #define DBG 0
@@ -304,7 +304,7 @@ tlv_readkeycontent_err:
 		__tmp; \
 	})
 
-u32 Tlv_WriteHead(struct storage_block_enc_head *enchead,
+static u32 Tlv_WriteHead(struct storage_block_enc_head *enchead,
 		  u8 *output, int32_t len)
 {
 	u32 *sum;
@@ -326,7 +326,7 @@ u32 Tlv_WriteHead(struct storage_block_enc_head *enchead,
 	return idx;
 }
 
-u32 Tlv_WriteObject(struct storage_object *object,
+static u32 Tlv_WriteObject(struct storage_object *object,
 		    u8 *output, int32_t len)
 {
 	u32 *sum;

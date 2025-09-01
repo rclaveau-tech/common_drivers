@@ -1662,7 +1662,7 @@ gckKERNEL_DumpProcessDB(
     return gcvSTATUS_OK;
 }
 
-void
+static void
 _DumpCounter(
     IN gcsDATABASE_COUNTERS * Counter,
     IN gctCONST_STRING Name

@@ -80,7 +80,7 @@ struct aml_hwspinlock_t *aml_spinlock;
  * Note that the ARM architecture guarantees single-copy atomicity for aligned
  * accesses regardless of status of address translation.
  */
-void __assert(const char *function, const char *file, u32 line,
+static void __assert(const char *function, const char *file, u32 line,
 		const char *assertion)
 {
 	pr_err("ASSERT: %s <%d> : %s\n", function, line, assertion);
@@ -221,6 +221,7 @@ static void aml_hwspinlock_unlock(struct hwspinlock *hwlock)
 	mb();
 }
 
+void test_hwspin_lock(struct hwspinlock *hwlock);
 void test_hwspin_lock(struct hwspinlock *hwlock)
 {
 	u32 i = 200;
@@ -320,12 +321,10 @@ probe_err:
 	return err;
 }
 
-static int aml_hwspinlock_remove(struct platform_device *pdev)
+static void aml_hwspinlock_remove(struct platform_device *pdev)
 {
 	hwspin_lock_unregister(aml_spinlock->bank);
 	platform_set_drvdata(pdev, NULL);
-
-	return 0;
 }
 
 static const struct of_device_id hwlock_of_match[] = {

@@ -42,8 +42,8 @@ void __iomem *sharemem_output_base;
 unsigned int efuse_obj_cmd_status;
 
 #define  DEFINE_EFUSEKEY_SHOW_ATTR(keyname)	\
-	static ssize_t  keyname##_show(struct class *cla, \
-					  struct class_attribute *attr,	\
+	static ssize_t  keyname##_show(const struct class *cla, \
+					  const struct class_attribute *attr,	\
 						char *buf)	\
 	{	\
 		ssize_t ret;	\
@@ -58,8 +58,8 @@ DEFINE_EFUSEKEY_SHOW_ATTR(usid)
 
 #ifndef EFUSE_READ_ONLY
 #define  DEFINE_EFUSEKEY_STORE_ATTR(keyname)	\
-	static ssize_t  keyname##_store(struct class *cla, \
-					  struct class_attribute *attr,	\
+	static ssize_t  keyname##_store(const struct class *cla, \
+					  const struct class_attribute *attr,	\
 						const char *buf,	\
 						size_t count)	\
 	{	\
@@ -516,8 +516,8 @@ exit:
 }
 EXPORT_SYMBOL(efuse_user_attr_read);
 
-static ssize_t userdata_show(struct class *cla,
-			     struct class_attribute *attr, char *buf)
+static ssize_t userdata_show(const struct class *cla,
+			     const struct class_attribute *attr, char *buf)
 {
 	char *op = NULL;
 	ssize_t ret;
@@ -567,8 +567,8 @@ exit:
 }
 
 #ifndef EFUSE_READ_ONLY
-static ssize_t userdata_store(struct class *cla,
-			      struct class_attribute *attr,
+static ssize_t userdata_store(const struct class *cla,
+			      const struct class_attribute *attr,
 			      const char *buf, size_t count)
 {
 	ssize_t ret;
@@ -618,8 +618,8 @@ exit:
 }
 #endif
 
-static ssize_t amlogic_set_store(struct class *cla,
-				 struct class_attribute *attr,
+static ssize_t amlogic_set_store(const struct class *cla,
+				 const struct class_attribute *attr,
 				 const char *buf, size_t count)
 {
 	ssize_t ret;
@@ -660,8 +660,8 @@ exit:
 	return ret;
 }
 
-static ssize_t secureboot_check_show(struct class *cla,
-				 struct class_attribute *attr, char *buf)
+static ssize_t secureboot_check_show(const struct class *cla,
+				 const struct class_attribute *attr, char *buf)
 {
 	ssize_t n = 0;
 	int ret;
@@ -683,8 +683,8 @@ static ssize_t secureboot_check_show(struct class *cla,
 	return n;
 }
 
-static ssize_t checkburn_show(struct class *cla,
-			     struct class_attribute *attr, char *buf)
+static ssize_t checkburn_show(const struct class *cla,
+			     const struct class_attribute *attr, char *buf)
 {
 	ssize_t n = 0;
 	struct aml_efuse_dev *efuse_dev;
@@ -708,8 +708,8 @@ static ssize_t checkburn_show(struct class *cla,
 	return n;
 }
 
-static ssize_t checkburn_store(struct class *cla,
-			      struct class_attribute *attr,
+static ssize_t checkburn_store(const struct class *cla,
+			      const struct class_attribute *attr,
 			      const char *buf, size_t count)
 {
 	ssize_t n = 0;
@@ -730,8 +730,8 @@ static ssize_t checkburn_store(struct class *cla,
 	return count;
 }
 
-static ssize_t checklist_show(struct class *cla,
-			     struct class_attribute *attr, char *buf)
+static ssize_t checklist_show(const struct class *cla,
+			     const struct class_attribute *attr, char *buf)
 {
 	int i;
 	ssize_t n = 0;
@@ -1048,8 +1048,8 @@ static int char2hex(char *hex, void *bin, size_t binlen)
 	return k;
 }
 
-static ssize_t efuse_obj_store(struct class *cla,
-	struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t efuse_obj_store(const struct class *cla,
+	const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int rc = -EINVAL;
 	char argv[3][48];
@@ -1157,8 +1157,8 @@ static ssize_t efuse_obj_store(struct class *cla,
 	return rc;
 }
 
-static ssize_t efuse_obj_show(struct class *class,
-	struct class_attribute *attr, char *buf)
+static ssize_t efuse_obj_show(const struct class *class,
+	const struct class_attribute *attr, char *buf)
 {
 	ssize_t len = 0;
 	int i;
@@ -1311,7 +1311,7 @@ static int efuse_probe(struct platform_device *pdev)
 	efuse_dev->reg_base = reg_base;
 	efuse_dev->secureboot_mask = secureboot_mask;
 	efuse_dev->cls.name = EFUSE_CLASS_NAME;
-	efuse_dev->cls.owner = THIS_MODULE;
+	//efuse_dev->cls.owner = THIS_MODULE;
 	efuse_dev->cls.class_groups = efuse_class_groups;
 	ret = class_register(&efuse_dev->cls);
 	if (ret)
@@ -1352,7 +1352,7 @@ out:
 	return ret;
 }
 
-static int efuse_remove(struct platform_device *pdev)
+static void efuse_remove(struct platform_device *pdev)
 {
 	struct aml_efuse_dev *efuse_dev = platform_get_drvdata(pdev);
 
@@ -1361,8 +1361,6 @@ static int efuse_remove(struct platform_device *pdev)
 	cdev_del(&efuse_dev->cdev);
 	class_unregister(&efuse_dev->cls);
 	platform_set_drvdata(pdev, NULL);
-
-	return 0;
 }
 
 static const struct of_device_id efuse_dt_match[] = {

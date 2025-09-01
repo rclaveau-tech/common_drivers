@@ -118,57 +118,70 @@ int global_timer_output_gpio_setup(struct global_timer_output_gpio *gtod,
 				   u8 init_val);
 #else
 unsigned int gpio_irq_get_channel_idx(int irq);
+int glb_timer_mipi_config(u8 srcn, unsigned int trig);
 int glb_timer_mipi_config(u8 srcn, unsigned int trig)
 {
 	return 0;
 }
 
+unsigned long long glb_timer_get_counter(u8 srcn);
 unsigned long long glb_timer_get_counter(u8 srcn)
 {
 	return 0;
 }
 
+u64 meson_global_timer_global_snapshot(void);
 u64 meson_global_timer_global_snapshot(void)
 {
 	return 0;
 }
 
+int meson_global_timer_reset(void);
 int meson_global_timer_reset(void)
 {
 	return 0;
 }
 
+u64 ns_to_global_timer_count(u64 time_in_ns);
 u64 ns_to_global_timer_count(u64 time_in_ns)
 {
 	return 0;
 }
 
+u64 global_timer_count_to_ns(u64 time_in_global_timer_ticks);
 u64 global_timer_count_to_ns(u64 time_in_global_timer_ticks)
 {
 	return 0;
 }
 
 int meson_global_timer_isp_event_snapshot_configure(u8 isp_event_src,
+						    enum meson_glb_srcsel_flag trigger_type);
+int meson_global_timer_isp_event_snapshot_configure(u8 isp_event_src,
 						    enum meson_glb_srcsel_flag trigger_type)
 {
 	return 0;
 }
 
+u64 meson_global_timer_isp_snapshot(u8 isp_event_src);
 u64 meson_global_timer_isp_snapshot(u8 isp_event_src)
 {
 	return 0;
 }
 
+int meson_global_timer_input_gpio_get_source_index(int virq);
 int meson_global_timer_input_gpio_get_source_index(int virq)
 {
 	return 0;
 }
 
+u64 meson_global_timer_input_gpio_get_snapshot(int id);
 u64 meson_global_timer_input_gpio_get_snapshot(int id)
 {
 	return 0;
 }
 
+int meson_global_timer_input_gpio_configure(u8 id,
+					    enum meson_glb_srcsel_flag trigger_type);
 int meson_global_timer_input_gpio_configure(u8 id,
 					    enum meson_glb_srcsel_flag trigger_type)
 {
@@ -176,17 +189,24 @@ int meson_global_timer_input_gpio_configure(u8 id,
 }
 
 struct global_timer_output_gpio*
+global_timer_output_gpio_get_from_index(struct device *dev, int index);
+struct global_timer_output_gpio*
 global_timer_output_gpio_get_from_index(struct device *dev, int index)
 {
 	return NULL;
 }
 
 int global_timer_output_start(struct global_timer_output_gpio *gtod,
+			      u64 expires);
+int global_timer_output_start(struct global_timer_output_gpio *gtod,
 			      u64 expires)
 {
 	return 0;
 }
 
+int global_timer_output_gpio_setup(struct global_timer_output_gpio *gtod,
+				   bool oneshot, u64 pulse_width, u64 interval,
+				   u8 init_val);
 int global_timer_output_gpio_setup(struct global_timer_output_gpio *gtod,
 				   bool oneshot, u64 pulse_width, u64 interval,
 				   u8 init_val)

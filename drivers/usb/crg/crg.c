@@ -63,7 +63,7 @@ static const struct aml_xhci_plat_priv crg_xhci_plat_priv = {
 };
 
 /* -------------------------------------------------------------------------- */
-void crg_set_mode(struct crg *crg, u32 mode)
+static void crg_set_mode(struct crg *crg, u32 mode)
 {
 	//TODO
 }
@@ -161,7 +161,7 @@ static int crg_core_get_phy(struct crg *crg)
 
 static struct property_entry	props[64];
 
-int crg_host_init(struct crg *crg)
+static int crg_host_init(struct crg *crg)
 {
 	//struct property_entry	props[64];
 	struct platform_device	*xhci;
@@ -411,7 +411,7 @@ err0:
 	return ret;
 }
 
-void crg_shutdown(struct platform_device *pdev)
+static void crg_shutdown(struct platform_device *pdev)
 {
 	struct crg     *crg = platform_get_drvdata(pdev);
 
@@ -426,7 +426,7 @@ void crg_shutdown(struct platform_device *pdev)
 	clk_disable_unprepare(crg->general_clk);
 }
 
-static int crg_remove(struct platform_device *pdev)
+static void crg_remove(struct platform_device *pdev)
 {
 	struct crg	   *crg = platform_get_drvdata(pdev);
 
@@ -439,7 +439,6 @@ static int crg_remove(struct platform_device *pdev)
 	pm_runtime_disable(&pdev->dev);
 
 	clk_disable_unprepare(crg->general_clk);
-	return 0;
 }
 
 #ifdef CONFIG_PM
@@ -625,11 +624,13 @@ static struct platform_driver crg_driver = {
 };
 
 /* AMLOGIC corigine driver does not allow module unload */
-int __init amlogic_crg_init(void)
+static int __init amlogic_crg_init(void)
 {
 	platform_driver_probe(&crg_driver, crg_probe);
 	return 0;
 }
+
+EXPORT_SYMBOL(amlogic_crg_init);
 
 #if 0
 late_initcall(amlogic_crg_init);

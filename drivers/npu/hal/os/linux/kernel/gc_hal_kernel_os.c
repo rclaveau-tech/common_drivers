@@ -275,7 +275,7 @@ _DestroyMdl(
 /*******************************************************************************
 ** Integer Id Management.
 */
-gceSTATUS
+static gceSTATUS
 _AllocateIntegerId(
     IN gcsINTEGER_DB_PTR Database,
     IN gctPOINTER KernelPointer,
@@ -366,7 +366,7 @@ again:
     return gcvSTATUS_OK;
 }
 
-gceSTATUS
+static gceSTATUS
 _QueryIntegerId(
     IN gcsINTEGER_DB_PTR Database,
     IN gctUINT32  Id,
@@ -408,7 +408,7 @@ _QueryIntegerId(
     }
 }
 
-gceSTATUS
+static gceSTATUS
 _DestroyIntegerId(
     IN gcsINTEGER_DB_PTR Database,
     IN gctUINT32 Id
@@ -450,7 +450,7 @@ _QueryProcessPageTable(
         *Address = page_to_phys(vmalloc_to_page(Logical)) | offset;
         return gcvSTATUS_OK;
     }
-    else if (virt_addr_valid(logical))
+    else if (virt_addr_valid((void *)logical))
     {
         /* Kernel logical address. */
         *Address = virt_to_phys(Logical);
@@ -6387,7 +6387,7 @@ gckOS_SignalUserSignal(
 ******************************** Software Timer ********************************
 \******************************************************************************/
 
-void
+static void
 _TimerFunction(
     struct work_struct * work
     )

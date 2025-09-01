@@ -1,1 +1,1 @@
-obj-y	+=	kmd/
+obj-m	+=	kmd/

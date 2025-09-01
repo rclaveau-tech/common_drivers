@@ -1617,6 +1617,7 @@ static int __init t7_pmx_init(void)
 arch_initcall(t7_pmx_init);
 
 #else
+int __init meson_t7_pinctrl_init(void);
 int __init meson_t7_pinctrl_init(void)
 {
 	meson_t7_pinctrl_driver.driver.of_match_table =

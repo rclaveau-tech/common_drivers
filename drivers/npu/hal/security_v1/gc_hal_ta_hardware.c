@@ -207,7 +207,7 @@ OnError:
 }
 
 
-gceSTATUS
+static gceSTATUS
 gctaHARDWARE_SetMMUStates(
     IN gcTA_HARDWARE Hardware,
     IN gctPOINTER MtlbAddress,
@@ -570,7 +570,7 @@ OnError:
     return status;
 }
 
-gceSTATUS
+/*static gceSTATUS
 gctaHARDWARE_MmuEnable(
     IN gcTA_HARDWARE Hardware
     )
@@ -590,7 +590,7 @@ gctaHARDWARE_MmuEnable(
  ~0U : (~(~0U << ((1 ? 0:0) - (0 ? 0:0) + 1))))))) << (0 ? 0:0))));
 
     return gcvSTATUS_OK;
-}
+}*/
 
 /*
 * In trust zone, we prepare page table array table and configure base address of

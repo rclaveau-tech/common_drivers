@@ -21,6 +21,8 @@
 #include "dolby_fw.h"
 #include <linux/amlogic/secmon.h>
 
+#include "main.h"
+
 #define DOLBY_FW_DEVICE_NAME   "dolby_fw"
 #define DOLBY_FW_DRIVER_NAME   "dolby_fw"
 #define DOLBY_FW_CLASS_NAME    "dolby_fw"
@@ -485,8 +487,7 @@ static int dolby_fw_probe(struct platform_device *pdev)
 	}
 	major_id = ret;
 
-	class_dolby_fw = class_create(THIS_MODULE,
-						DOLBY_FW_DEVICE_NAME);
+	class_dolby_fw = class_create(DOLBY_FW_DEVICE_NAME);
 	if (IS_ERR(class_dolby_fw)) {
 		ret = PTR_ERR(class_dolby_fw);
 		goto err1;
@@ -530,13 +531,12 @@ err:
 	return ret;
 }
 
-static int dolby_fw_remove(struct platform_device *pdev)
+static void dolby_fw_remove(struct platform_device *pdev)
 {
 	device_destroy(class_dolby_fw, MKDEV(major_id, 0));
 	class_destroy(class_dolby_fw);
 	unregister_chrdev(major_id, DOLBY_FW_DEVICE_NAME);
 	platform_set_drvdata(pdev, NULL);
-	return 0;
 }
 
 static const struct of_device_id amlogic_dolby_fw_dt_match[] = {

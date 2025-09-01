@@ -27,6 +27,8 @@
 #include <linux/amlogic/iomap.h>
 #include <linux/amlogic/aml_kt.h>
 
+#include "main.h"
+
 #include "aml_seckey_log.h"
 
 #define AML_MKL_DEVICE_NAME "aml_mkl"
@@ -798,7 +800,7 @@ static int aml_mkl_get_dts_info(struct aml_mkl_dev *dev, struct platform_device 
 	return ret;
 }
 
-int aml_mkl_init(struct class *aml_mkl_class, struct platform_device *pdev)
+static int aml_mkl_init(struct class *aml_mkl_class, struct platform_device *pdev)
 {
 	int ret = -1;
 	struct device *device;
@@ -860,7 +862,7 @@ unregister_chrdev:
 	return ret;
 }
 
-void aml_mkl_exit(struct class *aml_mkl_class, struct platform_device *pdev)
+static void aml_mkl_exit(struct class *aml_mkl_class, struct platform_device *pdev)
 {
 	device_destroy(aml_mkl_class, aml_mkl_devt);
 	cdev_del(&aml_mkl_dev.cdev);
@@ -874,7 +876,7 @@ static int aml_mkl_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 
-	aml_mkl_class = class_create(THIS_MODULE, AML_MKL_DEVICE_NAME);
+	aml_mkl_class = class_create(AML_MKL_DEVICE_NAME);
 	if (IS_ERR(aml_mkl_class)) {
 		KL_LOGE("class_create failed\n");
 		ret = PTR_ERR(aml_mkl_class);
@@ -900,12 +902,11 @@ device_create_error:
 	return ret;
 }
 
-static int aml_mkl_remove(struct platform_device *pdev)
+static void aml_mkl_remove(struct platform_device *pdev)
 {
 	aml_mkl_exit(aml_mkl_class, pdev);
 	class_destroy(aml_mkl_class);
 	debugfs_remove_recursive(aml_mkl_debug_dent);
-	return 0;
 }
 
 #ifdef CONFIG_OF

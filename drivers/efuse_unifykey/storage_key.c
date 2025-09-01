@@ -154,7 +154,7 @@ _out:
 	return ret;
 }
 
-int securekey_prebuf_init(void)
+static int securekey_prebuf_init(void)
 {
 	securekey_prebuf = kmalloc(SECUREKEY_SIZE, GFP_KERNEL);
 	if (!securekey_prebuf)
@@ -163,7 +163,7 @@ int securekey_prebuf_init(void)
 	return 0;
 }
 
-void securekey_prebuf_deinit(void)
+static void securekey_prebuf_deinit(void)
 {
 	kfree(securekey_prebuf);
 }
@@ -470,7 +470,7 @@ static s32 _amlkey_hash_normal(const u8 *name, u8 *hash)
 	return ret;
 }
 
-int normal_key_init(struct platform_device *pdev)
+static int normal_key_init(struct platform_device *pdev)
 {
 	u32 blksz;
 	int ret;
@@ -488,7 +488,7 @@ int normal_key_init(struct platform_device *pdev)
 	return 0;
 }
 
-void normal_key_deinit(void)
+static void normal_key_deinit(void)
 {
 	kfree(normal_block);
 }

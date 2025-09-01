@@ -296,6 +296,8 @@ EXTRA_CFLAGS += -DgcdENABLE_TRUST_APPLICATION=1
 
 obj-m = $(MODULE_NAME).o
 
+ccflags-y += $(EXTRA_CFLAGS)
+
 $(MODULE_NAME)-objs  = $(OBJS)
 
 endif

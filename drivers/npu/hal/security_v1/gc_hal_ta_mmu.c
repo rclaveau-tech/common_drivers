@@ -138,7 +138,7 @@ typedef struct _gcsMMU_STLB
 /*
 * Helper
 */
-gctUINT32
+static gctUINT32
 _MtlbOffset(
     gctUINT32 Address
     )
@@ -146,7 +146,7 @@ _MtlbOffset(
     return (Address & gcdMMU_MTLB_MASK) >> gcdMMU_MTLB_SHIFT;
 }
 
-gctUINT32
+static gctUINT32
 _StlbOffset(
     gctUINT32 Address
     )
@@ -522,7 +522,7 @@ OnError:
     return status;
 }
 
-gceSTATUS
+/*static gceSTATUS
 gctaMMU_Enable(
     IN gcTA_MMU Mmu,
     IN gcTA TA
@@ -540,7 +540,7 @@ gctaMMU_Enable(
 
 OnError:
     return status;
-}
+}*/
 
 void
 gctaMMU_DumpPagetableEntry(

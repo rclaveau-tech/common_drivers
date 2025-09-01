@@ -154,6 +154,12 @@ gckKERNEL_SecurityAllocateSecurityMemory(
     IN gckKERNEL Kernel,
     IN gctUINT32 Bytes,
     OUT gctUINT32 * Handle
+    );
+gceSTATUS
+gckKERNEL_SecurityAllocateSecurityMemory(
+    IN gckKERNEL Kernel,
+    IN gctUINT32 Bytes,
+    OUT gctUINT32 * Handle
     )
 {
     gceSTATUS status;
@@ -175,6 +181,8 @@ OnError:
     gcmkFOOTER();
     return status;
 }
+
+EXPORT_SYMBOL(gckKERNEL_SecurityAllocateSecurityMemory);
 
 gceSTATUS
 gckKERNEL_SecurityMapMemory(

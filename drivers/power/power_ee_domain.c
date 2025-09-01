@@ -20,6 +20,8 @@
 #include <dt-bindings/power/amlogic-sm1-power.h>
 #include <dt-bindings/power/amlogic-tm2-power.h>
 
+#include "main.h"
+
 /* AO Offsets */
 
 #define AO_RTI_GEN_PWR_SLEEP0		(0x3a << 2)
@@ -978,15 +980,14 @@ static struct platform_driver meson_ee_pwrc_driver = {
 	},
 };
 
-static int __init power_ee_domain_init(void)
+int power_ee_domain_init(void)
 {
 	return platform_driver_register(&meson_ee_pwrc_driver);
 }
 
-static void __exit power_ee_domain_exit(void)
+void __exit power_ee_domain_exit(void)
 {
 	platform_driver_unregister(&meson_ee_pwrc_driver);
 }
 
 EXPORT_SYMBOL(power_ee_domain_init);
-EXPORT_SYMBOL(power_ee_domain_exit);

@@ -1821,6 +1821,7 @@ static int __init t3_pmx_init(void)
 arch_initcall(t3_pmx_init);
 
 #else
+int __init meson_t3_pinctrl_init(void);
 int __init meson_t3_pinctrl_init(void)
 {
 	meson_t3_pinctrl_driver.driver.of_match_table =

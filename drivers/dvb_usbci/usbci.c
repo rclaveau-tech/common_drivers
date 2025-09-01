@@ -837,7 +837,7 @@ static const struct file_operations aml_intf_fops = {
 #endif
 };
 
-static char *aml_usbcam_class_devnode(struct device *dev, umode_t *mode)
+static char *aml_usbcam_class_devnode(const struct device *dev, umode_t *mode)
 {
 	if (mode)
 		*mode = 0666;
@@ -858,8 +858,8 @@ static struct usb_class_driver aml_usbcam_media_class = {
 	.devnode = aml_usbcam_class_devnode,
 };
 
-static ssize_t usb_show(struct class *class,
-	struct class_attribute *attr, char *buf)
+static ssize_t usb_show(const struct class *class,
+	const struct class_attribute *attr, char *buf)
 {
 	int ret;
 
@@ -886,7 +886,7 @@ static int aml_usbcam_register_class(void)
 		return -ENOMEM;
 
 	snprintf((char *)clp.name, CLASS_NAME_LEN, "amlusbcam-%d", 0);
-	clp.owner = THIS_MODULE;
+	//clp.owner = THIS_MODULE;
 	clp.class_groups = aml_usbcam_groups;
 	ret = class_register(&clp);
 	if (ret)

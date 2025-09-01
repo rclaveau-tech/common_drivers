@@ -130,7 +130,7 @@ static int adlak_voltage_adjust_r1p0(struct adlak_device *padlak) {
     return ret;
 }
 
-static int adlak_get_board_adj_vol_env(char *str)
+/*static int adlak_get_board_adj_vol_env(char *str)
 {
     int ret;
     ret = kstrtouint(str, 10, &nn_regulator_flag);
@@ -139,7 +139,7 @@ static int adlak_get_board_adj_vol_env(char *str)
     }
     return 0;
 }
-__setup("nn_adj_vol=", adlak_get_board_adj_vol_env);
+__setup("nn_adj_vol=", adlak_get_board_adj_vol_env);*/
 
 static int adlak_voltage_adjust_r2p0(struct adlak_device *padlak) {
 /*****************************************************************************

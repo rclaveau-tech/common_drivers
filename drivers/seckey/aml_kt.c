@@ -27,6 +27,8 @@
 #include "aml_seckey_log.h"
 #include "aml_kt_dev.h"
 
+#include "main.h"
+
 #define AML_KT_DEVICE_NAME "aml_kt"
 #define DEVICE_INSTANCES 1
 
@@ -947,7 +949,7 @@ int aml_kt_free(struct aml_kt_dev *dev, u32 handle)
 }
 EXPORT_SYMBOL(aml_kt_free);
 
-int aml_kt_open(struct inode *inode, struct file *filp)
+static int aml_kt_open(struct inode *inode, struct file *filp)
 {
 	struct aml_kt_dev *dev;
 
@@ -957,7 +959,7 @@ int aml_kt_open(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-int aml_kt_release(struct inode *inode, struct file *filp)
+static int aml_kt_release(struct inode *inode, struct file *filp)
 {
 	if (!filp->private_data)
 		return 0;
@@ -1147,7 +1149,7 @@ static int aml_kt_get_dts_info(struct aml_kt_dev *dev, struct platform_device *p
 	return KT_SUCCESS;
 }
 
-int aml_kt_init(struct class *aml_kt_class, struct platform_device *pdev)
+static int aml_kt_init(struct class *aml_kt_class, struct platform_device *pdev)
 {
 	int ret = -1;
 	struct device *device;
@@ -1211,7 +1213,7 @@ unregister_chrdev:
 	return ret;
 }
 
-void aml_kt_exit(struct class *aml_kt_class, struct platform_device *pdev)
+static void aml_kt_exit(struct class *aml_kt_class, struct platform_device *pdev)
 {
 	int i = 0;
 
@@ -1240,7 +1242,7 @@ static int aml_kt_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 
-	aml_kt_class = class_create(THIS_MODULE, AML_KT_DEVICE_NAME);
+	aml_kt_class = class_create(AML_KT_DEVICE_NAME);
 	if (IS_ERR(aml_kt_class)) {
 		KT_LOGE("class_create failed\n");
 		ret = PTR_ERR(aml_kt_class);
@@ -1266,12 +1268,11 @@ destroy_class:
 	return ret;
 }
 
-static int aml_kt_remove(struct platform_device *pdev)
+static void aml_kt_remove(struct platform_device *pdev)
 {
 	aml_kt_exit(aml_kt_class, pdev);
 	class_destroy(aml_kt_class);
 	debugfs_remove_recursive(aml_kt_debug_dent);
-	return 0;
 }
 
 #ifdef CONFIG_OF

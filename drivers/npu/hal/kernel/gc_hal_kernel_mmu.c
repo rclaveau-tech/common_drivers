@@ -338,7 +338,7 @@ _MtlbOffset(
     return (Address & gcdMMU_MTLB_MASK) >> gcdMMU_MTLB_SHIFT;
 }
 
-gctUINT32
+static gctUINT32
 _AddressToIndex(
     IN gcsADDRESS_AREA_PTR Area,
     IN gctUINT32 Address
@@ -572,7 +572,7 @@ OnError:
     return status;
 }
 
-gceSTATUS
+static gceSTATUS
 _GetMtlbFreeSpace(
     IN gckMMU Mmu,
     IN gctUINT32 NumEntries,
@@ -2387,7 +2387,7 @@ OnError:
     return status;
 }
 
-gctUINT32
+static gctUINT32
 _GetPageCountOfUsedNode(
     gctUINT32_PTR Node
     )
@@ -2447,7 +2447,7 @@ _GetProcessArea(
 **      gckMMU * Mmu
 **          Pointer to a variable that receives the gckMMU object pointer.
 */
-gceSTATUS
+static gceSTATUS
 _Construct(
     IN gckKERNEL Kernel,
     IN gctSIZE_T MmuSize,
@@ -3000,7 +3000,7 @@ _FreeAddressArea(
 **
 **      Nothing.
 */
-gceSTATUS
+static gceSTATUS
 _Destroy(
     IN gckMMU Mmu
     )
@@ -3096,7 +3096,7 @@ _Destroy(
 **  Adjust the index from which we search for a usable node to make sure
 **  index allocated is greater than Start.
 */
-gceSTATUS
+static gceSTATUS
 _AdjustIndex(
     IN gckMMU Mmu,
     IN gctUINT32 Index,
@@ -3214,7 +3214,7 @@ gckMMU_Destroy(
 **      gctUINT32 * Address
 **          Pointer to a variable that receives the hardware specific address.
 */
-gceSTATUS
+static gceSTATUS
 _AllocatePages(
     IN gckMMU Mmu,
     IN gctSIZE_T PageCount,
@@ -3462,7 +3462,7 @@ OnError:
 **
 **      Nothing.
 */
-gceSTATUS
+static gceSTATUS
 _FreePages(
     IN gckMMU Mmu,
     IN gctBOOL Secure,
@@ -3827,6 +3827,10 @@ gckMMU_DumpPageTableEntry(
 void
 gckMMU_CheckSaftPage(
     IN gckMMU Mmu
+    );
+void
+gckMMU_CheckSaftPage(
+    IN gckMMU Mmu
     )
 {
     gctUINT8_PTR safeLogical = Mmu->safePageLogical;
@@ -3851,6 +3855,12 @@ gckMMU_CheckSaftPage(
     }
 }
 
+EXPORT_SYMBOL(gckMMU_CheckSaftPage);
+
+void
+gckMMU_DumpAddressSpace(
+    IN gckMMU Mmu
+    );
 void
 gckMMU_DumpAddressSpace(
     IN gckMMU Mmu
@@ -3904,6 +3914,8 @@ gckMMU_DumpAddressSpace(
     gcmkVERIFY_OK(gckOS_ReleaseMutex(Mmu->os, Mmu->pageTableMutex));
 
 }
+
+EXPORT_SYMBOL(gckMMU_DumpAddressSpace);
 
 void
 gckMMU_DumpRecentFreedAddress(

@@ -2,7 +2,7 @@ menu "Amlogic NPU Support"
  
 	config AMLOGIC_NPU
 		tristate "amlogic NPU module"
-		default m
+		default n
 		help
 			Driver for NPU.
 

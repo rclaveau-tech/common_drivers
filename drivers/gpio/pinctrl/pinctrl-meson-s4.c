@@ -1231,7 +1231,7 @@ static int __init s4_pmx_init(void)
 arch_initcall(s4_pmx_init);
 
 #else
-int __init meson_s4_pinctrl_init(void)
+static int __init meson_s4_pinctrl_init(void)
 {
 	meson_s4_pinctrl_driver.driver.of_match_table =
 			meson_s4_pinctrl_dt_match;

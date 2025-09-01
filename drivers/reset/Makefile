@@ -2,7 +2,8 @@
 
 MODULE_NAME = amlogic-reset
 obj-$(CONFIG_AMLOGIC_RESET_MESON) = $(MODULE_NAME).o
-$(MODULE_NAME)-y += main.o
+#$(MODULE_NAME)-y += $(MODULE_NAME).o
+$(MODULE_NAME)-$(CONFIG_AMLOGIC_RESET_MESON) += main.o
 $(MODULE_NAME)-$(CONFIG_AMLOGIC_RESET_MESON) += reset-meson.o
 $(MODULE_NAME)-$(CONFIG_AMLOGIC_DOS_RESET_MESON) += reset-meson-dos.o
 

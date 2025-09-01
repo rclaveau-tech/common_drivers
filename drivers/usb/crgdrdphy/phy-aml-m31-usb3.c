@@ -373,9 +373,8 @@ static int amlogic_usb3_m31_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int amlogic_usb3_m31_remove(struct platform_device *pdev)
+static void amlogic_usb3_m31_remove(struct platform_device *pdev)
 {
-	return 0;
 }
 
 #ifdef CONFIG_PM_RUNTIME
@@ -423,10 +422,12 @@ static struct platform_driver amlogic_usb3_m31_driver = {
 
 #if IS_BUILTIN(CONFIG_AMLOGIC_CRG)
 
-int __init amlogic_usb3_m31_drv_init(void)
+static int __init amlogic_usb3_m31_drv_init(void)
 {
 	return platform_driver_register(&amlogic_usb3_m31_driver);
 }
+
+EXPORT_SYMBOL(amlogic_usb3_m31_drv_init);
 #else
 module_platform_driver(amlogic_usb3_m31_driver);
 

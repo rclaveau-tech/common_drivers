@@ -162,7 +162,7 @@ gctCONST_STRING _DispatchText[] =
 
 #if gcdGPU_TIMEOUT && gcdINTERRUPT_STATISTIC
 #if gcdENABLE_RECOVERY_ALL_CORES
-gceSTATUS
+static gceSTATUS
 _ClearPendingIntr(
     IN gckKERNEL Kernel
     )
@@ -204,7 +204,7 @@ OnError:
 }
 #endif
 
-void
+static void
 _MonitorTimerFunction(
     gctPOINTER Data
     )
@@ -379,7 +379,7 @@ _MonitorTimerFunction(
 }
 #endif
 
-void
+static void
 _DumpDriverConfigure(
     IN gckKERNEL Kernel
     )
@@ -394,6 +394,10 @@ _DumpDriverConfigure(
     gckOS_DumpParam();
 }
 
+void
+_DumpState(
+    IN gckKERNEL Kernel
+    );
 void
 _DumpState(
     IN gckKERNEL Kernel
@@ -439,7 +443,7 @@ gckKERNEL_GetHardwareType(
     return gcvSTATUS_OK;
 }
 
-gceSTATUS
+static gceSTATUS
 _SetRecovery(
     IN gckKERNEL Kernel,
     IN gctBOOL  Recovery,
@@ -1508,7 +1512,7 @@ OnError:
 **  Private function to allocate the requested amount of video memory, output
 **  video memory handle.
 */
-gceSTATUS
+static gceSTATUS
 _AllocateLinearMemory(
     IN gckKERNEL Kernel,
     IN gctUINT32 ProcessID,
@@ -1650,7 +1654,7 @@ OnError:
 **
 **          Nothing.
 */
-gceSTATUS
+static gceSTATUS
 _ReleaseVideoMemory(
     IN gckKERNEL Kernel,
     IN gctUINT32 ProcessID,
@@ -2236,7 +2240,7 @@ OnError:
 #if defined(CONFIG_DMA_SHARED_BUFFER)
 #include <linux/dma-buf.h>
 
-gceSTATUS
+static gceSTATUS
 _SetVidMemMetadata(
     IN gckKERNEL Kernel,
     IN gctUINT32 ProcessID,
@@ -2407,7 +2411,7 @@ OnError:
     return status;
 }
 
-gceSTATUS
+static gceSTATUS
 gckKERNEL_ConfigPowerManagement(
     IN gckKERNEL Kernel,
     IN OUT gcsHAL_INTERFACE * Interface
@@ -5517,7 +5521,7 @@ _ListAdd(
     Prev->next = New;
 }
 
-void
+static void
 _ListDel(
     gcsLISTHEAD_PTR Prev,
     gcsLISTHEAD_PTR Next
@@ -5926,7 +5930,7 @@ OnError:
     return status;
 }
 
-gceSTATUS
+static gceSTATUS
 gckDEVICE_ChipInfo(
     IN gckDEVICE Device,
     IN gcsHAL_INTERFACE_PTR Interface
@@ -5951,7 +5955,7 @@ gckDEVICE_ChipInfo(
     return gcvSTATUS_OK;
 }
 
-gceSTATUS
+static gceSTATUS
 gckDEVICE_Version(
     IN gckDEVICE Device,
     IN gcsHAL_INTERFACE_PTR Interface

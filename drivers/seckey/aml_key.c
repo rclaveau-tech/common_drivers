@@ -28,6 +28,8 @@
 #include "aml_seckey_log.h"
 #include "aml_kt_dev.h"
 
+#include "main.h"
+
 #define AML_KEY_DEVICE_NAME "key"
 #define DEVICE_INSTANCES 1
 
@@ -215,7 +217,7 @@ static int aml_key_set_host_key(struct aml_kt_dev *dev, struct key_descr *key_pa
 	return ret;
 }
 
-int aml_key_open(struct inode *inode, struct file *filp)
+static int aml_key_open(struct inode *inode, struct file *filp)
 {
 	struct aml_key_dev *dev;
 
@@ -225,7 +227,7 @@ int aml_key_open(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-int aml_key_release(struct inode *inode, struct file *filp)
+static int aml_key_release(struct inode *inode, struct file *filp)
 {
 	if (!filp->private_data)
 		return 0;
@@ -350,7 +352,7 @@ static const struct file_operations aml_key_fops = {
 	.compat_ioctl = aml_key_ioctl,
 };
 
-int aml_key_init(struct class *aml_key_class)
+static int aml_key_init(struct class *aml_key_class)
 {
 	int ret = -1;
 	struct device *device;
@@ -386,7 +388,7 @@ unregister_chrdev:
 	return ret;
 }
 
-void aml_key_exit(struct class *aml_key_class)
+static void aml_key_exit(struct class *aml_key_class)
 {
 	device_destroy(aml_key_class, aml_key_devt);
 	cdev_del(&aml_key_dev.cdev);
@@ -399,7 +401,7 @@ int __init aml_key_driver_init(void)
 {
 	int ret = 0;
 
-	aml_key_class = class_create(THIS_MODULE, AML_KEY_DEVICE_NAME);
+	aml_key_class = class_create(AML_KEY_DEVICE_NAME);
 	if (IS_ERR(aml_key_class)) {
 		LOGE("class_create failed\n");
 		ret = PTR_ERR(aml_key_class);

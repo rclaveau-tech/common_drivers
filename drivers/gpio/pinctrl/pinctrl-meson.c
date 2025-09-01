@@ -773,7 +773,7 @@ static int meson_gpiolib_register(struct meson_pinctrl *pc)
 	pc->chip.base = -1;
 	pc->chip.ngpio = pc->data->num_pins;
 	pc->chip.can_sleep = false;
-	pc->chip.of_node = pc->of_node;
+	//pc->chip.of_node = pc->of_node;
 	pc->chip.of_gpio_n_cells = 2;
 
 	ret = gpiochip_add_data(&pc->chip, pc);

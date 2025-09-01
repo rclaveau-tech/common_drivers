@@ -7,7 +7,7 @@
 #include <asm/byteorder.h>
 #include <linux/errno.h>
 #include <linux/io.h>
-#include <asm/unaligned.h>
+#include <linux/unaligned.h>
 #include <linux/types.h>
 #include <linux/bitops.h>
 #include <linux/dma-mapping.h>
@@ -482,7 +482,7 @@ static struct usb_endpoint_descriptor crg_udc_ep0_desc = {
 	.wMaxPacketSize = cpu_to_le16(64),
 };
 
-void crg_gadget_hold(struct crg_udc_lock *lock)
+static void crg_gadget_hold(struct crg_udc_lock *lock)
 {
 	if (!lock->held) {
 		__pm_stay_awake(lock->wakesrc);
@@ -490,7 +490,7 @@ void crg_gadget_hold(struct crg_udc_lock *lock)
 	}
 }
 
-void crg_gadget_drop(struct crg_udc_lock *lock)
+static void crg_gadget_drop(struct crg_udc_lock *lock)
 {
 	if (lock->held) {
 		__pm_relax(lock->wakesrc);
@@ -679,7 +679,7 @@ static void nuke(struct crg_udc_ep *udc_ep, int status, unsigned long flags)
 	}
 }
 
-void clear_req_container(struct crg_udc_request *udc_req_ptr)
+static void clear_req_container(struct crg_udc_request *udc_req_ptr)
 {
 	udc_req_ptr->buff_len_left = 0;
 	udc_req_ptr->trbs_needed = 0;
@@ -689,7 +689,7 @@ void clear_req_container(struct crg_udc_request *udc_req_ptr)
 	udc_req_ptr->short_pkt = 0;
 }
 
-bool is_pointer_less_than(struct transfer_trb_s *a,
+static bool is_pointer_less_than(struct transfer_trb_s *a,
 	struct transfer_trb_s *b, struct crg_udc_ep *udc_ep)
 {
 	if (b > a && (udc_ep->enq_pt >= b || udc_ep->enq_pt < a))
@@ -700,7 +700,7 @@ bool is_pointer_less_than(struct transfer_trb_s *a,
 }
 
 /* num_trbs here is the size of the ring. */
-u32 room_on_ring(struct crg_gadget_dev *crg_udc, u32 num_trbs,
+static u32 room_on_ring(struct crg_gadget_dev *crg_udc, u32 num_trbs,
 		struct transfer_trb_s *p_ring, struct transfer_trb_s *enq_pt,
 		struct transfer_trb_s *dq_pt)
 {
@@ -837,7 +837,7 @@ static void crg_udc_epcx_update_dqptr(struct crg_udc_ep *udc_ep)
 	crg_issue_command(crg_udc, CRG_CMD_SET_TR_DQPTR, cmd_param0, 0);
 }
 
-void setup_status_trb(struct crg_gadget_dev *crg_udc,
+static void setup_status_trb(struct crg_gadget_dev *crg_udc,
 		struct transfer_trb_s *p_trb,
 		struct usb_request *usb_req, u8 pcs, u8 set_addr, u8 stall)
 {
@@ -876,7 +876,7 @@ void setup_status_trb(struct crg_gadget_dev *crg_udc,
 	wmb();
 }
 
-void knock_doorbell(struct crg_gadget_dev *crg_udc, int DCI)
+static void knock_doorbell(struct crg_gadget_dev *crg_udc, int DCI)
 {
 	u32 tmp;
 	struct crg_uccr *uccr;
@@ -890,7 +890,7 @@ void knock_doorbell(struct crg_gadget_dev *crg_udc, int DCI)
 	reg_write(&uccr->doorbell, tmp);
 }
 
-void setup_datastage_trb(struct crg_gadget_dev *crg_udc,
+static void setup_datastage_trb(struct crg_gadget_dev *crg_udc,
 		struct transfer_trb_s *p_trb, struct usb_request *usb_req,
 		u8 pcs, u32 num_trb, u32 transfer_length, u32 td_size,
 		u8 IOC, u8 AZP, u8 dir, u8 setup_tag)
@@ -940,7 +940,7 @@ void setup_datastage_trb(struct crg_gadget_dev *crg_udc,
 			p_trb->dw0, p_trb->dw1, p_trb->dw2, p_trb->dw3);
 }
 
-void setup_trb(struct crg_gadget_dev *crg_udc,
+static void setup_trb(struct crg_gadget_dev *crg_udc,
 		struct transfer_trb_s *p_trb,
 		struct usb_request *usb_req, u32 xfer_len,
 		dma_addr_t xfer_buf_addr, u8 td_size, u8 pcs,
@@ -988,7 +988,7 @@ void setup_trb(struct crg_gadget_dev *crg_udc,
 		p_trb->dw2, p_trb->dw3);
 }
 
-int crg_udc_queue_trbs(struct crg_udc_ep *udc_ep_ptr,
+static int crg_udc_queue_trbs(struct crg_udc_ep *udc_ep_ptr,
 		struct crg_udc_request *udc_req_ptr,  bool b_isoc,
 		u32 xfer_ring_size,
 		u32 num_trbs_needed, u64 buffer_length)
@@ -1201,7 +1201,7 @@ int crg_udc_queue_trbs(struct crg_udc_ep *udc_ep_ptr,
 	return 0;
 }
 
-int crg_udc_queue_ctrl(struct crg_udc_ep *udc_ep_ptr,
+static int crg_udc_queue_ctrl(struct crg_udc_ep *udc_ep_ptr,
 		struct crg_udc_request *udc_req_ptr, u32 num_of_trbs_needed)
 {
 	struct crg_gadget_dev *crg_udc = udc_ep_ptr->crg_udc;
@@ -1247,9 +1247,9 @@ int crg_udc_queue_ctrl(struct crg_udc_ep *udc_ep_ptr,
 				dir = 0;
 			else if (crg_udc->setup_status == DATA_STAGE_RECV)
 				dir = 1;
-			else
-				CRG_DEBUG("unexpected setup_status!%d\n",
-					crg_udc->setup_status);
+			else {
+				CRG_DEBUG("unexpected setup_status!%d\n", crg_udc->setup_status);
+			}
 
 			if (udc_req_ptr->usb_req.zero == 1 &&
 				udc_req_ptr->usb_req.length != 0 &&
@@ -1327,7 +1327,7 @@ int crg_udc_queue_ctrl(struct crg_udc_ep *udc_ep_ptr,
 	return 0;
 }
 
-void build_ep0_status(struct crg_udc_ep *udc_ep_ptr,
+static void build_ep0_status(struct crg_udc_ep *udc_ep_ptr,
 		 bool default_value, u32 status,
 		 struct crg_udc_request *udc_req_ptr, u8 set_addr, u8 stall)
 {
@@ -1368,7 +1368,7 @@ void build_ep0_status(struct crg_udc_ep *udc_ep_ptr,
 	list_add_tail(&udc_req_ptr->queue, &udc_ep_ptr->queue);
 }
 
-void ep0_req_complete(struct crg_udc_ep *udc_ep_ptr)
+static void ep0_req_complete(struct crg_udc_ep *udc_ep_ptr)
 {
 	struct crg_gadget_dev *crg_udc = udc_ep_ptr->crg_udc;
 
@@ -1390,7 +1390,7 @@ void ep0_req_complete(struct crg_udc_ep *udc_ep_ptr)
 	}
 }
 
-void handle_cmpl_code_success(struct crg_gadget_dev *crg_udc,
+static void handle_cmpl_code_success(struct crg_gadget_dev *crg_udc,
 		struct event_trb_s *event, struct crg_udc_ep *udc_ep_ptr, unsigned long flags)
 {
 	u64 trb_pt;
@@ -1436,7 +1436,7 @@ void handle_cmpl_code_success(struct crg_gadget_dev *crg_udc,
 	}
 }
 
-void update_dequeue_pt(struct event_trb_s *event,
+static void update_dequeue_pt(struct event_trb_s *event,
 	struct crg_udc_ep *udc_ep)
 {
 	u32 deq_pt_lo = event->dw0;
@@ -1453,7 +1453,7 @@ void update_dequeue_pt(struct event_trb_s *event,
 	udc_ep->deq_pt = deq_pt;
 }
 
-void advance_dequeue_pt(struct crg_udc_ep *udc_ep)
+static void advance_dequeue_pt(struct crg_udc_ep *udc_ep)
 {
 	struct crg_udc_request *udc_req;
 
@@ -1477,7 +1477,7 @@ void advance_dequeue_pt(struct crg_udc_ep *udc_ep)
 	}
 }
 
-bool is_request_dequeued(struct crg_gadget_dev *crg_udc,
+static bool is_request_dequeued(struct crg_gadget_dev *crg_udc,
 		struct crg_udc_ep *udc_ep, struct event_trb_s *event)
 {
 	struct crg_udc_request *udc_req;
@@ -1509,7 +1509,7 @@ bool is_request_dequeued(struct crg_gadget_dev *crg_udc,
 	return status;
 }
 
-int crg_udc_build_td(struct crg_udc_ep *udc_ep_ptr,
+static int crg_udc_build_td(struct crg_udc_ep *udc_ep_ptr,
 		struct crg_udc_request *udc_req_ptr)
 {
 	int status = 0;
@@ -1584,7 +1584,7 @@ int crg_udc_build_td(struct crg_udc_ep *udc_ep_ptr,
 /* This function will go through the list of the USB requests for the
  * given endpoint and schedule any unscheduled trb's to the xfer ring
  */
-void queue_pending_trbs(struct crg_udc_ep *udc_ep_ptr)
+static void queue_pending_trbs(struct crg_udc_ep *udc_ep_ptr)
 {
 	struct crg_udc_request *udc_req_ptr;
 	/* schedule  trbs till there arent any pending unscheduled ones
@@ -1603,7 +1603,7 @@ void queue_pending_trbs(struct crg_udc_ep *udc_ep_ptr)
 	CRG_DEBUG("%s 2\n", __func__);
 }
 
-void squeeze_xfer_ring(struct crg_udc_ep *udc_ep_ptr,
+static void squeeze_xfer_ring(struct crg_udc_ep *udc_ep_ptr,
 		struct crg_udc_request *udc_req_ptr)
 {
 	struct transfer_trb_s *temp = udc_req_ptr->first_trb;
@@ -2099,17 +2099,21 @@ crg_udc_ep_queue(struct usb_ep *_ep, struct usb_request *_req,
 		!udc_req_ptr->usb_req.buf ||
 		!list_empty(&udc_req_ptr->queue)) {
 		CRG_DEBUG("%s, invalid usbrequest\n", __func__);
-		if (!udc_ep_ptr->first_trb)
+		if (!udc_ep_ptr->first_trb) {
 			CRG_DEBUG("%s, no first_trb\n", __func__);
+		}
 
-		if (!udc_req_ptr->usb_req.complete)
+		if (!udc_req_ptr->usb_req.complete) {
 			CRG_DEBUG("%s, no complete\n", __func__);
+		}
 
-		if (!udc_req_ptr->usb_req.buf)
+		if (!udc_req_ptr->usb_req.buf) {
 			CRG_DEBUG("%s, no req buf\n", __func__);
+		}
 
-		if (!list_empty(&udc_req_ptr->queue))
+		if (!list_empty(&udc_req_ptr->queue)) {
 			CRG_DEBUG("%s, list not empty\n", __func__);
+		}
 
 		spin_unlock_irqrestore(&crg_udc->udc_lock, flags);
 		return -EINVAL;
@@ -2467,7 +2471,7 @@ static void enable_setup_event(struct crg_gadget_dev *crg_udc)
 		&uccr->config1, reg_read(&uccr->config1));
 }
 
-int is_event_ring_x_empty(struct crg_gadget_dev *crg_udc, int index)
+static int is_event_ring_x_empty(struct crg_gadget_dev *crg_udc, int index)
 {
 	struct event_trb_s *event;
 	struct crg_udc_event *udc_event;
@@ -2484,7 +2488,7 @@ int is_event_ring_x_empty(struct crg_gadget_dev *crg_udc, int index)
 	return 0;
 }
 
-int is_event_rings_empty(struct crg_gadget_dev *crg_udc)
+static int is_event_rings_empty(struct crg_gadget_dev *crg_udc)
 {
 	int i;
 
@@ -2853,7 +2857,7 @@ static void crg_udc_start(struct crg_gadget_dev *crg_udc)
 	CRG_DEBUG("%s, control=0x%x\n", __func__, reg_read(&uccr->control));
 }
 
-void halt_all_eps(struct crg_gadget_dev *crg_udc)
+static void halt_all_eps(struct crg_gadget_dev *crg_udc)
 {
 	struct crg_uccr *uccr = crg_udc->uccr;
 	u32 tmp;
@@ -2865,7 +2869,9 @@ void halt_all_eps(struct crg_gadget_dev *crg_udc)
 	} while (tmp != 0);
 }
 
-void crg_udc_clear_portpm(struct crg_gadget_dev *crg_udc)
+EXPORT_SYMBOL(halt_all_eps);
+
+static void crg_udc_clear_portpm(struct crg_gadget_dev *crg_udc)
 {
 	struct crg_uccr *uccr = crg_udc->uccr;
 	u32 tmp;
@@ -2885,7 +2891,7 @@ void crg_udc_clear_portpm(struct crg_gadget_dev *crg_udc)
 	crg_udc->feature_u2_enable = 0;
 }
 
-void crg_udc_reinit(struct crg_gadget_dev *crg_udc, unsigned long flags)
+static void crg_udc_reinit(struct crg_gadget_dev *crg_udc, unsigned long flags)
 {
 	struct crg_uccr *uccr = crg_udc->uccr;
 	u32 i, tmp;
@@ -3141,7 +3147,7 @@ static int init_ep_info(struct crg_gadget_dev *crg_udc)
 	return 0;
 }
 
-void queue_setup_pkt(struct crg_gadget_dev *crg_udc,
+static void queue_setup_pkt(struct crg_gadget_dev *crg_udc,
 		struct usb_ctrlrequest *setup_pkt,
 		u16 setup_tag)
 {
@@ -3167,12 +3173,12 @@ static inline u32 index2DCI(u16 index)
 				USB_DIR_IN) ? 0 : 1);
 }
 
-void get_status_cmpl(struct usb_ep *ep, struct usb_request *req)
+static void get_status_cmpl(struct usb_ep *ep, struct usb_request *req)
 {
 	kfree(req->buf);
 }
 
-void getstatusrequest(struct crg_gadget_dev *crg_udc,
+static void getstatusrequest(struct crg_gadget_dev *crg_udc,
 		u8 RequestType, u16 value, u16 index, u16 length)
 {
 	u32 status_val = 0;
@@ -3300,7 +3306,7 @@ get_status_error:
 		list_add_tail(&udc_req_ptr->queue, &udc_ep_ptr->queue);
 }
 
-void set_address_cmpl(struct crg_gadget_dev *crg_udc)
+static void set_address_cmpl(struct crg_gadget_dev *crg_udc)
 {
 	if (crg_udc->device_state == USB_STATE_DEFAULT &&
 				crg_udc->dev_addr != 0) {
@@ -3313,7 +3319,7 @@ void set_address_cmpl(struct crg_gadget_dev *crg_udc)
 	}
 }
 
-void setaddressrequest(struct crg_gadget_dev *crg_udc,
+static void setaddressrequest(struct crg_gadget_dev *crg_udc,
 		u16 value, u16 index, u16 length)
 {
 	int status = -EINPROGRESS;
@@ -3346,7 +3352,7 @@ set_address_error:
 		true, status, NULL, status_set_addr, 0);
 }
 
-void set_sel_cmpl(struct usb_ep *ep, struct usb_request *req)
+static void set_sel_cmpl(struct usb_ep *ep, struct usb_request *req)
 {
 	struct crg_udc_ep *udc_ep;
 	struct crg_gadget_dev *crg_udc;
@@ -3370,7 +3376,7 @@ void set_sel_cmpl(struct usb_ep *ep, struct usb_request *req)
 			crg_udc->sel_value.u2_sel_value);
 }
 
-void setselrequest(struct crg_gadget_dev *crg_udc,
+static void setselrequest(struct crg_gadget_dev *crg_udc,
 		u16 value, u16 index, u16 length, u64 data)
 {
 	int status = -EINPROGRESS;
@@ -3412,7 +3418,7 @@ void setselrequest(struct crg_gadget_dev *crg_udc,
 		list_add_tail(&udc_req_ptr->queue, &udc_ep_ptr->queue);
 }
 
-void set_test_mode_cmpl(struct crg_gadget_dev *crg_udc)
+static void set_test_mode_cmpl(struct crg_gadget_dev *crg_udc)
 {
 	if (crg_udc->set_tm != 0) {
 		u32 tmp;
@@ -3437,7 +3443,7 @@ void set_test_mode_cmpl(struct crg_gadget_dev *crg_udc)
 	}
 }
 
-bool setfeaturesrequest(struct crg_gadget_dev *crg_udc,
+static bool setfeaturesrequest(struct crg_gadget_dev *crg_udc,
 	u8 RequestType, u8 bRequest, u16 value, u16 index, u16 length, unsigned long flags)
 {
 	int status = -EINPROGRESS;
@@ -3605,8 +3611,9 @@ bool setfeaturesrequest(struct crg_gadget_dev *crg_udc,
 				USB_INTRF_FUNC_SUSPEND_LP) {
 				if (index & USB_INTRF_FUNC_SUSPEND_RW)
 					CRG_DEBUG("Interface En Remote Wakeup\n");
-				else
+				else {
 					CRG_DEBUG("Interface Dis RemoteWakeup\n");
+				}
 
 				/* Do not need to return status stage here
 				 * Pass to composite gadget driver to process
@@ -3626,7 +3633,7 @@ set_feature_error:
 	return true;
 }
 
-bool setconfigurationrequest(struct crg_gadget_dev *crg_udc, u16 value)
+static bool setconfigurationrequest(struct crg_gadget_dev *crg_udc, u16 value)
 {
 	if (crg_udc->device_state <= USB_STATE_DEFAULT)
 		goto set_config_error;
@@ -3639,7 +3646,7 @@ set_config_error:
 	return true;
 }
 
-void set_isoch_delay(struct crg_gadget_dev *crg_udc,
+static void set_isoch_delay(struct crg_gadget_dev *crg_udc,
 		 u16 value, u16 index, u16 length)
 {
 	int status = -EINPROGRESS;
@@ -3653,7 +3660,7 @@ void set_isoch_delay(struct crg_gadget_dev *crg_udc,
 	build_ep0_status(&crg_udc->udc_ep[0], true, status, NULL, 0, 0);
 }
 
-void crg_handle_setup_pkt(struct crg_gadget_dev *crg_udc,
+static void crg_handle_setup_pkt(struct crg_gadget_dev *crg_udc,
 		struct usb_ctrlrequest *setup_pkt, u8 setup_tag, unsigned long flags)
 {
 	u16 wValue = setup_pkt->wValue;
@@ -3786,7 +3793,7 @@ void crg_handle_setup_pkt(struct crg_gadget_dev *crg_udc,
 	spin_lock_irqsave(&crg_udc->udc_lock, flags);
 }
 
-int crg_handle_xfer_event(struct crg_gadget_dev *crg_udc,
+static int crg_handle_xfer_event(struct crg_gadget_dev *crg_udc,
 			struct event_trb_s *event, unsigned long flags)
 {
 	u8 DCI = GETF(EVE_TRB_ENDPOINT_ID, event->dw3);
@@ -4037,7 +4044,7 @@ int g_dnl_board_usb_cable_connected(void)
 	return 0;
 }
 
-int crg_handle_port_status(struct crg_gadget_dev *crg_udc, unsigned long flags)
+static int crg_handle_port_status(struct crg_gadget_dev *crg_udc, unsigned long flags)
 {
 	struct crg_uccr *uccr = crg_udc->uccr;
 	u32 portsc_val;
@@ -4249,7 +4256,7 @@ int crg_handle_port_status(struct crg_gadget_dev *crg_udc, unsigned long flags)
 	return 0;
 }
 
-int crg_udc_handle_event(struct crg_gadget_dev *crg_udc,
+static int crg_udc_handle_event(struct crg_gadget_dev *crg_udc,
 			struct event_trb_s *event, unsigned long flags)
 {
 	int ret;
@@ -4314,7 +4321,7 @@ int crg_udc_handle_event(struct crg_gadget_dev *crg_udc,
 	return 0;
 }
 
-int process_event_ring(struct crg_gadget_dev *crg_udc, int index, unsigned long flags)
+static int process_event_ring(struct crg_gadget_dev *crg_udc, int index, unsigned long flags)
 {
 	struct event_trb_s *event;
 	struct crg_udc_event *udc_event;
@@ -4371,7 +4378,7 @@ int process_event_ring(struct crg_gadget_dev *crg_udc, int index, unsigned long 
 	return 0;
 }
 
-int crg_gadget_handle_interrupt(struct crg_gadget_dev *crg_udc)
+static int crg_gadget_handle_interrupt(struct crg_gadget_dev *crg_udc)
 {
 	struct crg_uccr *uccr = crg_udc->uccr;
 	u32 tmp_status;
@@ -4424,7 +4431,7 @@ static irqreturn_t crg_udc_common_irq(int irq, void *dev)
 	return IRQ_HANDLED;
 }
 
-int crg_gadget_irq_init(struct platform_device *pdev)
+static int crg_gadget_irq_init(struct platform_device *pdev)
 {
 	struct crg_gadget_dev *crg_udc;
 	int	irq = 0;
@@ -4449,12 +4456,14 @@ int crg_gadget_irq_init(struct platform_device *pdev)
 	return 0;
 }
 
-int crg_gadget_irq_remove(struct crg_gadget_dev *crg_udc)
+static int crg_gadget_irq_remove(struct crg_gadget_dev *crg_udc)
 {
 	free_irq(crg_udc->irq, crg_udc);
 
 	return 0;
 }
+
+EXPORT_SYMBOL(crg_gadget_irq_remove);
 
 static ssize_t udc_debug_show(struct device *d, struct device_attribute *attr,
 			char *buf)
@@ -4520,7 +4529,7 @@ static int crg_vbus_detect_thread(void *data)
 	return 0;
 }
 
-void amlogic_crg_m31_phy_init(struct crg_gadget_dev *crg_udc)
+static void amlogic_crg_m31_phy_init(struct crg_gadget_dev *crg_udc)
 {
 #define M31_SETTING 0x1E30CEB9
 	writel(1, crg_udc->phy_reg_addr + 0x8);
@@ -4761,7 +4770,7 @@ err0:
 	return ret;
 }
 
-static int crg_udc_remove(struct platform_device *pdev)
+static void crg_udc_remove(struct platform_device *pdev)
 {
 	struct crg_gadget_dev *crg_udc;
 	u32 tmp = 0;
@@ -4773,7 +4782,7 @@ static int crg_udc_remove(struct platform_device *pdev)
 
 	if (unlikely(crg_udc_probe_state != 1)) {
 		ret = -EINVAL;
-		goto err;
+		return;
 	}
 
 	uccr = crg_udc->uccr;
@@ -4815,9 +4824,6 @@ static int crg_udc_remove(struct platform_device *pdev)
 
 	CRG_DEBUG("%s %d gadget remove\n", __func__, __LINE__);
 	crg_udc_probe_state = 0;
-
-err:
-	return ret;
 }
 
 static void crg_udc_shutdown(struct platform_device *pdev)
@@ -4848,7 +4854,7 @@ static void crg_udc_shutdown(struct platform_device *pdev)
 /*Now we can support multi corigine device controllers*/
 /*But if we need to support multi device controllers of various vendors*/
 /*Gadget framework needs to be improved*/
-int usb_gadget_handle_interrupts(int index)
+static int usb_gadget_handle_interrupts(int index)
 {
 	int ret = 0;
 
@@ -4861,8 +4867,9 @@ int usb_gadget_handle_interrupts(int index)
 
 	return ret;
 }
+EXPORT_SYMBOL(usb_gadget_handle_interrupts);
 
-int crg_otg_write_UDC(const char *udc_name)
+static int crg_otg_write_UDC(const char *udc_name)
 {
 	struct crg_gadget_dev *crg_udc;
 	struct gadget_info *gi;
@@ -4903,7 +4910,7 @@ int crg_otg_write_UDC(const char *udc_name)
 			goto err;
 		}
 		gi->composite.gadget_driver.udc_name = name;
-		ret = usb_gadget_probe_driver(&gi->composite.gadget_driver);
+		ret = usb_gadget_register_driver(&gi->composite.gadget_driver);
 		if (ret) {
 			gi->composite.gadget_driver.udc_name = NULL;
 			goto err;
@@ -4919,7 +4926,7 @@ err:
 EXPORT_SYMBOL_GPL(crg_otg_write_UDC);
 
 #if IS_ENABLED(CONFIG_AMLOGIC_COMMON_USB)
-int crg_rewrite_otg_write_UDC(void)
+static int crg_rewrite_otg_write_UDC(void)
 {
 	struct crg_gadget_dev *crg_udc;
 	struct gadget_info *gi;
@@ -4957,7 +4964,7 @@ int crg_rewrite_otg_write_UDC(void)
 	mutex_lock(&gi->lock);
 	if (!gi->composite.gadget_driver.udc_name) {
 		gi->composite.gadget_driver.udc_name = name;
-		ret = usb_gadget_probe_driver(&gi->composite.gadget_driver);
+		ret = usb_gadget_register_driver(&gi->composite.gadget_driver);
 		if (ret) {
 			gi->composite.gadget_driver.udc_name = NULL;
 			goto err;
@@ -5123,7 +5130,7 @@ static struct platform_driver crg_udc_driver = {
 };
 
 /* init&exit MUST be synchronous. i.e. device_block_probing must not be holded */
-void crg_gadget_exit(void)
+static void crg_gadget_exit(void)
 {
 	pr_info("crg gadget exit\n");
 	mutex_lock(&crg_udc_driver_lock);
@@ -5140,7 +5147,7 @@ exit:
 }
 EXPORT_SYMBOL_GPL(crg_gadget_exit);
 
-int crg_gadget_init(void)
+static int crg_gadget_init(void)
 {
 	int ret = 0;
 

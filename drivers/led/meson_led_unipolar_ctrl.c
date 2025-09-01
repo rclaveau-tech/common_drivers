@@ -16,6 +16,8 @@
 #include <linux/dma-mapping.h>
 #include <linux/leds.h>
 #include <linux/completion.h>
+
+#include "main.h"
 // #define M_DEBUG
 
 #ifdef M_DEBUG
@@ -370,7 +372,7 @@ static irqreturn_t meson_unipolar_led_irq(int irqno, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-void meson_unipolar_set_brightness(struct led_classdev *led_cdev,
+static void meson_unipolar_set_brightness(struct led_classdev *led_cdev,
 					enum led_brightness brightness)
 {
 	struct meson_unipolar_ctrl *dcon_led = container_of(led_cdev,
@@ -458,7 +460,7 @@ static int unipolar_ctrl_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int unipolar_ctrl_remove(struct platform_device *pdev)
+static void unipolar_ctrl_remove(struct platform_device *pdev)
 {
 	struct meson_unipolar_ctrl *dcon_led = platform_get_drvdata(pdev);
 
@@ -466,8 +468,6 @@ static int unipolar_ctrl_remove(struct platform_device *pdev)
 	sysfs_remove_group(&dcon_led->cdev.dev->kobj,
 				&meson_unipolar_ctrl_attribute_group);
 	led_classdev_unregister(&dcon_led->cdev);
-
-	return 0;
 }
 
 static const struct of_device_id unipolar_ctrl_table[] = {

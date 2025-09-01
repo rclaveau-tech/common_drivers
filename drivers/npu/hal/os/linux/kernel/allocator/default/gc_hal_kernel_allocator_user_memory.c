@@ -173,29 +173,11 @@ static int import_page_map(gckOS Os, struct um_desc *um,
 
     down_read(&current_mm_mmap_sem);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0) && LINUX_VERSION_CODE < KERNEL_VERSION(4, 20, 0)
-    result = get_user_pages_longterm(
-#elif LINUX_VERSION_CODE > KERNEL_VERSION(5, 6, 0)
     result = pin_user_pages(
-#else
-    result = get_user_pages(
-#endif
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
-            current,
-            current->mm,
-#endif
             addr & PAGE_MASK,
             page_count,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)
             ((flags & VM_WRITE) ? FOLL_WRITE : 0) | FOLL_LONGTERM,
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0) || defined(CONFIG_PPC)
-            (flags & VM_WRITE) ? FOLL_WRITE : 0,
-#else
-            (flags & VM_WRITE) ? 1 : 0,
-            0,
-#endif
-            pages,
-            NULL);
+            pages);
 
     up_read(&current_mm_mmap_sem);
 
@@ -205,11 +187,7 @@ static int import_page_map(gckOS Os, struct um_desc *um,
         {
             if (pages[i])
             {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(5, 6, 0)
                 unpin_user_page(um->pages[i]);
-#else
-                put_page(pages[i]);
-#endif
             }
         }
 
@@ -357,7 +335,7 @@ static int import_pfn_map(gckOS Os, struct um_desc *um,
         if (pmd_none(*pmd) || pmd_bad(*pmd))
             goto err;
 
-        pte = pte_offset_map_lock(current->mm, pmd, addr, &ptl);
+        pte = __pte_offset_map_lock(current->mm, pmd, addr, &ptl);
 
         if (!pte_present(*pte))
         {
@@ -998,6 +976,12 @@ _UserMemoryAlloctorInit(
     IN gckOS Os,
     IN gcsDEBUGFS_DIR *Parent,
     OUT gckALLOCATOR * Allocator
+    );
+gceSTATUS
+_UserMemoryAlloctorInit(
+    IN gckOS Os,
+    IN gcsDEBUGFS_DIR *Parent,
+    OUT gckALLOCATOR * Allocator
     )
 {
     gceSTATUS status;
@@ -1017,4 +1001,3 @@ _UserMemoryAlloctorInit(
 OnError:
     return status;
 }
-

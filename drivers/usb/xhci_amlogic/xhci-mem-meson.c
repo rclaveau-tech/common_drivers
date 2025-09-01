@@ -900,14 +900,14 @@ void xhci_free_stop_ep_timer(struct aml_xhci_hcd *xhci, int slot_id)
 				ep_index = i;
 				msleep(20);
 			}
-			del_timer_sync(&virt_dev->eps[i].stop_cmd_queue_timer);
+			timer_delete_sync(&virt_dev->eps[i].stop_cmd_queue_timer);
 		}
 
 		while (timer_pending(&virt_dev->eps[i].stop_cmd_timer)) {
 			ep_index = i;
 			msleep(20);
 		}
-		del_timer_sync(&virt_dev->eps[i].stop_cmd_timer);
+		timer_delete_sync(&virt_dev->eps[i].stop_cmd_timer);
 	}
 	if (ep_index != -1)
 		aml_xhci_info(xhci, "when xhci suspend, waiting stop ep=%d, slot_id=%d\n",
@@ -931,8 +931,8 @@ void xhci_del_stop_ep_timer(struct aml_xhci_hcd *xhci, int slot_id)
 	for (i = 0; i < 31; i++) {
 		virt_dev->eps[i].ep_state &= ~EP_STOP_CMD_PENDING;
 		if (xhci->meson_quirks & XHCI_CRG_HOST_DELAY)
-			del_timer(&virt_dev->eps[i].stop_cmd_queue_timer);
-		del_timer(&virt_dev->eps[i].stop_cmd_timer);
+			timer_delete(&virt_dev->eps[i].stop_cmd_queue_timer);
+		timer_delete(&virt_dev->eps[i].stop_cmd_timer);
 	}
 }
 
@@ -1043,7 +1043,7 @@ out:
 }
 
 #if IS_ENABLED(CONFIG_AMLOGIC_COMMON_USB)
-int aml_xhci_usb_get_status(struct usb_device *dev, int recip, int type, int target,
+static int aml_xhci_usb_get_status(struct usb_device *dev, int recip, int type, int target,
 		void *data)
 {
 	int ret;
@@ -1100,7 +1100,7 @@ int aml_xhci_usb_get_status(struct usb_device *dev, int recip, int type, int tar
 }
 EXPORT_SYMBOL_GPL(aml_xhci_usb_get_status);
 
-void stop_ep_cmd_work(struct work_struct *work)
+static void stop_ep_cmd_work(struct work_struct *work)
 {
 	struct aml_xhci_hcd *xhci;
 	//struct aml_xhci_ep_ctx *ep_ctx;

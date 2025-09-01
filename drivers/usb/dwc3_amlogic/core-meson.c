@@ -1880,7 +1880,7 @@ static void dwc3_shutdown(struct platform_device *pdev)
 }
 #endif
 
-static int dwc3_remove(struct platform_device *pdev)
+static void dwc3_remove(struct platform_device *pdev)
 {
 	struct aml_dwc3	*dwc = platform_get_drvdata(pdev);
 
@@ -1902,8 +1902,6 @@ static int dwc3_remove(struct platform_device *pdev)
 
 	if (dwc->usb_psy)
 		power_supply_put(dwc->usb_psy);
-
-	return 0;
 }
 
 #ifdef CONFIG_PM
@@ -2228,16 +2226,19 @@ static struct platform_driver dwc3_driver = {
 };
 
 //module_platform_driver(dwc3_driver);
-int __init aml_dwc3_init(void)
+static int __init aml_dwc3_init(void)
 {
 	return platform_driver_register(&dwc3_driver);
 }
 //module_init(xhci_plat_init);
 
-void __exit aml_dwc3_exit(void)
+static void __exit aml_dwc3_exit(void)
 {
 	platform_driver_unregister(&dwc3_driver);
 }
+
+EXPORT_SYMBOL(aml_dwc3_init);
+EXPORT_SYMBOL(aml_dwc3_exit);
 
 //MODULE_ALIAS("platform:dwc3");
 //MODULE_AUTHOR("Felipe Balbi <balbi@ti.com>");

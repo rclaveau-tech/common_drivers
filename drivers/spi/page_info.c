@@ -112,7 +112,7 @@ unsigned char page_info_get_enable_bbt(void)
 	return page_info->dev_cfg1.enable_bbt;
 }
 
-unsigned char page_info_get_high_speed_mode(void)
+static unsigned char page_info_get_high_speed_mode(void)
 {
 	return page_info->dev_cfg1.high_speed_mode;
 }

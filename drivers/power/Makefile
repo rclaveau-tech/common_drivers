@@ -13,4 +13,6 @@ PR_FMT = $(subst amlogic-,,$(MODULE_NAME))
 PR_FMT_DEFINE="-Dpr_fmt(fmt)= \"[$(PR_FMT)]: \" fmt"
 ccflags-y += $(PR_FMT_DEFINE)
 
+$(MODULE_NAME)-objs += main.o power_domain_sysfs.o sec_pwr_ctrl.o sec_power_domain.o power_ee_domain.o
+
 include $(COMMON_DRIVERS_DIR)/drivers/power/meson_pmic6b/Makefile

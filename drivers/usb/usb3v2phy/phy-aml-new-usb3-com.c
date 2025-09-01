@@ -79,7 +79,7 @@ void force_disable_xhci_port_a(void)
 }
 EXPORT_SYMBOL(force_disable_xhci_port_a);
 
-void aml_new_usb_v2_init(void)
+static void aml_new_usb_v2_init(void)
 {
 	if (!g_phy_com_v2)
 		return;

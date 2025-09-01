@@ -28,7 +28,7 @@ ifneq ($(CONFIG_USB_DWC3_ULPI),)
 endif
 
 ifneq ($(CONFIG_DEBUG_FS),)
-	$(MODULE_NAME)-y				+= dwc3_amlogic/debugfs-meson.o
+	$(MODULE_NAME)-n				+= dwc3_amlogic/debugfs-meson.o
 endif
 endif
 

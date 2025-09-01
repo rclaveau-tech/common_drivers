@@ -139,7 +139,7 @@ sys_printf(
 ***************************** DEBUG SHOW FUNCTIONS *****************************
 \******************************************************************************/
 
-int gc_info_show(void* m, void* data)
+static int gc_info_show(void* m, void* data)
 {
     gckGALDEVICE device = galDevice;
     int i = 0;
@@ -183,7 +183,7 @@ int gc_info_show(void* m, void* data)
     return len;
 }
 
-int gc_clients_show(void* m, void* data)
+static int gc_clients_show(void* m, void* data)
 {
     gckGALDEVICE device = galDevice;
 
@@ -231,7 +231,7 @@ int gc_clients_show(void* m, void* data)
     return len;
 }
 
-int gc_meminfo_show(void* m, void* data)
+static int gc_meminfo_show(void* m, void* data)
 {
     gckGALDEVICE device = galDevice;
     gckKERNEL kernel = _GetValidKernel(device);
@@ -310,7 +310,7 @@ int gc_meminfo_show(void* m, void* data)
     return len;
 }
 
-int gc_load_show(void* m, void* data)
+static int gc_load_show(void* m, void* data)
 {
     int len = 0;
     gctUINT32 i = 0;
@@ -1580,52 +1580,52 @@ static int gc_poweroff_timeout_write(const char __user *buf, size_t count, void*
     return ret;
 }
 
-int gc_info_show_debugfs(struct seq_file* m, void* data)
+static int gc_info_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_info_show((void*)m , data);
 }
-int gc_clients_show_debugfs(struct seq_file* m, void* data)
+static int gc_clients_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_clients_show((void*)m , data);
 }
-int gc_meminfo_show_debugfs(struct seq_file* m, void* data)
+static int gc_meminfo_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_meminfo_show((void*)m , data);
 }
-int gc_idle_show_debugfs(struct seq_file* m, void* data)
+static int gc_idle_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_idle_show((void*)m , data);
 }
-int gc_db_old_show_debugfs(struct seq_file* m, void* data)
+static int gc_db_old_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_db_old_show((void*)m , data, gcvTRUE);
 }
-int gc_db_show_debugfs(struct seq_file* m, void* data)
+static int gc_db_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_db_show((void*)m , data, gcvTRUE);
 }
-int gc_version_show_debugfs(struct seq_file* m, void* data)
+static int gc_version_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_version_show((void*)m , data);
 }
-int gc_vidmem_old_show_debugfs(struct seq_file* m, void* data)
+static int gc_vidmem_old_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_vidmem_old_show((void*)m , data, gcvTRUE);
 }
-int gc_vidmem_show_debugfs(struct seq_file* m, void* data)
+static int gc_vidmem_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_vidmem_show((void*)m , data, gcvTRUE);
 }
-int gc_dump_trigger_show_debugfs(struct seq_file* m, void* data)
+static int gc_dump_trigger_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_dump_trigger_show((void*)m , data);
 }
-int gc_clk_show_debugfs(struct seq_file* m, void* data)
+static int gc_clk_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_clk_show((void*)m , data);
 }
 
-int gc_poweroff_timeout_show_debugfs(struct seq_file* m, void* data)
+static int gc_poweroff_timeout_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_poweroff_timeout_show((void*)m, data);
 }
@@ -1638,21 +1638,21 @@ int gc_switch_core_count_debugfs(struct seq_file* m, void* data)
 #endif
 
 #if VIVANTE_PROFILER
-int gc_load_show_debugfs(struct seq_file* m, void* data)
+static int gc_load_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_load_show((void*)m , data);
 }
 #endif
 
-int gc_dump_param_show_debugfs(struct seq_file* m, void* data)
+static int gc_dump_param_show_debugfs(struct seq_file* m, void* data)
 {
     return gc_dump_param_show((void*)m , data);
 }
-int gc_chipinfo_show_debugfs(struct seq_file*m, void *unused)
+static int gc_chipinfo_show_debugfs(struct seq_file*m, void *unused)
 {
     return gc_chipinfo_show((void *)m, unused);
 }
-int gc_chipinfo_write_debugfs(const char __user *ubuf, size_t count, void* data)
+static int gc_chipinfo_write_debugfs(const char __user *ubuf, size_t count, void* data)
 {
     return gc_chipinfo_write(ubuf, count, data );
 }

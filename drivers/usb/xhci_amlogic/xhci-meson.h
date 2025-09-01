@@ -17,7 +17,7 @@
 #include <linux/kernel.h>
 #include <linux/usb/hcd.h>
 #include <linux/io-64-nonatomic-lo-hi.h>
-#include <linux/android_kabi.h>
+//#include <linux/android_kabi.h>
 
 /* Code sharing between pci-quirks and xhci hcd */
 #include	"xhci-ext-caps-meson.h"
@@ -821,8 +821,8 @@ struct aml_xhci_command {
 	union aml_xhci_trb			*command_trb;
 	struct list_head		cmd_list;
 
-	ANDROID_KABI_RESERVE(1);
-	ANDROID_KABI_RESERVE(2);
+	//ANDROID_KABI_RESERVE(1);
+	//ANDROID_KABI_RESERVE(2);
 };
 
 /* drop context bitmasks */
@@ -1567,7 +1567,7 @@ struct aml_xhci_segment {
 	unsigned int		bounce_offs;
 	unsigned int		bounce_len;
 
-	ANDROID_KABI_RESERVE(1);
+	//ANDROID_KABI_RESERVE(1);
 };
 
 enum aml_xhci_cancelled_td_status {
@@ -1658,8 +1658,8 @@ struct aml_xhci_ring {
 	bool			last_td_was_short;
 	struct radix_tree_root	*trb_address_map;
 
-	ANDROID_KABI_RESERVE(1);
-	ANDROID_KABI_RESERVE(2);
+	//ANDROID_KABI_RESERVE(1);
+	//ANDROID_KABI_RESERVE(2);
 };
 
 struct aml_xhci_erst_entry {
@@ -1678,7 +1678,7 @@ struct aml_xhci_erst {
 	/* Num entries the ERST can contain */
 	unsigned int		erst_size;
 
-	ANDROID_KABI_RESERVE(1);
+	//ANDROID_KABI_RESERVE(1);
 };
 
 struct aml_xhci_scratchpad {
@@ -1994,10 +1994,10 @@ struct aml_xhci_hcd {
 
 	void			*dbc;
 
-	ANDROID_KABI_RESERVE(1);
+	/*ANDROID_KABI_RESERVE(1);
 	ANDROID_KABI_RESERVE(2);
 	ANDROID_KABI_RESERVE(3);
-	ANDROID_KABI_RESERVE(4);
+	ANDROID_KABI_RESERVE(4);*/
 
 	/* platform-specific data -- must come last */
 	unsigned long		priv[] __aligned(sizeof(s64));

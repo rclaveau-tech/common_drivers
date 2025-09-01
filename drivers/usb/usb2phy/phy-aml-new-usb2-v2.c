@@ -21,7 +21,7 @@
 struct amlogic_usb_v2	*g_phy2_v2;
 char name[32];
 
-void set_usb_phy_host_tuning(int port, int default_val)
+static void set_usb_phy_host_tuning(int port, int default_val)
 {
 	void __iomem	*phy_reg_base;
 
@@ -96,7 +96,7 @@ static void set_usb_phy_trim_tuning
 	aml_phy->phy_trim_state[port] = default_val;
 }
 
-void set_usb_phy_device_tuning(int port, int default_val)
+static void set_usb_phy_device_tuning(int port, int default_val)
 {
 	void __iomem	*phy_reg_base;
 
@@ -172,7 +172,7 @@ static void set_trim_initvalue
 	phy->phy_0xc_initvalue[port] = val;
 }
 
-void set_usb_pll(struct amlogic_usb_v2 *phy, void __iomem	*reg)
+static void set_usb_pll(struct amlogic_usb_v2 *phy, void __iomem	*reg)
 {
 	u32 val;
 
@@ -577,9 +577,8 @@ static int amlogic_new_usb2_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int amlogic_new_usb2_remove(struct platform_device *pdev)
+static void amlogic_new_usb2_remove(struct platform_device *pdev)
 {
-	return 0;
 }
 
 #ifdef CONFIG_PM_RUNTIME
@@ -635,8 +634,11 @@ MODULE_AUTHOR("Amlogic Inc.");
 MODULE_DESCRIPTION("amlogic USB2 v2 phy driver");
 MODULE_LICENSE("GPL v2");
 #else
-int __init amlogic_new_usb2_v2_driver_init(void)
+static int __init amlogic_new_usb2_v2_driver_init(void)
 {
 	return platform_driver_register(&amlogic_new_usb2_v2_driver);
 }
+
+EXPORT_SYMBOL(amlogic_new_usb2_v2_driver_init);
+EXPORT_SYMBOL(set_usb_phy_host_tuning);
 #endif

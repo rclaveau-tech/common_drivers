@@ -351,7 +351,7 @@ _ParseCommand(
                                  + (Parser->skipCount << 2);
 }
 
-gceSTATUS
+static gceSTATUS
 gckPARSER_Parse(
     IN gckPARSER Parser,
     IN gctUINT8_PTR Buffer,
@@ -400,6 +400,11 @@ gceSTATUS
 gckPARSER_RegisterCommandHandler(
     IN gckPARSER Parser,
     IN gckPARSER_HANDLER Handler
+    );
+gceSTATUS
+gckPARSER_RegisterCommandHandler(
+    IN gckPARSER Parser,
+    IN gckPARSER_HANDLER Handler
     )
 {
     Parser->commandHandler = Handler;
@@ -407,7 +412,9 @@ gckPARSER_RegisterCommandHandler(
     return gcvSTATUS_OK;
 }
 
-gceSTATUS
+EXPORT_SYMBOL(gckPARSER_RegisterCommandHandler);
+
+static gceSTATUS
 gckPARSER_Construct(
     IN gckOS Os,
     IN gckPARSER_HANDLER Handler,
@@ -430,7 +437,7 @@ OnError:
     return status;
 }
 
-void
+static void
 gckPARSER_Destroy(
     IN gckOS Os,
     IN gckPARSER Parser

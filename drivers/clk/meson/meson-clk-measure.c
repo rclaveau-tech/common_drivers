@@ -13,6 +13,8 @@
 #include <linux/amlogic/clk_measure.h>
 #include <linux/module.h>
 
+#include "clk-common-init.h"
+
 #define MSR_DURATION		GENMASK(15, 0)
 #define MSR_ENABLE		BIT(16)
 #define MSR_CONT		BIT(17) /* continuous measurement */
@@ -4116,18 +4118,16 @@ static struct platform_driver meson_msr_driver = {
 builtin_platform_driver(meson_msr_driver);
 #else
 #ifndef MODULE
-static int __init clk_measure_init(void)
+int __init clk_measure_init(void)
 {
 	return platform_driver_register(&meson_msr_driver);
 }
 arch_initcall_sync(clk_measure_init);
 #else
-static int __init clk_measure_init(void)
+int __init clk_measure_init(void)
 {
 	return platform_driver_register(&meson_msr_driver);
 }
-
-EXPORT_SYMBOL(clk_measure_init);
 
 #endif
 #endif

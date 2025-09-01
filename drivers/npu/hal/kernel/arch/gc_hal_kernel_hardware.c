@@ -9028,7 +9028,7 @@ OnError:
     return status;
 }
 
-gceSTATUS
+static gceSTATUS
 gckHARDWARE_QchannelFlushCache(
     IN gckHARDWARE Hardware
     )

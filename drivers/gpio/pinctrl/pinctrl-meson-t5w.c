@@ -1811,6 +1811,7 @@ static int __init t5w_pmx_init(void)
 arch_initcall(t5w_pmx_init);
 
 #else
+int __init meson_t5w_pinctrl_init(void);
 int __init meson_t5w_pinctrl_init(void)
 {
 	meson_t5w_pinctrl_driver.driver.of_match_table =

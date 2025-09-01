@@ -2178,8 +2178,8 @@ int aml___dwc3_gadget_ep_set_halt(struct aml_dwc3_ep *dep, int value, int protoc
 		if (dep->flags & DWC3_EP_END_TRANSFER_PENDING ||
 		    (dep->flags & DWC3_EP_DELAY_STOP)) {
 			dep->flags |= DWC3_EP_PENDING_CLEAR_STALL;
-			if (protocol)
-				dwc->clear_stall_protocol = dep->number;
+			/*if (protocol)
+				dwc->clear_stall_protocol = dep->number;*/
 
 			return 0;
 		}
@@ -3574,8 +3574,8 @@ static void dwc3_gadget_endpoint_command_complete(struct aml_dwc3_ep *dep,
 		}
 
 		dep->flags &= ~(DWC3_EP_STALL | DWC3_EP_WEDGE);
-		if (dwc->clear_stall_protocol == dep->number)
-			aml_dwc3_ep0_send_delayed_status(dwc);
+		/*if (dwc->clear_stall_protocol == dep->number)
+			aml_dwc3_ep0_send_delayed_status(dwc);*/
 	}
 
 	if ((dep->flags & DWC3_EP_DELAY_START) &&

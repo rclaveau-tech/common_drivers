@@ -17,6 +17,8 @@
 #include <linux/amlogic/aml_mbox.h>
 #include <linux/amlogic/leds_state.h>
 
+#include "main.h"
+
 struct mbox_chan *led_mbox_chan;
 
 static ssize_t blink_off_store(struct device *dev,
@@ -285,7 +287,7 @@ int meson_led_state_set_blink_off(u32 led_id, u32 blink_times,
 }
 EXPORT_SYMBOL_GPL(meson_led_state_set_blink_off);
 
-void meson_led_device_create(struct led_classdev *led_cdev)
+static void meson_led_device_create(struct led_classdev *led_cdev)
 {
 	int rc;
 
@@ -360,7 +362,7 @@ static int meson_led_state_resume(struct platform_device *pdev)
 }
 #endif
 
-static int meson_led_state_remove(struct platform_device *pdev)
+static void meson_led_state_remove(struct platform_device *pdev)
 {
 	struct led_state_data *data = platform_get_drvdata(pdev);
 	struct led_classdev *led_cdev = &data->cdev;
@@ -370,8 +372,6 @@ static int meson_led_state_remove(struct platform_device *pdev)
 	device_remove_file(led_cdev->dev, &dev_attr_blink_on);
 	device_remove_file(led_cdev->dev, &dev_attr_blink_off);
 	led_classdev_unregister(&data->cdev);
-
-	return 0;
 }
 
 static const struct of_device_id of_led_state_match[] = {

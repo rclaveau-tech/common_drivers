@@ -45,6 +45,8 @@
 
 #include "meson-cqhci.h"
 
+#include "meson-mmc-main.h"
+
 struct mmc_gpio {
 	struct gpio_desc *ro_gpio;
 	struct gpio_desc *cd_gpio;
@@ -2833,19 +2835,17 @@ static struct platform_driver g12a_mmc_driver = {
 	},
 };
 
-static int __init g12a_mmc_init(void)
+int __init g12a_mmc_init(void)
 {
 	return platform_driver_register(&g12a_mmc_driver);
 }
 
-static void __exit g12a_mmc_exit(void)
+void __exit g12a_mmc_exit(void)
 {
 	platform_driver_unregister(&g12a_mmc_driver);
 }
 
 //module_platform_driver(g12a_mmc_driver);
-EXPORT_SYMBOL(g12a_mmc_init);
-EXPORT_SYMBOL(g12a_mmc_exit);
 
 //MODULE_DESCRIPTION("Amlogic G12a SD/eMMC driver");
 //MODULE_AUTHOR("Kevin Hilman <khilman@baylibre.com>");

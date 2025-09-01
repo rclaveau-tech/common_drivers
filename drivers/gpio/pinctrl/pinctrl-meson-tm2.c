@@ -1876,6 +1876,7 @@ static int __init tm2_pmx_init(void)
 arch_initcall(tm2_pmx_init);
 
 #else
+int __init meson_tm2_pinctrl_init(void);
 int __init meson_tm2_pinctrl_init(void)
 {
 	meson_tm2_pinctrl_driver.driver.of_match_table =

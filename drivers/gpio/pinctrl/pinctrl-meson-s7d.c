@@ -1401,6 +1401,7 @@ static int __init s7d_pmx_init(void)
 arch_initcall(s7d_pmx_init);
 
 #else
+int __init meson_s7d_pinctrl_init(void);
 int __init meson_s7d_pinctrl_init(void)
 {
 	meson_s7d_pinctrl_driver.driver.of_match_table =

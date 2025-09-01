@@ -777,7 +777,7 @@ static void xhci_stop_watchdog_timer_in_irq(struct aml_xhci_hcd *xhci,
 {
 	ep->ep_state &= ~EP_STOP_CMD_PENDING;
 	/* Can't del_timer_sync in interrupt */
-	del_timer(&ep->stop_cmd_timer);
+	timer_delete(&ep->stop_cmd_timer);
 }
 
 /*
@@ -1302,7 +1302,7 @@ void aml_xhci_hc_died(struct aml_xhci_hcd *xhci)
  */
 void aml_xhci_stop_endpoint_command_watchdog(struct timer_list *t)
 {
-	struct aml_xhci_virt_ep *ep = from_timer(ep, t, stop_cmd_timer);
+	struct aml_xhci_virt_ep *ep = timer_container_of(ep, t, stop_cmd_timer);
 	struct aml_xhci_hcd *xhci = ep->xhci;
 	unsigned long flags;
 	u32 usbsts;
@@ -5072,7 +5072,7 @@ EXPORT_SYMBOL_GPL(xhci_start_stop_endpoint_work);
 
 void xhci_stop_endpoint_command_timer(struct timer_list *t)
 {
-	struct aml_xhci_virt_ep *ep = from_timer(ep, t, stop_cmd_queue_timer);
+	struct aml_xhci_virt_ep *ep = timer_container_of(ep, t, stop_cmd_queue_timer);
 	struct aml_xhci_hcd *xhci = ep->xhci;
 	struct aml_xhci_command *command;
 	unsigned long flags;

@@ -32,6 +32,8 @@
 #include <linux/proc_fs.h>
 #include <linux/amlogic/gki_module.h>
 
+#include "main.h"
+
 static LIST_HEAD(cluster_list);
 static DEFINE_MUTEX(cluster_list_lock);
 static DEFINE_MUTEX(cpufreq_target_lock);
@@ -199,12 +201,14 @@ static int aml_cpufreq_set_target(struct cpufreq_policy *policy,
 
 static unsigned int aml_cpufreq_get_rate(unsigned int cpu)
 {
-	struct cpufreq_policy policy;
+	struct cpufreq_policy *policy;
 	struct cluster_data *data;
 	u32 rate = 0;
 
-	if (!cpufreq_get_policy(&policy, cpu)) {
-		data = policy.driver_data;
+	policy = cpufreq_cpu_get(cpu);
+
+	if (policy) {
+		data = policy->driver_data;
 		rate = clk_get_rate(data->cpuclk) / 1000;
 		pr_debug("%s: cpu: %d, cluster: %d, freq: %u\n",
 			 __func__, cpu, data->clusterid, rate);
@@ -348,8 +352,8 @@ static bool aml_setup_opptable(struct cluster_data *data)
 	list_for_each_entry(opp, &opptable->opp_list, node) {
 		if (!opp->available)
 			continue;
-		pr_debug("%lu %lu\n", opp->rate, opp->supplies[0].u_volt);
-		data->opp_table[i].rate = opp->rate / 1000;
+		pr_debug("%lu %lu\n", opp->rates[0], opp->supplies[0].u_volt);
+		data->opp_table[i].rate = opp->rates[0] / 1000;
 		data->opp_table[i].volt = opp->supplies[0].u_volt;
 		i++;
 	}
@@ -405,7 +409,7 @@ static int opptable_show(struct seq_file *m, void *v)
 
 static int aml_opptable_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, opptable_show, PDE_DATA(inode));
+	return single_open(file, opptable_show, pde_data(inode));
 }
 
 static const struct proc_ops aml_opptable_fops = {
@@ -493,15 +497,13 @@ static void destroy_aml_cpufreq_proc_files(struct cpufreq_policy *policy)
 	remove_proc_entry(policy_name, data->procroot);
 }
 
-static int aml_cpufreq_exit(struct cpufreq_policy *policy)
+static void aml_cpufreq_exit(struct cpufreq_policy *policy)
 {
 	struct cluster_data *data = policy->driver_data;
 
 	if (!data->suspended)
 		aml_cpufreq_set_target(policy, data->exit_index);
 	destroy_aml_cpufreq_proc_files(policy);
-
-	return 0;
 }
 
 static int aml_cpufreq_suspend(struct cpufreq_policy *policy)
@@ -536,7 +538,6 @@ static struct cpufreq_driver aml_cpufreq_driver = {
 	.get			= aml_cpufreq_get_rate,
 	.init			= aml_cpufreq_init,
 	.exit			= aml_cpufreq_exit,
-	.attr			= cpufreq_generic_attr,
 	.suspend		= aml_cpufreq_suspend,
 	.resume			= aml_cpufreq_resume,
 	.register_em	= cpufreq_register_em_with_opp,
@@ -587,8 +588,6 @@ static int aml_cpufreq_probe(struct platform_device *pdev)
 	struct cluster_data *clusterdata;
 	char cluster_name[10] = {0};
 	int ret = -1, i = 0, j, count;
-	struct property *prop;
-	const __be32 *cur;
 
 	while (1) {
 		sprintf(cluster_name, "cluster%d", i);
@@ -626,7 +625,7 @@ static int aml_cpufreq_probe(struct platform_device *pdev)
 		clusterdata[i].dev = &pdev->dev;
 		clusterdata[i].procroot = root;
 		/*setup cluster related cpus*/
-		of_property_for_each_u32(cluster_np, "cluster_cores", prop, cur, j) {
+		of_property_for_each_u32(cluster_np, "cluster_cores", j) {
 			cpumask_set_cpu(j, clusterdata[i].cpus);
 			pr_info("cpu%d->cluster%d\n", j, clusterdata[i].clusterid);
 		}
@@ -667,9 +666,9 @@ out:
 	return ret;
 }
 
-static int aml_cpufreq_remove(struct platform_device *pdev)
+static void aml_cpufreq_remove(struct platform_device *pdev)
 {
-	return cpufreq_unregister_driver(&aml_cpufreq_driver);
+	cpufreq_unregister_driver(&aml_cpufreq_driver);
 }
 
 static const struct of_device_id aml_cpufreq_dt_match[] = {

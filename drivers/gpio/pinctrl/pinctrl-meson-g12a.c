@@ -1643,6 +1643,7 @@ static int __init g12a_pmx_init(void)
 arch_initcall(g12a_pmx_init);
 
 #else
+int __init meson_g12a_pinctrl_init(void);
 int __init meson_g12a_pinctrl_init(void)
 {
 	meson_g12a_pinctrl_driver.driver.of_match_table =

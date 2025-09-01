@@ -184,7 +184,7 @@ gcTA_Destroy(
 *   Map a scatter gather list into gpu address space.
 *
 */
-gceSTATUS
+static gceSTATUS
 gcTA_MapMemory(
     IN gcTA TA,
     IN gctUINT32 *PhysicalArray,
@@ -238,7 +238,7 @@ OnError:
     return status;
 }
 
-gceSTATUS
+static gceSTATUS
 gcTA_UnmapMemory(
     IN gcTA TA,
     IN gctUINT32 GPUAddress,
@@ -255,7 +255,7 @@ OnError:
     return status;
 }
 
-gceSTATUS
+static gceSTATUS
 gcTA_StartCommand(
     IN gcTA TA,
     IN gctUINT32 Address,

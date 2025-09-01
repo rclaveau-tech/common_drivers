@@ -71,7 +71,7 @@
 MODULE_DESCRIPTION("Vivante Graphics Driver");
 MODULE_LICENSE("Dual MIT/GPL");
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)
-MODULE_IMPORT_NS(VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver);
+MODULE_IMPORT_NS("VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver");
 #endif
 
 static struct class* gpuClass = NULL;
@@ -411,8 +411,8 @@ static int findtok(const char *buff,const char token,int lenth)
 }
 
 /*==========================some sysfs functions,class begin===================================*/
-static ssize_t show_class_control(struct class *class,
-		        struct class_attribute *attr, char *buf)
+static ssize_t show_class_control(const struct class *class,
+		        const struct class_attribute *attr, char *buf)
 {
 	gctUINT32 status = 0;
 
@@ -426,8 +426,8 @@ static ssize_t show_class_control(struct class *class,
 
 /*============the control format should as: (control-domain:control-value)==========*/
 
-static ssize_t store_class_control(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t store_class_control(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	gctUINT32 status = 0;
 	int pos = 0;
@@ -484,22 +484,22 @@ static ssize_t store_class_control(struct class *class,
 	return count;
 }
 
-static ssize_t show_class_policy(struct class *class,
-		        struct class_attribute *attr, char *buf)
+static ssize_t show_class_policy(const struct class *class,
+		        const struct class_attribute *attr, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "policy read,just for test\n");
 }
 
-static ssize_t store_class_policy(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t store_class_policy(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	ssize_t ret = 0;
 	printk("store_policy,%s\n",buf);
 	return ret;
 }
 
-static ssize_t show_class_status(struct class *class,
-		        struct class_attribute *attr, char *buf)
+static ssize_t show_class_status(const struct class *class,
+		        const struct class_attribute *attr, char *buf)
 {
 	gctUINT32 status = 0;
 	if(platform->ops->getPowerStatus)
@@ -509,22 +509,22 @@ static ssize_t show_class_status(struct class *class,
 	return snprintf(buf, PAGE_SIZE, "status:%d",status);
 }
 
-static ssize_t store_class_status(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t store_class_status(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	ssize_t ret = 0;
 	printk("store_status,%s\n",buf);
 	return ret;
 }
 
-static ssize_t show_class_info(struct class *class,
-		        struct class_attribute *attr, char *buf)
+static ssize_t show_class_info(const struct class *class,
+		        const struct class_attribute *attr, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "info read,just for test\n");
 }
 
-static ssize_t store_class_info(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t store_class_info(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	ssize_t ret = 0;
 	printk("store_info,%s\n",buf);
@@ -1421,7 +1421,7 @@ static int drv_init(void)
         }
 
         /* Create the device class. */
-        device_class = class_create(THIS_MODULE, "npu");
+        device_class = class_create("npu");
 
         if (IS_ERR(device_class))
         {
@@ -1674,11 +1674,7 @@ static int __devinit viv_dev_probe(struct platform_device *pdev)
     return ret;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)
-static int viv_dev_remove(struct platform_device *pdev)
-#else
- static int __devexit viv_dev_remove(struct platform_device *pdev)
-#endif
+static void viv_dev_remove(struct platform_device *pdev)
 {
     gcmkHEADER();
 
@@ -1696,7 +1692,6 @@ static int viv_dev_remove(struct platform_device *pdev)
     galcore_device->dma_mask = NULL;
     galcore_device = NULL;
     gcmkFOOTER_NO();
-    return 0;
 }
 
 

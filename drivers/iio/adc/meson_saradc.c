@@ -31,6 +31,8 @@
 #include <linux/pm_runtime.h>
 #include "meson_saradc.h"
 
+#include "main.h"
+
 #define MESON_SAR_ADC_REG0					0x00
 	#define MESON_SAR_ADC_REG0_PANEL_DETECT			BIT(31)
 	#define MESON_SAR_ADC_REG0_BUSY_MASK			GENMASK(30, 28)
@@ -1751,18 +1753,16 @@ static struct platform_driver meson_sar_adc_driver = {
 	},
 };
 
-static int __init meson_sar_adc_driver_init(void)
+int __init meson_sar_adc_driver_init(void)
 {
 	return platform_driver_register(&meson_sar_adc_driver);
 }
 
-static void __exit meson_sar_adc_driver_exit(void)
+void __exit meson_sar_adc_driver_exit(void)
 {
 	platform_driver_unregister(&meson_sar_adc_driver);
 }
 
-EXPORT_SYMBOL(meson_sar_adc_driver_init);
-EXPORT_SYMBOL(meson_sar_adc_driver_exit);
 MODULE_AUTHOR("Martin Blumenstingl <martin.blumenstingl@googlemail.com>");
 MODULE_DESCRIPTION("Amlogic Meson SAR ADC driver");
 MODULE_LICENSE("GPL v2");
