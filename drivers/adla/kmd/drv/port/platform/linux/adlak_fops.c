@@ -63,6 +63,7 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
     int                                  ret    = 0;
     int                                  cp_ret = 0;
     struct adlak_buf_req                 buf_req;
+    struct adlak_buf_desc                buf_desc;
     struct adlak_network_desc            net_reg_desc;
     struct adlak_context *               context = filp->private_data;
     struct adlak_device *                padlak  = context->padlak;
@@ -72,9 +73,8 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
     struct adlak_get_stat_desc           stat_desc;
     struct adlak_buf_flush               flush_desc;
     struct adlak_extern_buf_info         ext_buf_attach;
+    struct adlak_extern_buf_info         ext_buf_dettach;
     struct adlak_profile_cfg_desc        profile_cfg;
-    struct adlak_context_attribute       context_attr;
-    uint64_t                             mem_handle;
     u_long                               size;
     AML_LOG_DEBUG("%s", __func__);
 
@@ -100,7 +100,6 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
             if (!udata) {
                 ret = padlak->dev_caps.size;
             } else {
-                adlak_mem_usage_update(padlak);
                 /* copy cap info/errcode to user for reference */
                 cp_ret = copy_to_user(udata, padlak->dev_caps.data, padlak->dev_caps.size);
                 if ((ERR(NONE) == ret) && (ERR(NONE) != cp_ret)) {
@@ -133,7 +132,7 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
 
         case ADLAK_IOCTL_FREEBUF:
             AML_LOG_DEBUG("ADLAK_IOCTL_FREEBUF");
-            ret = copy_from_user(&mem_handle, udata, sizeof(mem_handle));
+            ret = copy_from_user(&buf_desc, udata, sizeof(struct adlak_buf_desc));
             if (ret) {
                 AML_LOG_ERR("buf_desc copy from user failed!");
                 ret = ERR(EFAULT);
@@ -143,9 +142,14 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
             if (ret) {
                 break;
             }
-            ret = adlak_mem_free_request(context, mem_handle);
+            ret = adlak_mem_free_request(context, &buf_desc);
 
             adlak_os_mutex_unlock(&padlak->dev_mutex);
+            /* copy buf info/errcode to user for reference */
+            cp_ret = copy_to_user(udata, &buf_desc, sizeof(struct adlak_buf_desc));
+            if ((ERR(NONE) == ret) && (ERR(NONE) != cp_ret)) {
+                ret = cp_ret;
+            }
 
             break;
 
@@ -173,7 +177,7 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
 
         case ADLAK_IOCTL_DETTACH_EXTERN_BUF:
             AML_LOG_DEBUG("ADLAK_IOCTL_DETTACH_EXTERN_BUF");
-            ret = copy_from_user(&mem_handle, udata, sizeof(mem_handle));
+            ret = copy_from_user(&ext_buf_dettach, udata, sizeof(struct adlak_extern_buf_info));
             if (ret) {
                 AML_LOG_ERR("ext_buf_dettach desc copy from user failed!");
                 ret = ERR(EFAULT);
@@ -183,14 +187,19 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
             if (ret) {
                 break;
             }
-            ret = adlak_ext_mem_dettach_request(context, mem_handle);
+            ret = adlak_ext_mem_dettach_request(context, &ext_buf_dettach);
 
             adlak_os_mutex_unlock(&padlak->dev_mutex);
+            /* copy buf info/errcode to user for reference */
+            cp_ret = copy_to_user(udata, &ext_buf_dettach, sizeof(struct adlak_extern_buf_info));
+            if ((ERR(NONE) == ret) && (ERR(NONE) != cp_ret)) {
+                ret = cp_ret;
+            }
 
             break;
 
-        case ADLAK_IOCTL_FLUSH_CACHE:
-            AML_LOG_DEBUG("ADLAK_IOCTL_FLUSH_CACHE");
+        case ADLAK_IOCTL_FlUSH_CACHE:
+            AML_LOG_DEBUG("ADLAK_IOCTL_FlUSH_CACHE");
             ret = copy_from_user(&flush_desc, udata, sizeof(struct adlak_buf_flush));
             if (ret) {
                 AML_LOG_ERR("flush cache desc copy from user failed!");
@@ -281,9 +290,9 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
             }
 
             break;
-        case ADLAK_IOCTL_INVOKE_CANCEL:
+        case ADLAK_IOCTL_INVOKE_CANCLE:
 
-            AML_LOG_DEBUG("ADLAK_IOCTL_INVOKE_CANCEL");
+            AML_LOG_DEBUG("ADLAK_IOCTL_INVOKE_CANCLE");
             ret =
                 copy_from_user(&uninvoke_desc, udata, sizeof(struct adlak_network_invoke_del_desc));
             if (ret) {
@@ -329,9 +338,9 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
 
             break;
 
-        case ADLAK_IOCTL_PROFILE_CFG:
+        case ADLAK_IOCTL_PRPOFILE_CFG:
 
-            AML_LOG_DEBUG("ADLAK_IOCTL_PROFILE_CFG");
+            AML_LOG_DEBUG("ADLAK_IOCTL_PRPOFILE_CFG");
             ret = copy_from_user(&profile_cfg, udata, sizeof(struct adlak_profile_cfg_desc));
             if (ret) {
                 AML_LOG_ERR("profile_cfg desc copy from user failed!");
@@ -368,22 +377,6 @@ static long drv_ioctl(struct file *filp, unsigned int ioctl_code, unsigned long 
             }
 
             break;
-        case ADLAK_IOCTL_SET_CONTEXT_ATTRIBUTE:
-            AML_LOG_DEBUG("ADLAK_IOCTL_SET_CONTEXT_ATTRIBUTE");
-            ret = copy_from_user(&context_attr, udata, sizeof(struct adlak_context_attribute));
-            if (ret) {
-                AML_LOG_ERR("stat desc copy from user failed!");
-                ret = ERR(EFAULT);
-                break;
-            }
-            ret = adlak_set_context_attribute(context, &context_attr);
-            /* copy buf info/errcode to user for reference */
-            cp_ret = copy_to_user(udata, &context_attr, sizeof(struct adlak_context_attribute));
-            if ((ERR(NONE) == ret) && (ERR(NONE) != cp_ret)) {
-                ret = cp_ret;
-            }
-
-            break;
         default:
             /*not support command*/
             ret = ERR(ENOTTY);
@@ -401,15 +394,14 @@ static long drv_ioctl_compat(struct file *filp, unsigned int ioctl_code, unsigne
 #endif
 static int drv_mmap(struct file *filp, struct vm_area_struct *vma) {
     int                   ret;
-    struct adlak_context *context        = filp->private_data;
-    unsigned long         vm_pgoff_store = vma->vm_pgoff;
-    uint64_t              uid            = vma->vm_pgoff * ADLAK_PAGE_SIZE;
+    struct adlak_context *context = filp->private_data;
+    uint64_t              iova    = vma->vm_pgoff * ADLAK_PAGE_SIZE;
 
-    AML_LOG_DEBUG("%s uid=0x%lX", __func__, (uintptr_t)uid);
+    AML_LOG_DEBUG("%s iova=0x%lX", __func__, (uintptr_t)iova);
 
     vma->vm_pgoff = 0;
-    ret           = adlak_mem_mmap(context, vma, uid);
-    vma->vm_pgoff = vm_pgoff_store;
+    ret           = adlak_mem_mmap(context, vma, iova);
+    vma->vm_pgoff = iova;
     return ret;
 }
 unsigned int drv_poll(struct file *filp, struct poll_table_struct *wait) {
@@ -432,7 +424,7 @@ unsigned int drv_poll(struct file *filp, struct poll_table_struct *wait) {
 
     adlak_os_mutex_lock(&pwq->wq_mutex);
     list_for_each_entry_safe(ptask, ptask_tmp, &pwq->finished_list, head) {
-        if (ptask) {
+        if (ptask && ptask->net_id == context->net_id) {
             {
                 mask = POLLPRI;
 #ifdef CONFIG_ADLAK_DEBUG_INNNER

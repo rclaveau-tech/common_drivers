@@ -56,38 +56,6 @@ struct adlak_proc_info {
     uint32_t irq_status;
 };
 
-struct adlak_parser_storage {
-    uint32_t base_addr;
-    uint32_t size;
-    uint32_t rpt;
-    uint32_t wpt;
-    uint32_t ppt;
-    uint32_t finish_id;
-    uint32_t timestamp;
-    uint32_t dbg_sw_id;
-    uint32_t is_save_from_hw;
-};
-
-struct adlak_simple_bitmap {
-    void *   bitmap_pool;
-    uint32_t size;
-    uint32_t rpt;
-};
-
-typedef struct {
-    uint32_t *data;
-    uint32_t  size;
-    uint32_t  head;
-    uint32_t  tail;
-} adlak_circular_buffer;
-
-struct adlak_cmq_buffer {
-    uint32_t                    size;
-    uint32_t                    cmq_wr_offset;
-    uint32_t                    cmq_rd_offset;
-    struct adlak_mem_handle *   cmq_mm_info;
-    struct adlak_parser_storage parser_storage_info;
-};
 struct adlak_device {
 #ifndef CONFIG_ADLA_FREERTOS
     struct class *class;
@@ -100,21 +68,19 @@ struct adlak_device {
     int                     major;
     struct clk *            clk_axi;
     struct clk *            clk_core;
-    struct clk *            clk;
-    struct clk *            clk_parent0;
-    struct clk *            clk_parent1;
-    struct dentry *         debugfs_parent;
 #endif
-    struct adlak_simple_bitmap net_id_bitmap;
-
+    int32_t                   net_id;
     adlak_os_mutex_t          dev_mutex;
     adlak_os_spinlock_t       spinlock;
     struct adlak_hardware_res hw_res;
     struct adlak_device_caps  dev_caps;
+    struct adlak_mem *        mm;
     struct adlak_workqueue    queue;
     struct adlak_proc_info    proc;
     struct list_head          context_list;
     void *                    hw_info;
+    uint64_t                  smmu_entry;
+    void *                    psmmu;
     uint32_t                  hw_timeout_ms;  // unit is system tick
     int                       dependency_mode;
     int                       all_task_num;
@@ -127,23 +93,30 @@ struct adlak_device {
     int                       clk_core_freq_set;
 
     int is_suspend;
+    int need_reset_queue;
     int is_reset;
-    /*Variables related to pm control*/
-    int             pm_suspend;
-    adlak_os_sema_t sem_pm_wakeup;
 
-    struct adlak_cmq_buffer cmq_buffer_public;
+    struct _cmq_buf_info {
+        uint32_t size;       /*max size per invoke*/
+        uint32_t total_size; /*cmq_total_size = 2 * cmq_size */
+
+        uint32_t                 cmq_wr_offset;
+        uint32_t                 cmq_rd_offset;
+        struct adlak_mem_handle *cmq_mm_info;
+
+    } cmq_buf_info;
 
     bool smmu_en;
 
-    int          dpm_en;
-    int          dpm_period_set;
-    void *       pdpm;          // dynamic power management
-    bool         share_swap_en; /*Share swap memory between diffrent models*/
-    unsigned int share_buf_size;
-    unsigned int iova_max_size_GB;  // unit is Gbyte
-    uint32_t     save_time_en;
-    uint32_t     dev_hw_version; //Gops, base on
+    int   dpm_en;
+    int   dpm_period_set;
+    void *pdpm;  // dynamic power management
+
+    bool            share_swap_en; /*Share swap memory between diffrent models*/
+    unsigned int    share_buf_size;
+    int             nn_regulator_type;
+    int             nn_dts_hw_ver;
+    uint32_t        nn_voltage;
 };
 
 /**
