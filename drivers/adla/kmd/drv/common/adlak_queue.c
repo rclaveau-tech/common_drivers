@@ -53,7 +53,6 @@ int adlak_queue_init(struct adlak_device *padlak) {
     adlak_os_sema_init(&pwq->wk_update, 1, 0);
 
     adlak_os_mutex_lock(&pwq->wq_mutex);
-    pwq->padlak = padlak;
     adlak_queue_reset(padlak);
 
     adlak_os_mutex_unlock(&pwq->wq_mutex);
@@ -73,7 +72,12 @@ int adlak_queue_reset(struct adlak_device *padlak) {
 
     pwq->sched_num     = 0;
     pwq->sched_num_max = ADLAK_SCHEDULE_LIST_MAX;
-    pwq->ptask_sch_cur = NULL;
+
+    adlak_os_memset((void *)&pwq->id_cur, 0, sizeof(pwq->id_cur));
+    pwq->id_cur.global_id_pwe = -1;
+    pwq->id_cur.global_id_pwx = -1;
+    pwq->id_cur.global_id_rs  = -1;
+    pwq->ptask_sch_cur        = NULL;
 
     return 0;
 }
@@ -85,7 +89,7 @@ static void adlak_invoke_list_del(struct list_head *hd) {
     if (!list_empty(hd)) {
         list_for_each_entry_safe(ptask, ptask_tmp, hd, head) {
             if (ptask) {
-                AML_LOG_DEBUG("net_id=%d", ptask->context->net_id);
+                AML_LOG_DEBUG("net_id=%d", ptask->net_id);
                 list_del(&ptask->head);
                 adlak_invoke_destroy(ptask);
             }
@@ -149,10 +153,9 @@ static int print_task_info(char *buf, ssize_t buf_size, struct adlak_task *ptask
             break;
     }
 
-    return adlak_os_snprintf(&buf[0], buf_size, "%-*d%-*d%-*d%-*d%-*s%-*d\n", 12,
-                             ptask->context->net_id, 12, ptask->invoke_idx, 20,
-                             ptask->invoke_start_idx, 20, ptask->invoke_end_idx, 12, state_str, 12,
-                             ptask->flag);
+    return adlak_os_snprintf(&buf[0], buf_size, "%-*d%-*d%-*d%-*d%-*s%-*d\n", 12, ptask->net_id, 12,
+                             ptask->invoke_idx, 20, ptask->invoke_start_idx, 20,
+                             ptask->invoke_end_idx, 12, state_str, 12, ptask->flag);
 }
 
 static int print_task_list(struct list_head *hd, char *buf, ssize_t buf_size) {
@@ -162,11 +165,11 @@ static int print_task_list(struct list_head *hd, char *buf, ssize_t buf_size) {
     struct adlak_task *ptask_tmp = NULL;
     int                number;
 
-    char boundary[] =
+    char boudary[] =
         "-----------------------------------------------"
         "-----------------------------------------------";
 
-    ret += adlak_os_snprintf(buf + ret, buf_size - ret, "%s\n", boundary);
+    ret += adlak_os_snprintf(buf + ret, buf_size - ret, "%s\n", boudary);
     ptask  = NULL;
     number = 0;
     list_for_each_entry_safe(ptask, ptask_tmp, hd, head) {
@@ -176,7 +179,7 @@ static int print_task_list(struct list_head *hd, char *buf, ssize_t buf_size) {
     if (!number) {
         ret += adlak_os_snprintf(buf + ret, buf_size - ret, "No task.\n");
     }
-    ret += adlak_os_snprintf(buf + ret, buf_size - ret, "%s\n", boundary);
+    ret += adlak_os_snprintf(buf + ret, buf_size - ret, "%s\n", boudary);
 
     return ret;
 }
@@ -237,4 +240,11 @@ int adlak_debug_invoke_list_dump(struct adlak_device *padlak, uint32_t debug) {
     adlak_os_free(buf);
 #endif
     return 0;
+}
+
+int adlak_test_irq_emu(struct adlak_device *padlak) { return 0; }
+inline uint32_t adlak_cmd_get_sw_id(struct adlak_workqueue *pwq) {
+    uint32_t id = pwq->id_cur.global_id_sw++;
+    id          = PS_CMD_SET_SW_ID | (id & PS_CMD_SW_ID_MASK);
+    return id;
 }
