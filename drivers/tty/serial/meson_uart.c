@@ -157,30 +157,28 @@ static void meson_uart_shutdown(struct uart_port *port)
 
 static void meson_uart_start_tx(struct uart_port *port)
 {
-	struct circ_buf *xmit = &port->state->xmit;
-	unsigned int ch;
+	struct tty_port *tport = &port->state->port;
+	unsigned char ch;
 	struct meson_uart_port *mup = to_meson_port(port);
 	unsigned long flags;
 
 	spin_lock_irqsave(&mup->wr_lock, flags);
-	while (!uart_circ_empty(xmit)) {
+	while (!kfifo_is_empty(&tport->xmit_fifo)) {
 		if (readl_relaxed(port->membase + AML_UART_STATUS)
 			& AML_UART_TX_FULL)
 			break;
 
-		ch = xmit->buf[xmit->tail];
+		uart_fifo_get(port, &ch);
 		writel_relaxed(ch, port->membase + AML_UART_WFIFO);
-		xmit->tail = (xmit->tail + 1) & (SERIAL_XMIT_SIZE - 1);
-		port->icount.tx++;
 	}
 	spin_unlock_irqrestore(&mup->wr_lock, flags);
 }
 
 static void meson_transmit_chars(struct uart_port *port)
 {
-	struct circ_buf *xmit = &port->state->xmit;
+	struct tty_port *tport = &port->state->port;
 	struct meson_uart_port *mup = to_meson_port(port);
-	unsigned int ch;
+	unsigned char ch;
 	int count = 256;
 
 	spin_lock(&port->lock);
@@ -191,22 +189,20 @@ static void meson_transmit_chars(struct uart_port *port)
 		goto clear_and_return;
 	}
 
-	if (uart_circ_empty(xmit) || uart_tx_stopped(port))
+	if (!uart_fifo_get(port, &ch) || uart_tx_stopped(port))
 		goto clear_and_return;
 
 	spin_lock(&mup->wr_lock);
-	while (!uart_circ_empty(xmit) && count-- > 0) {
+	while (!kfifo_is_empty(&tport->xmit_fifo) && count-- > 0) {
 		if (readl_relaxed(port->membase + AML_UART_STATUS)
 			& AML_UART_TX_FULL)
 			break;
-		ch = xmit->buf[xmit->tail];
+
 		writel_relaxed(ch, port->membase + AML_UART_WFIFO);
-		xmit->tail = (xmit->tail + 1) & (SERIAL_XMIT_SIZE - 1);
-		port->icount.tx++;
 	}
 	spin_unlock(&mup->wr_lock);
 
-	if (uart_circ_chars_pending(xmit) < WAKEUP_CHARS)
+	if (kfifo_len(&tport->xmit_fifo) < WAKEUP_CHARS)
 		uart_write_wakeup(port);
 
  clear_and_return:
@@ -384,7 +380,7 @@ static void meson_uart_change_speed(struct uart_port *port, unsigned long baud)
 
 static void meson_uart_set_termios(struct uart_port *port,
 				   struct ktermios *termios,
-				   struct ktermios *old)
+				   const struct ktermios *old)
 {
 	unsigned int cflags, iflags, baud;
 	unsigned long flags;
@@ -558,7 +554,7 @@ static void meson_uart_enable_tx_engine(struct uart_port *port)
 	writel_relaxed(val, port->membase + AML_UART_CONTROL);
 }
 
-static void meson_console_putchar(struct uart_port *port, int ch)
+static void meson_console_putchar(struct uart_port *port, unsigned char ch)
 {
 	if (!port->membase)
 		return;
@@ -830,15 +826,13 @@ static int meson_uart_probe(struct platform_device *pdev)
 	return ret;
 }
 
-static int meson_uart_remove(struct platform_device *pdev)
+static void meson_uart_remove(struct platform_device *pdev)
 {
 	struct uart_port *port;
 
 	port = platform_get_drvdata(pdev);
 	uart_remove_one_port(&meson_uart_driver, port);
 	meson_ports[pdev->id] = NULL;
-
-	return 0;
 }
 
 static int meson_uart_resume(struct platform_device *pdev)

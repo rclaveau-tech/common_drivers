@@ -570,14 +570,14 @@ meson_gpio_irq_release_channel(struct meson_gpio_irq_controller *ctl,
 #ifdef CONFIG_AMLOGIC_MODIFY
 unsigned int gpio_irq_get_channel_idx(int irq)
 {
-	struct irq_desc *desc;
+	struct irq_data *data;
 	u32 *channel_hwirq;
 
-	desc = irq_to_desc(irq);
-	if (!desc)
+	data = irq_get_irq_data(irq);
+	if (!data)
 		return -EINVAL;
 
-	channel_hwirq = irq_data_get_irq_chip_data(irq_desc_get_irq_data(desc));
+	channel_hwirq = irq_data_get_irq_chip_data(data);
 
 	return meson_gpio_irq_get_channel_idx(gclt, channel_hwirq);
 }
