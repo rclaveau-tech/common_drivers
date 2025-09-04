@@ -1446,7 +1446,7 @@ static int meson_sar_adc_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "missing match param\n");
 		return -ENODEV;
 	}
-	memcpy(match_param, match_data->param, sizeof(*match_param));
+	*match_param = *match_data->param;
 
 	priv->param = match_param;
 
