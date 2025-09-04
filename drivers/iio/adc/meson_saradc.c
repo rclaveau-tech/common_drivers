@@ -1442,9 +1442,18 @@ static int meson_sar_adc_probe(struct platform_device *pdev)
 	if (!match_param)
 		return -ENOMEM;
 
+	if (!match_data->param) {
+		dev_err(&pdev->dev, "missing match param\n");
+		return -ENODEV;
+	}
 	memcpy(match_param, match_data->param, sizeof(*match_param));
 
 	priv->param = match_param;
+
+	if (!match_param->dops) {
+		dev_err(&pdev->dev, "missing dops\n");
+		return -ENOTSUPP;
+	}
 
 	if (!match_param->dops->extra_init || !match_param->dops->set_test_input ||
 	    !match_param->dops->read_fifo || !match_param->dops->enable_chnl ||
@@ -1467,6 +1476,11 @@ static int meson_sar_adc_probe(struct platform_device *pdev)
 	irq = irq_of_parse_and_map(pdev->dev.of_node, 0);
 	if (!irq)
 		return -EINVAL;
+
+	if (!priv->param->regmap_config) {
+		dev_err(&pdev->dev, "missing regmap_config\n");
+		return -EINVAL;
+	}
 
 	priv->regmap = devm_regmap_init_mmio(&pdev->dev, base,
 					     priv->param->regmap_config);
@@ -1524,6 +1538,11 @@ static int meson_sar_adc_probe(struct platform_device *pdev)
 		ret = meson_sar_adc_temp_sensor_init(indio_dev);
 		if (ret)
 			return ret;
+	}
+
+	if (!priv->param->channels || !priv->param->num_channels) {
+		dev_err(&pdev->dev, "invalid channel table\n");
+		return -EINVAL;
 	}
 
 	indio_dev->channels = priv->param->channels;
