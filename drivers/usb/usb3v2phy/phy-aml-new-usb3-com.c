@@ -21,6 +21,7 @@
 #include <linux/notifier.h>
 #include <linux/amlogic/usbtype.h>
 #include "../phy/phy-aml-new-usb-v2.h"
+#include "usb_main.h"
 
 struct amlogic_usb_v2	*g_phy_com_v2;
 
@@ -79,7 +80,7 @@ void force_disable_xhci_port_a(void)
 }
 EXPORT_SYMBOL(force_disable_xhci_port_a);
 
-static void aml_new_usb_v2_init(void)
+void aml_new_usb_v2_init(void)
 {
 	if (!g_phy_com_v2)
 		return;

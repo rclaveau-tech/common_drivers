@@ -1098,7 +1098,7 @@ static int aml_xhci_usb_get_status(struct usb_device *dev, int recip, int type, 
 	kfree(status);
 	return ret;
 }
-EXPORT_SYMBOL_GPL(aml_xhci_usb_get_status);
+//EXPORT_SYMBOL_GPL(aml_xhci_usb_get_status);
 
 static void stop_ep_cmd_work(struct work_struct *work)
 {

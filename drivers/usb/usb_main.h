@@ -76,6 +76,9 @@ int __init amlogic_usb3_m31_drv_init(void);
 int __init amlogic_usb2_m31_drv_init(void);
 int __init crg_otg_init(void);
 int __init crg_otg_v2_init(void);
+void crg_gadget_exit(void);
+int crg_gadget_init(void);
+int crg_otg_write_UDC(const char *udc_name);
 #else
 static inline  int __init amlogic_crg_drd_usb2_drv_init(void)
 {
@@ -141,6 +144,7 @@ int __init aml_xhci_plat_init(void);
 void __exit aml_xhci_plat_exit(void);
 int __init aml_xhci_hcd_init(void);
 void __exit aml_xhci_hcd_fini(void);
+void aml_new_usb_v2_init(void);
 #if IS_ENABLED(CONFIG_USB_DWC3)
 
 int __init aml_dwc3_init(void);

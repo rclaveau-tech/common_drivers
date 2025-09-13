@@ -17,6 +17,7 @@
 //#include <linux/amlogic/power_ctrl.h>
 #include <linux/amlogic/usb-v2.h>
 #include <linux/amlogic/usbtype.h>
+#include "usb_main.h"
 
 static int amlogic_usb2_m31_init(struct usb_phy *x)
 {
@@ -111,12 +112,11 @@ static struct platform_driver amlogic_usb2_m31_driver = {
 
 #if IS_BUILTIN(CONFIG_AMLOGIC_CRG)
 
-static int __init amlogic_usb2_m31_drv_init(void)
+int __init amlogic_usb2_m31_drv_init(void)
 {
 	return platform_driver_register(&amlogic_usb2_m31_driver);
 }
 
-EXPORT_SYMBOL(amlogic_usb2_m31_drv_init);
 #else
 module_platform_driver(amlogic_usb2_m31_driver);
 

@@ -29,6 +29,7 @@
 #include "xhci-trace-meson.h"
 #include "xhci-debugfs-meson.h"
 #include "xhci-dbgcap-meson.h"
+#include "usb_main.h"
 
 #define DRIVER_AUTHOR "Sarah Sharp"
 #define DRIVER_DESC "'eXtensible' Host Controller (xHC) Driver"
@@ -6100,7 +6101,7 @@ EXPORT_SYMBOL_GPL(aml_xhci_init_driver);
 //MODULE_DESCRIPTION(DRIVER_DESC);
 //MODULE_AUTHOR(DRIVER_AUTHOR);
 //MODULE_LICENSE("GPL");
-static int __init aml_xhci_hcd_init(void)
+int __init aml_xhci_hcd_init(void)
 {
 	/*
 	 * Check the compiler generated sizes of structures that must be laid
@@ -6132,13 +6133,11 @@ static int __init aml_xhci_hcd_init(void)
  * If an init function is provided, an exit function must also be provided
  * to allow module unload.
  */
-static void __exit aml_xhci_hcd_fini(void)
+void __exit aml_xhci_hcd_fini(void)
 {
 	aml_xhci_debugfs_remove_root();
 }
 
-EXPORT_SYMBOL(aml_xhci_hcd_init);
-EXPORT_SYMBOL(aml_xhci_hcd_fini);
 
-//module_init(xhci_hcd_init);
-//module_exit(xhci_hcd_fini);
+//module_init(aml_xhci_hcd_init);
+//module_exit(aml_xhci_hcd_fini);

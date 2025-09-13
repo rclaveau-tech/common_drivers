@@ -24,6 +24,8 @@
 #include "xhci-plat-meson.h"
 #include "xhci-mvebu.h"
 
+#include "usb_main.h"
+
 static struct hc_driver __read_mostly xhci_plat_hc_driver;
 
 static int xhci_plat_setup(struct usb_hcd *hcd);
@@ -186,6 +188,7 @@ MODULE_DEVICE_TABLE(of, usb_xhci_of_match);
 
 static int xhci_plat_probe(struct platform_device *pdev)
 {
+	pr_warn("### %s() start\n", __func__);
 	const struct aml_xhci_plat_priv *priv_match;
 	const struct hc_driver	*driver;
 	struct device		*sysdev, *tmpdev;
@@ -201,9 +204,11 @@ static int xhci_plat_probe(struct platform_device *pdev)
 
 	driver = &xhci_plat_hc_driver;
 
+	dev_warn(&pdev->dev, "get IRQ from platform");
 	irq = platform_get_irq(pdev, 0);
 	if (irq < 0)
 		return irq;
+	dev_warn(&pdev->dev, "we got IRQ from platform");
 
 	/*
 	 * sysdev must point to a device that is known to the system firmware
@@ -386,6 +391,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	if (priv && (priv->quirks & XHCI_SG_TRB_CACHE_SIZE_QUIRK))
 		xhci->quirks |= XHCI_SG_TRB_CACHE_SIZE_QUIRK;
 
+	dev_warn(&pdev->dev, "usb_add_hcd");
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (ret)
 		goto disable_usb_phy;
@@ -393,6 +399,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	if (HCC_MAX_PSA(xhci->hcc_params) >= 4)
 		xhci->shared_hcd->can_do_streams = 1;
 
+	dev_warn(&pdev->dev, "usb_add_hcd with shared_hcd");
 	ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
 	if (ret)
 		goto dealloc_usb2_hcd;
@@ -405,6 +412,8 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	 * runtime pm using power/control in sysfs.
 	 */
 	pm_runtime_forbid(&pdev->dev);
+
+	pr_warn("### %s() end\n", __func__);
 
 	return 0;
 
@@ -566,20 +575,19 @@ static struct platform_driver usb_xhci_driver = {
 };
 //MODULE_ALIAS("platform:xhci-hcd");
 
-static int __init aml_xhci_plat_init(void)
+int __init aml_xhci_plat_init(void)
 {
+	pr_warn("### %s() start\n", __func__);
 	aml_xhci_init_driver(&xhci_plat_hc_driver, &xhci_plat_overrides);
 	return platform_driver_register(&usb_xhci_driver);
 }
 //module_init(xhci_plat_init);
 
-static void __exit aml_xhci_plat_exit(void)
+void __exit aml_xhci_plat_exit(void)
 {
 	platform_driver_unregister(&usb_xhci_driver);
 }
 
-EXPORT_SYMBOL(aml_xhci_plat_init);
-EXPORT_SYMBOL(aml_xhci_plat_exit);
 //module_exit(xhci_plat_exit);
 
 //MODULE_DESCRIPTION("xHCI Platform Host Controller Driver");

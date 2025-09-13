@@ -32,6 +32,7 @@
 #include "../xhci_amlogic/xhci-meson.h"
 #include "../xhci_amlogic/xhci-plat-meson.h"
 //#include "crg_xhci.h"
+#include "crg.h"
 
 #define CRG_DEFAULT_AUTOSUSPEND_DELAY	5000 /* ms */
 #define CRG_XHCI_RESOURCES_NUM	2
@@ -624,13 +625,12 @@ static struct platform_driver crg_driver = {
 };
 
 /* AMLOGIC corigine driver does not allow module unload */
-static int __init amlogic_crg_init(void)
+int __init amlogic_crg_init(void)
 {
 	platform_driver_probe(&crg_driver, crg_probe);
 	return 0;
 }
 
-EXPORT_SYMBOL(amlogic_crg_init);
 
 #if 0
 late_initcall(amlogic_crg_init);

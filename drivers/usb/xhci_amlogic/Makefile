@@ -8,6 +8,7 @@ ccflags-y += $(PR_FMT_DEFINE)
 # CFLAGS_xhci-trace.o := -I$(src)
 # ccflags-y += -I$(srctree)/drivers/usb/host/
 ccflags-y += -I.
+ccflags-y += -I$(src)
 
 $(MODULE_NAME)-y += xhci_amlogic/xhci-meson.o xhci_amlogic/xhci-mem-meson.o xhci_amlogic/xhci-ext-caps-meson.o
 $(MODULE_NAME)-y += xhci_amlogic/xhci-ring-meson.o xhci_amlogic/xhci-hub-meson.o

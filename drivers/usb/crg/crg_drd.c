@@ -34,6 +34,7 @@
 #include "../xhci_amlogic/xhci-meson.h"
 #include "../xhci_amlogic/xhci-plat-meson.h"
 //#include "crg_xhci.h"
+#include "crg.h"
 
 static const struct aml_xhci_plat_priv crg_xhci_plat_priv = {
 	.quirks = XHCI_NO_64BIT_SUPPORT | XHCI_RESET_ON_RESUME,
@@ -107,21 +108,30 @@ static int crg_core_init(struct crg_drd *crg)
 {
 	int			ret;
 
+	dev_warn(crg->dev, "do crg_core_soft_reset\n");
 	ret = crg_core_soft_reset(crg);
-	if (ret)
+	if (ret) {
+		dev_err(crg->dev, "failed to soft reset crg\n");
 		return ret;
+	}
 
+	dev_warn(crg->dev, "set suspend on usb2_phy\n");
 	usb_phy_set_suspend(crg->usb2_phy, 0);
+	dev_warn(crg->dev, "set suspend on usb3_phy\n");
 	usb_phy_set_suspend(crg->usb3_phy, 0);
 
+	dev_warn(crg->dev, "set mode\n");
 	switch (crg->dr_mode) {
 	case USB_DR_MODE_PERIPHERAL:
+		dev_warn(crg->dev, "set mode to device\n");
 		crg_set_mode(crg, CRG_GCTL_PRTCAP_DEVICE);
 		break;
 	case USB_DR_MODE_HOST:
+		dev_warn(crg->dev, "set mode to host\n");
 		crg_set_mode(crg, CRG_GCTL_PRTCAP_HOST);
 		break;
 	case USB_DR_MODE_OTG:
+		dev_warn(crg->dev, "set mode to otg\n");
 		crg_set_mode(crg, CRG_GCTL_PRTCAP_OTG);
 		break;
 	default:
@@ -163,17 +173,29 @@ static int crg_core_resume(struct crg_drd *crg)
 
 static int crg_core_get_phy(struct crg_drd *crg)
 {
+	pr_warn("### %s() start\n", __func__);
 	struct device *dev = crg->dev;
 
+	dev_warn(dev, "set super_speed_support\n");
 	crg->super_speed_support = 0;
 
+	dev_warn(dev, "set usb2_phy\n");
 	crg->usb2_phy = devm_usb_get_phy_by_phandle(dev, "usb-phy", 0);
+	if(IS_ERR(crg->usb2_phy))
+		dev_warn(dev, "crg->usb2_phy %d\n", (int)PTR_ERR(crg->usb2_phy));
 
+	dev_warn(dev, "set usb3_phy\n");
 	crg->usb3_phy = devm_usb_get_phy_by_phandle(dev, "usb-phy", 1);
+	if(IS_ERR(crg->usb3_phy))
+		dev_warn(dev, "crg->usb3_phy %d\n", (int)PTR_ERR(crg->usb3_phy));
 
+	dev_warn(dev, "check usb3_phy\n");
 	if (crg->usb3_phy)
 		if (crg->usb3_phy->flags == AML_USB3_PHY_ENABLE)
+			dev_warn(dev, "set crg->super_speed_support\n");
 			crg->super_speed_support = 1;
+
+	pr_warn("### %s() end\n", __func__);
 
 	return 0;
 }
@@ -202,11 +224,13 @@ static struct property_entry	props[64];
 static int crg_host_init(struct crg_drd *crg)
 {
 	//struct property_entry	props[64];
-	struct platform_device	*xhci;
-	int			ret, irq;
-	struct resource		*res;
-	struct platform_device	*crg_pdev = to_platform_device(crg->dev);
-	int			prop_idx = 0;
+	struct platform_device *xhci;
+	int	ret, irq;
+	struct resource	*res;
+	struct platform_device *crg_pdev = to_platform_device(crg->dev);
+	int	prop_idx = 0;
+	unsigned long irq_flags;
+	const char *irq_name;
 
 	irq = platform_get_irq_byname(crg_pdev, "host");
 	if (irq == -EPROBE_DEFER)
@@ -218,41 +242,55 @@ static int crg_host_init(struct crg_drd *crg)
 			return irq;
 
 		if (irq <= 0) {
+			dev_warn(crg->dev, "get IRQ from platform\n");
 			irq = platform_get_irq(crg_pdev, 0);
 			if (irq <= 0) {
+				dev_warn(crg->dev, "check IRQ ret is EPROBE_DEFER\n");
 				if (irq != -EPROBE_DEFER) {
 					dev_err(crg->dev,
 						"missing host IRQ\n");
 				}
+				dev_warn(crg->dev, "check IRQ is not ok\n");
 				if (!irq)
 					irq = -EINVAL;
 				return irq;
 			}
+			dev_warn(crg->dev, "IRQ received from platform, get resource\n");
 			res = platform_get_resource(crg_pdev,
-							IORESOURCE_IRQ, 0);
+							IORESOURCE_IRQ, irq);
+			if (IS_ERR_OR_NULL(res))
+				dev_err(crg->dev, "get resource failed\n");
 
 		} else {
+			dev_warn(crg->dev, "we got a valid IRQ for crg_usb3\n");
 			res = platform_get_resource_byname(crg_pdev,
 							   IORESOURCE_IRQ,
 							   "crg_usb3");
 		}
 
 	} else {
+		dev_warn(crg->dev, "we got a valid IRQ for host\n");
 		res = platform_get_resource_byname(crg_pdev, IORESOURCE_IRQ,
 						   "host");
 	}
 
+	dev_warn(crg->dev, "fill start xhci_resources for IRQ %d\n", irq);
 	crg->xhci_resources[1].start = irq;
+	dev_warn(crg->dev, "fill end xhci_resources for IRQ %d\n", irq);
 	crg->xhci_resources[1].end = irq;
-	crg->xhci_resources[1].flags = res->flags;
-	crg->xhci_resources[1].name = res->name;
+	dev_warn(crg->dev, "fill flags xhci_resources for IRQ %d with %ld\n", irq, irq_flags);
+	crg->xhci_resources[1].flags = IRQF_SHARED;
+	dev_warn(crg->dev, "fill name xhci_resources for IRQ %d with %s\n", irq, irq_name);
+	crg->xhci_resources[1].name = "crg_usb3";
 
+	dev_warn(crg->dev, "try to allocate xHCI device\n");
 	xhci = platform_device_alloc("xhci-hcd-meson", PLATFORM_DEVID_AUTO);
 	if (!xhci) {
 		dev_err(crg->dev, "couldn't allocate xHCI device\n");
 		return -ENOMEM;
 	}
 
+	dev_warn(crg->dev, "set xhci->dev.coherent_dma_mask\n");
 	dma_set_coherent_mask(&xhci->dev, crg->dev->coherent_dma_mask);
 
 	xhci->dev.parent	= crg->dev;
@@ -261,6 +299,7 @@ static int crg_host_init(struct crg_drd *crg)
 
 	crg->xhci = xhci;
 
+	dev_warn(crg->dev, "Add resources to xHCI device\n");
 	ret = platform_device_add_resources(xhci, crg->xhci_resources,
 						CRG_XHCI_RESOURCES_NUM);
 	if (ret) {
@@ -270,6 +309,7 @@ static int crg_host_init(struct crg_drd *crg)
 
 	memset(props, 0, sizeof(struct property_entry) * ARRAY_SIZE(props));
 
+	dev_warn(crg->dev, "Add properties to xHCI device\n");
 	if (crg->super_speed_support)
 		props[prop_idx++] = PROPERTY_ENTRY_BOOL("super_speed_support");
 
@@ -302,6 +342,7 @@ static int crg_host_init(struct crg_drd *crg)
 	props[prop_idx++] = PROPERTY_ENTRY_BOOL("xhci-crg-host-016");
 
 	if (prop_idx) {
+		dev_warn(crg->dev, "device_create_managed_software_node\n");
 		ret = device_create_managed_software_node(&xhci->dev, props, NULL);
 		if (ret) {
 			dev_err(crg->dev, "failed to add properties to xHCI\n");
@@ -309,11 +350,13 @@ static int crg_host_init(struct crg_drd *crg)
 		}
 	}
 //	crg_xhci_init();
+	dev_warn(crg->dev, "platform_device_add_data\n");
 	ret = platform_device_add_data(xhci, &crg_xhci_plat_priv,
 								sizeof(crg_xhci_plat_priv));
 	if (ret)
 		goto err1;
 
+	dev_warn(crg->dev, "platform_device_add\n");
 	ret = platform_device_add(xhci);
 	if (ret) {
 		dev_err(crg->dev, "failed to register xHCI device\n");
@@ -323,6 +366,7 @@ static int crg_host_init(struct crg_drd *crg)
 	return 0;
 
 err1:
+	dev_warn(crg->dev, "platform_device_put\n");
 	platform_device_put(xhci);
 	return ret;
 }
@@ -356,6 +400,7 @@ static int crg_core_init_mode(struct crg_drd *crg)
 
 static int crg_probe(struct platform_device *pdev)
 {
+	pr_warn("### %s() start\n", __func__);
 	struct device *dev = &pdev->dev;
 	struct resource	*res;
 	struct crg_drd *crg;
@@ -400,18 +445,25 @@ static int crg_probe(struct platform_device *pdev)
 		clk_prepare_enable(crg->general_clk);
 	}
 
+	dev_warn(dev, "platform_set_drvdata\n");
 	platform_set_drvdata(pdev, crg);
 
+	dev_warn(dev, "crg_core_get_phy\n");
 	ret = crg_core_get_phy(crg);
-	if (ret)
+	if (ret) {
+		dev_err(dev, "failed to get phy\n");
 		goto err0;
+	}
 
+	dev_warn(dev, "check dma_mask\n");
 	if (!dev->dma_mask) {
+		dev_warn(dev, "!dev->dma_mask\n");
 		dev->dma_mask = dev->parent->dma_mask;
 		dev->dma_parms = dev->parent->dma_parms;
 		dma_set_coherent_mask(dev, dev->parent->coherent_dma_mask);
 	}
 
+	dev_warn(dev, "pm_runtime_set_active\n");
 	pm_runtime_set_active(dev);
 	pm_runtime_use_autosuspend(dev);
 	pm_runtime_set_autosuspend_delay(dev, CRG_DEFAULT_AUTOSUSPEND_DELAY);
@@ -420,8 +472,10 @@ static int crg_probe(struct platform_device *pdev)
 	if (ret < 0)
 		goto err0;
 
+	dev_warn(dev, "pm_runtime_forbid\n");
 	pm_runtime_forbid(dev);
 
+	dev_warn(dev, "crg_core_init\n");
 	ret = crg_core_init(crg);
 	if (ret) {
 		dev_err(dev, "failed to initialize core\n");
@@ -450,9 +504,13 @@ static int crg_probe(struct platform_device *pdev)
 		break;
 	}
 
+	dev_warn(dev, "crg_core_init_mode\n");
 	ret = crg_core_init_mode(crg);
-	if (ret)
+	if (ret) {
+		dev_err(dev, "failed to initialize mode\n");
 		goto err0;
+	}
+	dev_warn(dev, "get wr-outstanding-tune property\n");
 	prop = of_get_property(pdev->dev.of_node, "wr-outstanding-tune", NULL);
 	if (prop)
 		wr_outstanding_tune = of_read_ulong(prop, 1);
@@ -463,11 +521,15 @@ static int crg_probe(struct platform_device *pdev)
 		writel(wr_outstanding_tune, (void __iomem *)((unsigned long)crg->regs + 0x210c));
 	}
 
+	dev_warn(dev, "pm_runtime_put\n");
 	pm_runtime_put(dev);
+
+	pr_warn("### %s() end\n", __func__);
 
 	return 0;
 
 err0:
+	dev_warn(dev, "unmap IO that returned error\n");
 	iounmap(crg->regs);
 	return ret;
 }
@@ -703,7 +765,7 @@ static struct platform_driver crg_host_driver = {
 };
 
 static int crg_driver_state;
-static void crg_exit(void)
+void crg_exit(void)
 {
 	pr_info("crg exit\n");
 	if (crg_driver_state != 1)
@@ -713,7 +775,7 @@ static void crg_exit(void)
 }
 EXPORT_SYMBOL_GPL(crg_exit);
 
-static int crg_init(void)
+int crg_init(void)
 {
 	int ret;
 
@@ -735,14 +797,18 @@ exit:
 EXPORT_SYMBOL_GPL(crg_init);
 
 /* AMLOGIC corigine driver does not allow module unload */
-static int __init amlogic_crg_host_driver_init(void)
+int __init amlogic_crg_host_driver_init(void)
 {
-	platform_driver_probe(&crg_host_driver, crg_probe);
+	int ret = 0;
+	pr_warn("### %s() start\n", __func__);
+	ret = platform_driver_probe(&crg_host_driver, crg_probe);
+	if (ret)
+		pr_err("failed to register crg_host_driver, return %d\n", ret);
+	pr_warn("### %s() end\n", __func__);
 
 	return 0;
 }
 
-EXPORT_SYMBOL(amlogic_crg_host_driver_init);
 
 #if 0
 late_initcall(amlogic_crg_init);

@@ -1285,7 +1285,8 @@
 			};
 
 			periphs_pinctrl: pinctrl@4000 {
-				compatible = "amlogic,meson-t7-periphs-pinctrl";
+				compatible = "amlogic,t7-periphs-pinctrl",
+					     "amlogic,meson-t7-periphs-pinctrl";
 				#address-cells = <2>;
 				#size-cells = <2>;
 				ranges;
@@ -1301,7 +1302,8 @@
 			};
 
 			gpio_intc: interrupt-controller@4080 {
-				compatible = "amlogic,meson-t7-gpio-intc",
+				compatible = "amlogic,t7-gpio-intc",
+					     "amlogic,meson-t7-gpio-intc",
 					     "amlogic,meson-gpio-intc";
 				reg = <0x0 0x4080 0x0 0x20>;
 				interrupt-controller;
@@ -1621,9 +1623,9 @@
 			};
 		};
 
-		crg_phy_20: crgphy20@fe03c000 {
+		crg_phy_20: usb-phy0@fe03c000 {
 			compatible = "amlogic, amlogic-crg-drd-usb2";
-			status = "disable";
+			status = "disabled";
 			#phy-cells = <0>;
 			reg = <0x0 0xfe03a000 0x0 0x80
 					0x0 0xFE002000 0x0 0x100
@@ -1636,7 +1638,7 @@
 			pll-setting-6 = <0x78000>;
 			pll-setting-7 = <0xe0004>;
 			pll-setting-8 = <0xe000c>;
-			dis-thred-enhance = <0x2>;/**t7-0x38:bit[26-27]**/
+			dis-thred-enhance = <0x2>;/*t7-0x38:bit[26-27]*/
 			version = <2>;
 			//power-domains = <&pwrdm PDID_SC2_USB_COMB>;
 			phy0-reset-level-bit = <8>;
@@ -1650,7 +1652,7 @@
 
 		crg_phy_21: crgphy21@fe03e000 {
 			compatible = "amlogic, amlogic-crg-drd-usb2";
-			status = "disable";
+			status = "disabled";
 			#phy-cells = <0>;
 			reg = <0x0 0xfe03a020 0x0 0x60
 				0x0 0xFE002000 0x0 0x100
@@ -1663,7 +1665,7 @@
 			pll-setting-6 = <0x78000>;
 			pll-setting-7 = <0xe0004>;
 			pll-setting-8 = <0xe000c>;
-			dis-thred-enhance = <0x2>;/**t7-0x38:bit[26-27]**/
+			dis-thred-enhance = <0x2>;/*t7-0x38:bit[26-27]*/
 			version = <2>;
 			//power-domains = <&pwrdm PDID_SC2_USB_COMB>;
 			phy0-reset-level-bit = <9>;
@@ -1677,7 +1679,7 @@
 
 		crg3_phy_21: crg3phy21@fe03a080 {
 			compatible = "amlogic, amlogic-crg-drd-usb3";
-			status = "disable";
+			status = "disabled";
 			#phy-cells = <0>;
 			reg = <0x0 0xfe03a080 0x0 0x20>;
 			phy1-reg = <0xfe062000>;
@@ -1697,9 +1699,9 @@
 			phy-id = <1>;
 		};
 
-		crg3_phy_20: crg3phy20@fe03a080 {
+		crg3_phy_20: usb-phy1@fe03a080 {
 			compatible = "amlogic, amlogic-crg-drd-usb3";
-			status = "disable";
+			status = "disabled";
 			#phy-cells = <0>;
 			reg = <0x0 0xfe03a080 0x0 0x20>;
 			phy1-reg = <0xfe062000>;
@@ -1755,6 +1757,7 @@
 			status = "disabled";
 			reg = <0x0 0xfde00000 0x0 0x100000>;
 			interrupts = <GIC_SPI 130 IRQ_TYPE_EDGE_RISING>;
+			interrupt-names = "crg_usb3";
 			usb-phy = <&crg_phy_20>, <&crg3_phy_20>;
 			cpu-type = "gxl";
 			clock-src = "usb3.0";
@@ -1765,7 +1768,7 @@
 
 		crg_udc_3: crgudc3@0xfde00000 {
 			compatible = "amlogic, crg_udc";
-			status = "disable";
+			status = "disabled";
 			device_name = "crg_udc_3";
 			reg = <0x0 0xfde00000 0x0 0x100000>;
 			interrupts = <GIC_SPI 130 IRQ_TYPE_EDGE_RISING>;
@@ -1781,7 +1784,7 @@
 
 		crg_udc_2: crgudc2@0xfdd00000 {
 			compatible = "amlogic, crg_udc";
-			status = "disable";
+			status = "disabled";
 			device_name = "crg_udc_2";
 			reg = <0x0 0xfdd00000 0x0 0x100000>;
 			interrupts = <GIC_SPI 131 IRQ_TYPE_EDGE_RISING>;
@@ -2112,33 +2115,30 @@
 		};
 
 		uart_A: serial@fe078000 {
-			compatible = "amlogic,meson-uart";
+			compatible = "amlogic,meson-s4-uart";
 			reg = <0x0 0xfe078000 0x0 0x18>;
-			interrupts = <0 168 1>;
+			interrupts = <GIC_SPI 168 IRQ_TYPE_EDGE_RISING>;
 			status = "disabled";
-			clocks = <&xtal>;
-			clock-names = "clk_uart";
-			xtal_tick_en = <2>;
-			fifosize = < 64 >;
-			support-sysrq = <1>;  /* 0 not support*/
+			clocks = <&xtal>, <&xtal>, <&xtal>;
+			clock-names = "xtal", "pclk", "baud";
 		};
 
 		uart_C: serial@fe07c000 {
-			compatible = "amlogic,meson-uart";
+			compatible = "amlogic,meson-s4-uart";
 			reg = <0x0 0xfe07c000 0x0 0x18>;
-			interrupts = <0 170 1>;
+			interrupts = <GIC_SPI 170 IRQ_TYPE_EDGE_RISING>;
 			status = "disabled";
-			clocks = <&xtal
-				&clkc CLKID_UART_C>;
-			clock-names = "clk_uart",
-				"clk_gate";
+			clocks = <&xtal>,
+				<&clkc CLKID_UART_C>, <&xtal>;
+			clock-names = "xtal",
+				"pclk", "baud";
 			fifosize = < 64 >;
 			pinctrl-names = "default";
 			pinctrl-0 = <&c_uart_pins>;
 		};
 
 		uart_D: serial@fe07e000 {
-			compatible = "amlogic,meson-uart";
+			compatible = "amlogic,meson-s4-uart";
 			status = "disabled";
 			reg = <0x0 0xfe07e000 0x0 0x18>;
 			interrupts = <0 171 1>;
@@ -2152,7 +2152,7 @@
 		};
 
 		uart_E: serial@fe080000 {
-			compatible = "amlogic,meson-uart";
+			compatible = "amlogic,meson-s4-uart";
 			status = "disabled";
 			reg = <0x0 0xfe080000 0x0 0x18>;
 			interrupts = <0 172 1>;
@@ -2166,7 +2166,7 @@
 		};
 
 		uart_F: serial@fe082000 {
-			compatible = "amlogic,meson-uart";
+			compatible = "amlogic,meson-s4-uart";
 			status = "disabled";
 			reg = <0x0 0xfe082000 0x0 0x18>;
 			interrupts = <0 173 1>;
@@ -2716,7 +2716,7 @@
 		compatible = "amlogic, meson-ir";
 		reg = <0x0 0xfe084040 0x0 0xA4>,
 			<0x0 0xfe084000 0x0 0x20>;
-		status = "disable";
+		status = "disabled";
 		protocol = <REMOTE_TYPE_NEC>;
 		interrupts = <GIC_SPI 22 IRQ_TYPE_EDGE_RISING>;
 		map = <&custom_maps>;
@@ -4546,6 +4546,7 @@
 };
 
 &gpu{
+	compatible = "amlogic,meson-g12a-mali", "arm,mali-bifrost";
 	operating-points-v2 = <&gpu_opp_table>;
 	reg =   <0 0xFE400000 0 0x04000>, /*mali APB bus base address*/
 		<0 0xFE002000 0 0x01000>, /*reset register*/
@@ -4553,8 +4554,10 @@
 		<0 0xFE000000 0 0x01000>, /*hiubus for clk cntl*/
 		<0 0xFE002000 0 0x01000>; /*reset register*/
 
-	interrupts = <0 144 4>, <0 145 4>, <0 146 4>;
-	interrupt-names = "GPU", "MMU", "JOB";
+	interrupts = <GIC_SPI 144 IRQ_TYPE_LEVEL_HIGH>,
+		     <GIC_SPI 145 IRQ_TYPE_LEVEL_HIGH>,
+		     <GIC_SPI 146 IRQ_TYPE_LEVEL_HIGH>;
+	interrupt-names = "gpu", "mmu", "job";
 	power-domains = <&pwrdm PDID_T7_MALI_TOP>;
 	num_of_pp = <4>;
 	system-coherency = <0>;

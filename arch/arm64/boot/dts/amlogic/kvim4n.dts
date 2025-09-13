@@ -53,11 +53,15 @@
 		mmc2 = &sd_emmc_a;
 	};
 
-	memory@00000000 {
+	chosen {
+		stdout-path = "serial0:921600n8";
+	};
+
+	memory@0 {
 		device_type = "memory";
-		linux,usable-memory = <0x00000000 0x00000000 0x00000000 0xE0000000
-					0x00000001 0x00000000 0x00000000 0xE0000000
-					0x00000002 0x00000000 0x00000000 0x40000000>;
+		reg = <0x0 0x0 0x0 0xE0000000
+					0x00000001 0x0 0x0 0xE0000000
+					0x00000002 0x0 0x0 0x40000000>;
 	};
 
 	reserved-memory {
@@ -65,13 +69,13 @@
 		#size-cells = <2>;
 		ranges;
 
-		ramdump_bl33z@00000000 {
+		ramdump_bl33z@0 {
 			reg = <0x0 0x0 0x0 0x1800000>; /* 0 ~ 24M */
 			status = "disabled";
 		};
 
 		/* global autoconfigured region for contiguous allocations */
-		ramoops@0x07400000 {
+		ramoops@07400000 {
 			compatible = "ramoops";
 			reg = <0x0 0x07400000 0x0 0x00100000>;
 			record-size = <0x20000>;
@@ -1392,7 +1396,7 @@
 };
 
 &crg_udc_3 {
-	status = "disable";
+	status = "disabled";
 };
 
 &crg20_otg {
@@ -1412,7 +1416,7 @@
 };
 
 &crg3_drd {
-	compatible = "amlogic, crg-host-drd";
+	compatible = "amlogic, crg-host-drd", "generic-xhci";
 	/*compatible = "amlogic, crg-drd";*/
 	status = "okay";
 };

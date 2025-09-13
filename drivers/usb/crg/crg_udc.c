@@ -34,6 +34,7 @@
 #include <linux/usb/composite.h>
 #include <linux/configfs.h>
 #include <linux/suspend.h>
+#include "usb_main.h"
 
 #define CRG_MTP_WR 1
 #define MAX_PACKET_SIZE 1024
@@ -2857,7 +2858,7 @@ static void crg_udc_start(struct crg_gadget_dev *crg_udc)
 	CRG_DEBUG("%s, control=0x%x\n", __func__, reg_read(&uccr->control));
 }
 
-static void halt_all_eps(struct crg_gadget_dev *crg_udc)
+/*static void halt_all_eps(struct crg_gadget_dev *crg_udc)
 {
 	struct crg_uccr *uccr = crg_udc->uccr;
 	u32 tmp;
@@ -2869,7 +2870,7 @@ static void halt_all_eps(struct crg_gadget_dev *crg_udc)
 	} while (tmp != 0);
 }
 
-EXPORT_SYMBOL(halt_all_eps);
+EXPORT_SYMBOL(halt_all_eps);*/
 
 static void crg_udc_clear_portpm(struct crg_gadget_dev *crg_udc)
 {
@@ -4456,14 +4457,14 @@ static int crg_gadget_irq_init(struct platform_device *pdev)
 	return 0;
 }
 
-static int crg_gadget_irq_remove(struct crg_gadget_dev *crg_udc)
+/*static int crg_gadget_irq_remove(struct crg_gadget_dev *crg_udc)
 {
 	free_irq(crg_udc->irq, crg_udc);
 
 	return 0;
 }
 
-EXPORT_SYMBOL(crg_gadget_irq_remove);
+EXPORT_SYMBOL(crg_gadget_irq_remove);*/
 
 static ssize_t udc_debug_show(struct device *d, struct device_attribute *attr,
 			char *buf)
@@ -4854,7 +4855,7 @@ static void crg_udc_shutdown(struct platform_device *pdev)
 /*Now we can support multi corigine device controllers*/
 /*But if we need to support multi device controllers of various vendors*/
 /*Gadget framework needs to be improved*/
-static int usb_gadget_handle_interrupts(int index)
+/*static int usb_gadget_handle_interrupts(int index)
 {
 	int ret = 0;
 
@@ -4867,9 +4868,9 @@ static int usb_gadget_handle_interrupts(int index)
 
 	return ret;
 }
-EXPORT_SYMBOL(usb_gadget_handle_interrupts);
+EXPORT_SYMBOL(usb_gadget_handle_interrupts);*/
 
-static int crg_otg_write_UDC(const char *udc_name)
+int crg_otg_write_UDC(const char *udc_name)
 {
 	struct crg_gadget_dev *crg_udc;
 	struct gadget_info *gi;
@@ -5130,7 +5131,7 @@ static struct platform_driver crg_udc_driver = {
 };
 
 /* init&exit MUST be synchronous. i.e. device_block_probing must not be holded */
-static void crg_gadget_exit(void)
+void crg_gadget_exit(void)
 {
 	pr_info("crg gadget exit\n");
 	mutex_lock(&crg_udc_driver_lock);
@@ -5147,7 +5148,7 @@ exit:
 }
 EXPORT_SYMBOL_GPL(crg_gadget_exit);
 
-static int crg_gadget_init(void)
+int crg_gadget_init(void)
 {
 	int ret = 0;
 

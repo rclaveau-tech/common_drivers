@@ -20,6 +20,7 @@
 #include <linux/amlogic/cpu_version.h>
 #include "../phy/phy-aml-new-usb-v2.h"
 #include <linux/clk.h>
+#include "usb_main.h"
 
 struct amlogic_usb_v2	*g_crg_drd_phy2[2];
 char name_crg[32];
@@ -923,9 +924,8 @@ MODULE_AUTHOR("Amlogic Inc.");
 MODULE_DESCRIPTION("amlogic crg drd USB2 phy driver");
 MODULE_LICENSE("GPL v2");
 #else
-static int __init amlogic_crg_drd_usb2_drv_init(void)
+int __init amlogic_crg_drd_usb2_drv_init(void)
 {
 	return platform_driver_register(&amlogic_crg_drd_usb2_driver);
 }
-EXPORT_SYMBOL(amlogic_crg_drd_usb2_drv_init);
 #endif

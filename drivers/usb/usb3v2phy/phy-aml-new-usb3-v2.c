@@ -21,6 +21,7 @@
 #include <linux/notifier.h>
 #include <linux/amlogic/usbtype.h>
 #include "../phy/phy-aml-new-usb-v2.h"
+#include "usb_main.h"
 
 #define HOST_MODE	0
 #define DEVICE_MODE	1
@@ -799,10 +800,9 @@ MODULE_AUTHOR("Amlogic Inc.");
 MODULE_DESCRIPTION("amlogic USB3 v2 phy driver");
 MODULE_LICENSE("GPL v2");
 #else
-static int __init amlogic_new_usb3_v2_driver_init(void)
+int __init amlogic_new_usb3_v2_driver_init(void)
 {
 	return platform_driver_register(&amlogic_new_usb3_v2_driver);
 }
 
-EXPORT_SYMBOL(amlogic_new_usb3_v2_driver_init);
 #endif

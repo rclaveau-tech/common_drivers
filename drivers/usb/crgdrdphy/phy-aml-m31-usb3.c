@@ -23,6 +23,7 @@
 //#include <linux/amlogic/power_ctrl.h>
 #include "../phy/phy-aml-new-usb-v2.h"
 #include <linux/amlogic/aml_gpio_consumer.h>
+#include "usb_main.h"
 
 #define	phy_to_m31usb(x)	container_of((x), struct amlogic_usb_m31, phy)
 
@@ -422,12 +423,11 @@ static struct platform_driver amlogic_usb3_m31_driver = {
 
 #if IS_BUILTIN(CONFIG_AMLOGIC_CRG)
 
-static int __init amlogic_usb3_m31_drv_init(void)
+int __init amlogic_usb3_m31_drv_init(void)
 {
 	return platform_driver_register(&amlogic_usb3_m31_driver);
 }
 
-EXPORT_SYMBOL(amlogic_usb3_m31_drv_init);
 #else
 module_platform_driver(amlogic_usb3_m31_driver);
 
