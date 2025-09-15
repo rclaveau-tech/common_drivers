@@ -111,20 +111,22 @@ static int calculate_hotstep(struct thermal_instance *instance)
 	struct thermal_cooling_device *cdev;
 	struct cpucore_cooling_device *cpucore_dev;
 	int hyst = 0, trip_temp;
+	const struct thermal_trip *trip;
 
 	if (!instance)
 		return -EINVAL;
 
-	tz = instance->tz;
 	cdev = instance->cdev;
+	tz = to_thermal_zone(&cdev->device);
+	trip = instance->trip;
 
-	if (!tz || !cdev)
+	if (!tz || !cdev || !trip)
 		return -EINVAL;
 
 	cpucore_dev = cdev->devdata;
 
-	tz->ops->get_trip_hyst(tz, instance->trip, &hyst);
-	tz->ops->get_trip_temp(tz, instance->trip, &trip_temp);
+	hyst = trip->hysteresis;
+	trip_temp = trip->temperature;
 
 	if (tz->temperature >= (trip_temp + (cpucore_dev->hotstep + 1) * hyst)) {
 		cpucore_dev->hotstep++;

@@ -174,8 +174,8 @@ static void meson_report_trigger(struct meson_tsensor_data *p)
 
 	mutex_lock(&tz->lock);
 	/* Find the level for which trip happened */
-	for (i = 0; i < of_thermal_get_ntrips(tz); i++) {
-		tz->ops->get_trip_temp(tz, i, &temp);
+	for (i = 0; i < tz->num_trips; i++) {
+		temp = tz->trips[i].trip.temperature;
 		if (tz->last_temperature < temp)
 			break;
 	}
@@ -302,12 +302,12 @@ static int meson_tsensor_trips_initialize(struct platform_device *pdev)
 	struct meson_tsensor_data *data = platform_get_drvdata(pdev);
 	int ret;
 
-	if (of_thermal_get_ntrips(data->tzd) > data->ntrip) {
+	if (data->tzd->num_trips > data->ntrip) {
 		dev_info_once(&pdev->dev,
 			 "More trip points than supported by this tsensor.\n");
 		dev_info_once(&pdev->dev,
 			 "%d trip points should be configured in polling mode.\n",
-			 (of_thermal_get_ntrips(data->tzd) - data->ntrip));
+			 (data->tzd->num_trips - data->ntrip));
 	}
 	mutex_lock(&data->lock);
 	ret = data->tsensor_trips_initialize(pdev);
@@ -422,10 +422,10 @@ static int r1p1_tsensor_trips_initialize(struct platform_device *pdev)
 	for (i = (data->ntrip - 1); i >= 0; i--) {
 		reg_off = (i / 2) << 2;
 		bit_off = ((i + 1) % 2);
-		tz->ops->get_trip_temp(tz, i, &temp);
+		temp = tz->trips[i].trip.temperature;
 		temp /= MCELSIUS;
-		tz->ops->get_trip_hyst(tz, i, &temp_hist);
-		temp_hist = temp - (temp_hist / MCELSIUS);
+		temp_hist = tz->trips[i].trip.hysteresis / MCELSIUS;
+		temp_hist = temp - temp_hist;
 
 		/* Set 12-bit temperature code for rising threshold levels */
 		threshold_code = temp_to_code(data, temp, true);
@@ -502,6 +502,14 @@ static void r1p1_tsensor_clear_irqs(struct meson_tsensor_data *data)
 	writel(val_irq, data->base_c + R1P1_TS_CFG_REG1);
 }
 
+static bool of_thermal_is_trip_valid(struct thermal_zone_device *tz, int trip)
+{
+	if (trip >= tz->num_trips || trip < 0)
+		return false;
+
+	return true;
+}
+
 static void r1p1_tsensor_update_irqs(struct meson_tsensor_data *data)
 {
 	struct thermal_zone_device *tz = data->tzd;
@@ -509,8 +517,8 @@ static void r1p1_tsensor_update_irqs(struct meson_tsensor_data *data)
 	unsigned int i, con;
 
 	/* Find the level for which trip happened */
-	for (i = 0; i < of_thermal_get_ntrips(tz); i++) {
-		tz->ops->get_trip_temp(tz, i, &temp);
+	for (i = 0; i < tz->num_trips; i++) {
+		temp = tz->trips[i].trip.temperature;
 		if (tz->last_temperature < temp)
 			break;
 	}
@@ -525,9 +533,9 @@ static void r1p1_tsensor_update_irqs(struct meson_tsensor_data *data)
 	writel(con, data->base_c + R1P1_TS_CFG_REG1);
 }
 
-static int meson_get_temp(void *p, int *temp)
+static int meson_get_temp(struct thermal_zone_device *tz, int *temp)
 {
-	struct meson_tsensor_data *data = p;
+	struct meson_tsensor_data *data = thermal_zone_device_priv(tz);
 
 	if (!data->tsensor_read)
 		return -EINVAL;
@@ -539,7 +547,7 @@ static int meson_get_temp(void *p, int *temp)
 	return 0;
 }
 
-int meson_get_temperature(void)
+/*int meson_get_temperature(void)
 {
 	int temp;
 	int ret;
@@ -551,7 +559,7 @@ int meson_get_temperature(void)
 	}
 	return temp / 1000;
 }
-EXPORT_SYMBOL(meson_get_temperature);
+EXPORT_SYMBOL(meson_get_temperature);*/
 
 static void meson_tsensor_work(struct work_struct *work)
 {
@@ -770,37 +778,40 @@ static void meson_thermal_hot_callback(struct thermal_zone_device *tz)
 	struct media_cooling_device *media_cdev;
 	u32 state_set, *last_state;
 	unsigned long state_get;
+	int i;
 
 	if (tz->temperature < 0)
 		return;
 
 	mutex_lock(&tz->lock);
-	list_for_each_entry(instance, &tz->thermal_instances, tz_node) {
-		cdev = instance->cdev;
-		switch (meson_get_cooldev_type(cdev)) {
-		case COOL_DEV_TYPE_CPU_CORE:
-			cpucore_cdev = cdev->devdata;
-			last_state = &cpucore_cdev->setstep;
-			break;
-		case COOL_DEV_TYPE_DDR:
-			ddr_cdev = cdev->devdata;
-			last_state = &ddr_cdev->last_state;
-			break;
-		case COOL_DEV_TYPE_MEDIA:
-			media_cdev = cdev->devdata;
-			last_state = &media_cdev->setstep;
-			break;
-		default:
-			continue;
-		}
-		if (cdev->ops && cdev->ops->set_cur_state) {
-			cdev->ops->get_requested_power(cdev, &state_set);
-			if (state_set != *last_state) {
-				cdev->ops->set_cur_state(cdev, (unsigned long)state_set);
-				*last_state = state_set;
-				cdev->ops->get_cur_state(cdev, &state_get);
-				pr_info("[%s]temp:%d, set:0x%x, get:0x%lx\n", cdev->type,
-						tz->temperature, state_set, state_get);
+	for (i = 0; i < tz->num_trips; i++) {
+		list_for_each_entry(instance, &tz->trips[i].thermal_instances, trip_node) {
+			cdev = instance->cdev;
+			switch (meson_get_cooldev_type(cdev)) {
+			case COOL_DEV_TYPE_CPU_CORE:
+				cpucore_cdev = cdev->devdata;
+				last_state = &cpucore_cdev->setstep;
+				break;
+			case COOL_DEV_TYPE_DDR:
+				ddr_cdev = cdev->devdata;
+				last_state = &ddr_cdev->last_state;
+				break;
+			case COOL_DEV_TYPE_MEDIA:
+				media_cdev = cdev->devdata;
+				last_state = &media_cdev->setstep;
+				break;
+			default:
+				continue;
+			}
+			if (cdev->ops && cdev->ops->set_cur_state) {
+				cdev->ops->get_requested_power(cdev, &state_set);
+				if (state_set != *last_state) {
+					cdev->ops->set_cur_state(cdev, (unsigned long)state_set);
+					*last_state = state_set;
+					cdev->ops->get_cur_state(cdev, &state_get);
+					pr_info("[%s]temp:%d, set:0x%x, get:0x%lx\n", cdev->type,
+							tz->temperature, state_set, state_get);
+				}
 			}
 		}
 	}
@@ -815,28 +826,30 @@ static void meson_handle_thermal_trip(struct thermal_zone_device *tz, int trip, 
 	u32 state_set;
 	static u32 last_state_set;
 	unsigned long state_get;
-	int tz_temp;
+	int tz_temp, i;
 
 	if (temp < 0)
 		return;
 
-	tz->ops->get_trip_type(tz, trip, &type);
+	type = tz->trips[trip].trip.type;
 	if (type == THERMAL_TRIP_HOT) {
 		mutex_lock(&tz->lock);
 		tz_temp = tz->temperature;
-		list_for_each_entry(instance, &tz->thermal_instances, tz_node) {
-			cdev = instance->cdev;
-			tz->temperature = temp;
-			if (cdev->ops && cdev->ops->set_cur_state &&
-				instance->trip == THERMAL_TRIP_HOT) {
-				cdev->ops->get_requested_power(cdev, &state_set);
-				if (state_set != last_state_set) {
-					cdev->ops->set_cur_state(cdev, (unsigned long)state_set);
-					last_state_set = state_set;
-					cdev->ops->get_cur_state(cdev, &state_get);
-					pr_info("[%s %d]temp:%d, ddrset:0x%x, get:0x%lx\n",
-						__func__, __LINE__, tz->temperature,
-						state_set, state_get);
+		for (i = 0; i < tz->num_trips; i++) {
+			list_for_each_entry(instance, &tz->trips[i].thermal_instances, trip_node) {
+				cdev = instance->cdev;
+				tz->temperature = temp;
+				if (cdev->ops && cdev->ops->set_cur_state &&
+					instance->trip->type == THERMAL_TRIP_HOT) {
+					cdev->ops->get_requested_power(cdev, &state_set);
+					if (state_set != last_state_set) {
+						cdev->ops->set_cur_state(cdev, (unsigned long)state_set);
+						last_state_set = state_set;
+						cdev->ops->get_cur_state(cdev, &state_get);
+						pr_info("[%s %d]temp:%d, ddrset:0x%x, get:0x%lx\n",
+							__func__, __LINE__, tz->temperature,
+							state_set, state_get);
+					}
 				}
 			}
 		}
@@ -845,7 +858,7 @@ static void meson_handle_thermal_trip(struct thermal_zone_device *tz, int trip, 
 	}
 }
 
-static struct thermal_zone_of_device_ops meson_sensor_ops = {
+static struct thermal_zone_device_ops meson_sensor_ops = {
 	.get_temp = meson_get_temp,
 
 };
@@ -901,11 +914,7 @@ static ssize_t tsensor_tempwrite_write(struct file *file, const char __user *use
 	if (kstrtoint(buf, 0, &temperature))
 		return -EINVAL;
 
-#if CONFIG_AMLOGIC_KERNEL_VERSION >= 14515
 	for (i = 0; i < tz->num_trips; i++)
-#else
-	for (i = 0; i < tz->trips; i++)
-#endif
 		meson_handle_thermal_trip(tz, i, temperature);
 
 	return count;
@@ -956,7 +965,7 @@ static int meson_tsensor_probe(struct platform_device *pdev)
 
 	INIT_WORK(&data->irq_work, meson_tsensor_work);
 
-	data->tzd = devm_thermal_zone_of_sensor_register(&pdev->dev,
+	data->tzd = devm_thermal_of_zone_register(&pdev->dev,
 							 data->id,
 							 data,
 							 &meson_sensor_ops);
@@ -967,15 +976,12 @@ static int meson_tsensor_probe(struct platform_device *pdev)
 	}
 
 	tz = data->tzd;
-#if CONFIG_AMLOGIC_KERNEL_VERSION >= 14515
+
 	for (i = 0; i < tz->num_trips; i++) {
-#else
-	for (i = 0; i < tz->trips; i++) {
-#endif
-		tz->ops->get_trip_type(tz, i, &trip_type);
+		trip_type = tz->trips[i].trip.type;
 		switch (trip_type) {
 		case THERMAL_TRIP_HOT:
-			tz->ops->hot = meson_thermal_hot_callback;
+			tz->ops.hot = meson_thermal_hot_callback;
 			break;
 		default:
 			break;
@@ -1017,7 +1023,7 @@ out:
 	return 0;
 
 err_thermal:
-	thermal_zone_of_sensor_unregister(&pdev->dev, data->tzd);
+	devm_thermal_of_zone_unregister(&pdev->dev, data->tzd);
 
 	return ret;
 }
@@ -1027,7 +1033,7 @@ static void meson_tsensor_remove(struct platform_device *pdev)
 	struct meson_tsensor_data *data = platform_get_drvdata(pdev);
 	struct thermal_zone_device *tzd = data->tzd;
 
-	thermal_zone_of_sensor_unregister(&pdev->dev, tzd);
+	devm_thermal_of_zone_unregister(&pdev->dev, tzd);
 	meson_tsensor_control(pdev, false);
 	clk_unprepare(data->clk);
 	devm_kfree(&pdev->dev, data);
@@ -1088,7 +1094,7 @@ static void meson_tsensor_shutdown(struct platform_device *pdev)
 	struct meson_tsensor_data *data = platform_get_drvdata(pdev);
 	struct thermal_zone_device *tzd = data->tzd;
 
-	thermal_zone_of_sensor_unregister(&pdev->dev, tzd);
+	devm_thermal_of_zone_unregister(&pdev->dev, tzd);
 	meson_tsensor_suspend(&pdev->dev);
 }
 

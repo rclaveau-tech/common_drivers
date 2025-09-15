@@ -105,21 +105,23 @@ static unsigned long cdev_calc_next_state_by_temp(struct thermal_instance *insta
 	struct thermal_cooling_device *cdev;
 	struct ddr_cooling_device *ddr_device;
 	int i, hyst = 0, trip_temp, max;
+	const struct thermal_trip *trip;
 
 	if (!ins)
 		return -EINVAL;
 
-	tz = ins->tz;
 	cdev = ins->cdev;
+	tz = to_thermal_zone(&cdev->device);
+	trip = instance->trip;
 
-	if (!tz || !cdev)
+	if (!tz || !cdev || !trip)
 		return -EINVAL;
 
 	ddr_device = cdev->devdata;
 	max = ddr_device->ddr_status - 1;
 
-	tz->ops->get_trip_hyst(tz, instance->trip, &hyst);
-	tz->ops->get_trip_temp(tz, instance->trip, &trip_temp);
+	hyst = trip->hysteresis;
+	trip_temp = trip->temperature;
 
 	for (i = 0; i < ddr_device->ddr_status; i++) {
 		if (temperature < (trip_temp + (i + 1) * hyst))
@@ -137,7 +139,7 @@ static int ddr_get_requested_power(struct thermal_cooling_device *cdev,
 
 	mutex_lock(&cdev->lock);
 	list_for_each_entry(instance, &cdev->thermal_instances, cdev_node) {
-		tz = instance->tz;
+		tz = to_thermal_zone(&cdev->device);
 		if (cdev->ops && cdev->ops->set_cur_state)
 			*power = (u32)cdev_calc_next_state_by_temp(instance, tz->temperature);
 	}

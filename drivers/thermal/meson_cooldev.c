@@ -37,7 +37,7 @@ struct meson_cooldev {
 
 static struct meson_cooldev *meson_gcooldev;
 
-int get_cool_dev_type(char *type)
+static int get_cool_dev_type(char *type)
 {
 	int i;
 
@@ -243,9 +243,9 @@ static int meson_cooldev_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int meson_cooldev_remove(struct platform_device *pdev)
+static void meson_cooldev_remove(struct platform_device *pdev)
 {
-	return 0;
+	return;
 }
 
 static const struct of_device_id meson_cooldev_of_match[] = {
