@@ -5,9 +5,9 @@ config AMLOGIC_ETH_PRIVE
 	help
 	  Currently has a driver for the Amlogic PHY debug
 
-config STMMAC_ETH
+config AMLOGIC_STMMAC_ETH
 	tristate "STMicroelectronics Multi-Gigabit Ethernet driver"
-	depends on HAS_IOMEM && HAS_DMA && AMLOGIC_KERNEL_VERSION=14515
+	depends on HAS_IOMEM && HAS_DMA
 	depends on PTP_1588_CLOCK_OPTIONAL
 	select MII
 	select PCS_XPCS
@@ -19,21 +19,21 @@ config STMMAC_ETH
 	  This is the driver for the Ethernet IPs built around a
 	  Synopsys IP Core.
 
-if STMMAC_ETH
+if AMLOGIC_STMMAC_ETH
 
 config STMMAC_SELFTESTS
 	bool "Support for STMMAC Selftests"
 	depends on INET
-	depends on STMMAC_ETH
+	depends on AMLOGIC_STMMAC_ETH
 	default n
 	help
 	  This adds support for STMMAC Selftests using ethtool. Enable this
 	  feature if you are facing problems with your HW and submit the test
 	  results to the netdev Mailing List.
 
-config STMMAC_PLATFORM
+config AMLOGIC_STMMAC_PLATFORM
 	tristate "STMMAC Platform bus support"
-	depends on STMMAC_ETH
+	depends on AMLOGIC_STMMAC_ETH
 	select MFD_SYSCON
 	default y
 	help
@@ -45,7 +45,7 @@ config STMMAC_PLATFORM
 
 	  If unsure, say N.
 
-if STMMAC_PLATFORM
+if AMLOGIC_STMMAC_PLATFORM
 
 config DWMAC_DWC_QOS_ETH
 	tristate "Support for snps,dwc-qos-ethernet.txt DT binding."
@@ -55,9 +55,9 @@ config DWMAC_DWC_QOS_ETH
 	help
 	  Support for chips using the snps,dwc-qos-ethernet.txt DT binding.
 
-config DWMAC_GENERIC
+config AMLOGIC_DWMAC_GENERIC
 	tristate "Generic driver for DWMAC"
-	default STMMAC_PLATFORM
+	default AMLOGIC_STMMAC_PLATFORM
 	help
 	  Generic DWMAC driver for platforms that don't require any
 	  platform specific code to function or is using platform
@@ -113,7 +113,7 @@ config DWMAC_MEDIATEK
 
 	  This selects the MT2712 SoC support for the stmmac driver.
 
-config DWMAC_MESON
+config AMLOGIC_DWMAC_MESON
 	tristate "Amlogic Meson dwmac support"
 	depends on OF && COMMON_CLK
 	help

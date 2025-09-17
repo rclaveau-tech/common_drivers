@@ -417,7 +417,7 @@ static int meson8b_init_prg_eth(struct meson8b_dwmac *dwmac)
 #if IS_ENABLED(CONFIG_AMLOGIC_ETH_PRIVE)
 #ifdef CONFIG_PM_SLEEP
 static bool mac_wol_enable;
-void set_wol_notify_bl31(u32 enable_bl31)
+static void set_wol_notify_bl31(u32 enable_bl31)
 {
 	struct arm_smccc_res res;
 
@@ -453,7 +453,7 @@ static int aml_custom_setting(struct platform_device *pdev, struct meson8b_dwmac
 	if (of_property_read_u32(np, "internal_phy", &internal_phy) != 0)
 		pr_info("use default internal_phy as 0\n");
 
-	ndev->wol_enabled = true;
+	ndev->ethtool->wol_enabled = true;
 #ifdef CONFIG_PM_SLEEP
 	if (of_property_read_u32(np, "mac_wol", &wol_switch_from_user) == 0)
 		pr_info("feature mac_wol\n");
@@ -461,7 +461,7 @@ static int aml_custom_setting(struct platform_device *pdev, struct meson8b_dwmac
 
 	/*internal_phy 1:inphy;2:exphy; 0 as default*/
 	if (internal_phy == 2) {
-		ndev->wol_enabled = false;
+		ndev->ethtool->wol_enabled = false;
 		if (of_property_read_u32(np, "cali_val", &cali_val) != 0)
 			pr_err("set default cali_val as 0\n");
 		writel(cali_val, dwmac->regs + PRG_ETH1);
@@ -760,7 +760,7 @@ static int meson8b_resume(struct device *dev)
 	if ((wol_switch_from_user) && (without_reset)) {
 		ret = stmmac_resume(dev);
 
-		if (get_resume_method() == ETH_PHY_WAKEUP) {
+		/*if (get_resume_method() == ETH_PHY_WAKEUP) {
 			pr_info("evan---wol rx--KEY_POWER\n");
 			input_event(dwmac->input_dev,
 				EV_KEY, KEY_POWER, 1);
@@ -768,12 +768,12 @@ static int meson8b_resume(struct device *dev)
 			input_event(dwmac->input_dev,
 				EV_KEY, KEY_POWER, 0);
 			input_sync(dwmac->input_dev);
-		}
+		}*/
 		/*RTC wait linkup*/
 		pr_info("eth hold wakelock 5s\n");
 		pm_wakeup_event(dev, 5000);
-		priv->amlogic_task_action = 100;
-		stmmac_trigger_amlogic_task(priv);
+		//priv->amlogic_task_action = 100;
+		//stmmac_trigger_amlogic_task(priv);
 	} else {
 		if (internal_phy != 2) {
 			if (dwmac->data->resume)
@@ -785,28 +785,25 @@ static int meson8b_resume(struct device *dev)
 		ret = stmmac_resume(dev);
 		/*this flow only for txhd2, not for common anymore*/
 		if (phy_mode == 2)
-			stmmac_global_err(priv);
+			dev_warn(dev, "phy_mode == 2 !!!");
 	}
 	return ret;
 }
 
-static int meson8b_dwmac_remove(struct platform_device *pdev)
+static void meson8b_dwmac_remove(struct platform_device *pdev)
 {
 	struct net_device *ndev = platform_get_drvdata(pdev);
 	struct stmmac_priv *priv = netdev_priv(ndev);
-	int err;
 
 	struct meson8b_dwmac *dwmac = get_stmmac_bsp_priv(&pdev->dev);
 
 	input_unregister_device(dwmac->input_dev);
 
-	err = stmmac_dvr_remove(&pdev->dev);
-	if (err < 0)
-		dev_err(&pdev->dev, "failed to remove platform: %d\n", err);
+	stmmac_dvr_remove(&pdev->dev);
 
 	stmmac_remove_config_dt(pdev, priv->plat);
 
-	return err;
+	return;
 }
 
 #ifdef CONFIG_HIBERNATION
@@ -835,15 +832,15 @@ static int meson8b_restore(struct device *dev)
 		writel(mc_val, dwmac->regs + PRG_ETH0);
 	else
 		writel(0x4be04, dwmac->regs + PRG_ETH0);
-	g12a_resume_enable_internal_mdio();
+	//g12a_resume_enable_internal_mdio();
 	/*our phy not support wol by now*/
 	if (phydev)
 		phydev->irq_suspended = 0;
 	ret = stmmac_resume(dev);
-	gxl_resume_internal_registers(phydev);
+	//gxl_resume_internal_registers(phydev);
 
-	priv->amlogic_task_action = 100;
-	stmmac_trigger_amlogic_task(priv);
+	//priv->amlogic_task_action = 100;
+	//stmmac_trigger_amlogic_task(priv);
 
 	return ret;
 }

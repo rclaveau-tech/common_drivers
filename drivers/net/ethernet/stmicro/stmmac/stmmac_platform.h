@@ -19,7 +19,7 @@ void stmmac_remove_config_dt(struct platform_device *pdev,
 int stmmac_get_platform_resources(struct platform_device *pdev,
 				  struct stmmac_resources *stmmac_res);
 
-int stmmac_pltfr_remove(struct platform_device *pdev);
+void stmmac_pltfr_remove(struct platform_device *pdev);
 extern const struct dev_pm_ops stmmac_pltfr_pm_ops;
 #if IS_ENABLED(CONFIG_AMLOGIC_ETH_PRIVE)
 extern void __iomem *phy_analog_config_addr;
