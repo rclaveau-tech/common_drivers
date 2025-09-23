@@ -1608,7 +1608,7 @@
 			};
 
 			reset: reset-controller@2000 {
-				compatible = "amlogic,meson-t7-reset";
+				compatible = "amlogic,t7-reset";
 				reg = <0x0 0x2000 0x0 0x98>;
 				#reset-cells = <1>;
 			};
