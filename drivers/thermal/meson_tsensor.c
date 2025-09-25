@@ -547,19 +547,20 @@ static int meson_get_temp(struct thermal_zone_device *tz, int *temp)
 	return 0;
 }
 
-/*int meson_get_temperature(void)
+int meson_get_temperature(void);
+int meson_get_temperature(void)
 {
 	int temp;
 	int ret;
 
-	ret = meson_get_temp(g_tsensor_data_ptr, &temp);
+	ret = meson_get_temp(g_tsensor_data_ptr->tzd, &temp);
 	if (ret) {
 		pr_debug("meson_get_temp failed!\n");
 		return ret;
 	}
 	return temp / 1000;
 }
-EXPORT_SYMBOL(meson_get_temperature);*/
+EXPORT_SYMBOL(meson_get_temperature);
 
 static void meson_tsensor_work(struct work_struct *work)
 {
