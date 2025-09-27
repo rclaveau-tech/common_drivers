@@ -68,6 +68,7 @@ obj-$(CONFIG_AMLOGIC_NPU)		+= npu/
 obj-m					+= adla/
 obj-$(CONFIG_AMLOGIC_USBCAM)		+= dvb_usbci/
 obj-y	+= misc/
+obj-y	+= gpu/arm/
 
 KBUILD_CFLAGS_MODULE += $(GKI_EXT_KERNEL_MODULE_PREDEFINE)
 all:
