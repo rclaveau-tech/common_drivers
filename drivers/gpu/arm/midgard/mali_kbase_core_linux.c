@@ -4210,6 +4210,8 @@ static ssize_t kbasep_serialize_jobs_debugfs_write(struct file *file, const char
 	CSTD_UNUSED(ppos);
 
 	count = min_t(size_t, sizeof(buf) - 1, count);
+	if (!buf)
+		return -ENOMEM;
 	if (copy_from_user(buf, ubuf, count))
 		return -EFAULT;
 

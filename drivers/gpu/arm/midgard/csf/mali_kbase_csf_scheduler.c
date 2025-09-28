@@ -6795,7 +6795,7 @@ int kbase_csf_scheduler_init(struct kbase_device *kbdev)
 #endif /* !CONFIG_MALI_NO_MALI */
 
 	spin_lock_init(&scheduler->gpu_metrics_lock);
-	hrtimer_init(&scheduler->gpu_metrics_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL_SOFT);
+	hrtimer_setup(&scheduler->gpu_metrics_timer, &gpu_metrics_timer_callback, CLOCK_MONOTONIC, HRTIMER_MODE_REL_SOFT);
 	scheduler->gpu_metrics_timer.function = gpu_metrics_timer_callback;
 #endif /* CONFIG_MALI_TRACE_POWER_GPU_WORK_PERIOD */
 
@@ -6827,7 +6827,7 @@ int kbase_csf_scheduler_early_init(struct kbase_device *kbdev)
 	KBASE_KTRACE_ADD(kbdev, SCHED_SUSPENDED, NULL, scheduler->state);
 	scheduler->csg_scheduling_period_ms = CSF_SCHEDULER_TIME_TICK_MS;
 	scheduler_doorbell_init(kbdev);
-	hrtimer_init(&scheduler->tick_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+	hrtimer_setup(&scheduler->tick_timer, &tick_timer_callback, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 	scheduler->tick_timer.function = tick_timer_callback;
 
 	atomic_set(&scheduler->pending_sync_update_works, false);
