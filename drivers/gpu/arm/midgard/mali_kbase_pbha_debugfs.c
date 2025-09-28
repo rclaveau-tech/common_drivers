@@ -95,6 +95,8 @@ static ssize_t int_id_overrides_write(struct file *file, const char __user *ubuf
 
 	if (count >= sizeof(raw_str))
 		return -E2BIG;
+	if(!raw_str)
+		return -ENOMEM;
 	if (copy_from_user(raw_str, ubuf, count))
 		return -EINVAL;
 	raw_str[count] = '\0';
