@@ -451,12 +451,17 @@ stmmac_probe_config_dt(struct platform_device *pdev, u8 *mac)
 	if (!plat)
 		return ERR_PTR(-ENOMEM);
 
-	rc = of_get_mac_address(np, mac);
-	if (rc) {
-		if (rc == -EPROBE_DEFER)
-			return ERR_PTR(rc);
+	extern ssize_t efuse_user_attr_read(char *name, char *buf);
 
-		eth_zero_addr(mac);
+	rc = efuse_user_attr_read("mac", mac);
+	if (rc < 0) {
+		rc = of_get_mac_address(np, mac);
+		if (rc) {
+			if (rc == -EPROBE_DEFER)
+				return ERR_PTR(rc);
+
+			eth_zero_addr(mac);
+		}
 	}
 
 	phy_mode = device_get_phy_mode(&pdev->dev);
