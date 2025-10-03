@@ -296,7 +296,7 @@ static void secure_reg_update(struct vpu_secure_ins *ins,
 	}
 }
 
-u32 set_vpu_module_security(struct vpu_secure_ins *ins,
+static u32 set_vpu_module_security(struct vpu_secure_ins *ins,
 			    enum secure_module_e module,
 			    u32 secure_src, u32 vpp_index)
 {
@@ -527,8 +527,8 @@ int secure_config(enum secure_module_e module, int secure_src, u32 vpp_index)
 }
 EXPORT_SYMBOL(secure_config);
 
-static ssize_t vpu_security_info_show(struct class *cla,
-				      struct class_attribute *attr, char *buf)
+static ssize_t vpu_security_info_show(const struct class *cla,
+				      const struct class_attribute *attr, char *buf)
 {
 	struct vpu_security_device_info *info = &vpu_security_info;
 
@@ -536,14 +536,14 @@ static ssize_t vpu_security_info_show(struct class *cla,
 		info->mismatch_cnt);
 }
 
-static ssize_t log_level_show(struct class *cla,
-			      struct class_attribute *attr, char *buf)
+static ssize_t log_level_show(const struct class *cla,
+			      const struct class_attribute *attr, char *buf)
 {
 	return snprintf(buf, 40, "%d\n", log_level);
 }
 
-static ssize_t log_level_store(struct class *cla,
-			       struct class_attribute *attr,
+static ssize_t log_level_store(const struct class *cla,
+			       const struct class_attribute *attr,
 			       const char *buf, size_t count)
 {
 	int res = 0;
@@ -555,8 +555,8 @@ static ssize_t log_level_store(struct class *cla,
 	return count;
 }
 
-static ssize_t debug_value_show(struct class *cla,
-			      struct class_attribute *attr, char *buf)
+static ssize_t debug_value_show(const struct class *cla,
+			      const struct class_attribute *attr, char *buf)
 {
 	ssize_t len = 0;
 
@@ -581,8 +581,8 @@ static ssize_t debug_value_show(struct class *cla,
 	return len;
 }
 
-static ssize_t debug_value_store(struct class *cla,
-			       struct class_attribute *attr,
+static ssize_t debug_value_store(const struct class *cla,
+			       const struct class_attribute *attr,
 			       const char *buf, size_t count)
 {
 	int res = 0;
@@ -687,8 +687,7 @@ static int vpu_security_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 #endif
-	info->clsp = class_create(THIS_MODULE,
-				  CLASS_NAME);
+	info->clsp = class_create(CLASS_NAME);
 	if (IS_ERR(info->clsp)) {
 		ret = PTR_ERR(info->clsp);
 		pr_err("fail to create class\n");
@@ -718,7 +717,7 @@ fail_create_class:
 	return ret;
 }
 
-static int vpu_security_remove(struct platform_device *pdev)
+static void vpu_security_remove(struct platform_device *pdev)
 {
 	int i;
 	struct vpu_security_device_info *info = &vpu_security_info;
@@ -729,7 +728,6 @@ static int vpu_security_remove(struct platform_device *pdev)
 	class_destroy(info->clsp);
 	info->clsp = NULL;
 	info->probed = 0;
-	return 0;
 }
 
 static struct platform_driver vpu_security_driver = {
@@ -741,6 +739,7 @@ static struct platform_driver vpu_security_driver = {
 	},
 };
 
+int __init vpu_security_init(void);
 int __init vpu_security_init(void)
 {
 	int r;
@@ -753,6 +752,7 @@ int __init vpu_security_init(void)
 	return 0;
 }
 
+void __exit vpu_security_exit(void);
 void __exit vpu_security_exit(void)
 {
 	platform_driver_unregister(&vpu_security_driver);

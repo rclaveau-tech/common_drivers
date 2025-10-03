@@ -174,7 +174,7 @@ static inline int is_rdma_done(int rdma_type)
  *    0: Do not execute RDMA configuration.
  *    1: Execute RDMA configuration.
  */
-int need_to_rdma_config(int rdma_type)
+static int need_to_rdma_config(int rdma_type)
 {
 	int run_config = 1;
 
@@ -275,7 +275,7 @@ check_count:
 	return run_config;
 }
 
-int _vsync_rdma_config(int rdma_type)
+static int _vsync_rdma_config(int rdma_type)
 {
 	int iret = 0;
 	int enable_ = cur_enable[rdma_type] & 0xf;
@@ -469,7 +469,7 @@ int pre_vsync_rdma_config(void)
 	return _vsync_rdma_config(PRE_VSYNC_RDMA);
 }
 EXPORT_SYMBOL(pre_vsync_rdma_config);
-void _vsync_rdma_config_pre(int rdma_type)
+static void _vsync_rdma_config_pre(int rdma_type)
 {
 	int enable_ = cur_enable[rdma_type] & 0xf;
 
@@ -718,6 +718,7 @@ static void ex_vsync_rdma_irq(void *arg)
  * success: return index, this index can be used in read-back table
  *   fail: return -1
  */
+s32 VSYNC_ADD_RD_REG(u32 adr);
 s32 VSYNC_ADD_RD_REG(u32 adr)
 {
 	int enable_ = cur_enable[VSYNC_RDMA_READ] & 0xf;
@@ -735,6 +736,7 @@ EXPORT_SYMBOL(VSYNC_ADD_RD_REG);
  * success: return start addr of read-back
  *   fail: return NULL
  */
+u32 *VSYNC_GET_RD_BACK_ADDR(void);
 u32 *VSYNC_GET_RD_BACK_ADDR(void)
 {
 	int enable_ = cur_enable[VSYNC_RDMA_READ] & 0xf;
@@ -935,6 +937,7 @@ int PRE_VSYNC_WR_MPEG_REG_BITS(u32 adr, u32 val, u32 start, u32 len)
 }
 EXPORT_SYMBOL(PRE_VSYNC_WR_MPEG_REG_BITS);
 
+u32 _VSYNC_RD_MPEG_REG(u32 adr);
 u32 _VSYNC_RD_MPEG_REG(u32 adr)
 {
 	u32 read_val = 0;
@@ -951,6 +954,7 @@ u32 _VSYNC_RD_MPEG_REG(u32 adr)
 }
 EXPORT_SYMBOL(_VSYNC_RD_MPEG_REG);
 
+int _VSYNC_WR_MPEG_REG(u32 adr, u32 val);
 int _VSYNC_WR_MPEG_REG(u32 adr, u32 val)
 {
 	int enable_ = cur_enable[LINE_N_INT_RDMA] & 0xf;
@@ -969,6 +973,7 @@ int _VSYNC_WR_MPEG_REG(u32 adr, u32 val)
 }
 EXPORT_SYMBOL(_VSYNC_WR_MPEG_REG);
 
+int _VSYNC_WR_MPEG_REG_BITS(u32 adr, u32 val, u32 start, u32 len);
 int _VSYNC_WR_MPEG_REG_BITS(u32 adr, u32 val, u32 start, u32 len)
 {
 	int enable_ = cur_enable[LINE_N_INT_RDMA] & 0xf;
@@ -1158,10 +1163,10 @@ int get_rdma_type(int handle)
 	return rdma_type;
 }
 
-u32 is_line_n_rdma_enable(void)
+/*u32 is_line_n_rdma_enable(void)
 {
 	return second_rdma_feature;
-}
+}*/
 
 static int parse_para(const char *para, int para_num, int *result)
 {
@@ -1200,15 +1205,15 @@ static int parse_para(const char *para, int para_num, int *result)
 	return count;
 }
 
-static ssize_t show_second_rdma_feature(struct class *class,
-					struct class_attribute *attr,
+static ssize_t show_second_rdma_feature(const struct class *class,
+					const struct class_attribute *attr,
 					char *buf)
 {
 	return snprintf(buf, 40, "%d\n", second_rdma_feature);
 }
 
-static ssize_t store_second_rdma_feature(struct class *class,
-					 struct class_attribute *attr,
+static ssize_t store_second_rdma_feature(const struct class *class,
+					 const struct class_attribute *attr,
 					 const char *buf, size_t count)
 {
 	int res = 0;
@@ -1221,8 +1226,8 @@ static ssize_t store_second_rdma_feature(struct class *class,
 	return count;
 }
 
-static ssize_t show_enable(struct class *class,
-			   struct class_attribute *attr,
+static ssize_t show_enable(const struct class *class,
+			   const struct class_attribute *attr,
 			   char *buf)
 {
 	int i;
@@ -1236,8 +1241,8 @@ static ssize_t show_enable(struct class *class,
 			enable_flag);
 }
 
-static ssize_t store_enable(struct class *class,
-			    struct class_attribute *attr,
+static ssize_t store_enable(const struct class *class,
+			    const struct class_attribute *attr,
 			    const char *buf, size_t count)
 {
 	int i = 0;
@@ -1251,8 +1256,8 @@ static ssize_t store_enable(struct class *class,
 	return count;
 }
 
-static ssize_t show_irq_count(struct class *class,
-			      struct class_attribute *attr,
+static ssize_t show_irq_count(const struct class *class,
+			      const struct class_attribute *attr,
 			      char *buf)
 {
 	int i;
@@ -1267,8 +1272,8 @@ static ssize_t show_irq_count(struct class *class,
 	return snprintf(buf, PAGE_SIZE, "irq count: %s\n", buf_str);
 }
 
-static ssize_t store_irq_count(struct class *class,
-			       struct class_attribute *attr,
+static ssize_t store_irq_count(const struct class *class,
+			       const struct class_attribute *attr,
 			       const char *buf, size_t count)
 {
 	int i = 0;
@@ -1289,8 +1294,8 @@ static ssize_t store_irq_count(struct class *class,
 	return count;
 }
 
-static ssize_t show_debug_flag(struct class *class,
-			       struct class_attribute *attr,
+static ssize_t show_debug_flag(const struct class *class,
+			       const struct class_attribute *attr,
 			       char *buf)
 {
 	int i;
@@ -1305,8 +1310,8 @@ static ssize_t show_debug_flag(struct class *class,
 	return snprintf(buf, PAGE_SIZE, "debug_flag: %s\n", buf_str);
 }
 
-static ssize_t store_debug_flag(struct class *class,
-				struct class_attribute *attr,
+static ssize_t store_debug_flag(const struct class *class,
+				const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	int channel = 0;
@@ -1327,8 +1332,8 @@ static ssize_t store_debug_flag(struct class *class,
 	return count;
 }
 
-static ssize_t show_vsync_cfg_count(struct class *class,
-				    struct class_attribute *attr,
+static ssize_t show_vsync_cfg_count(const struct class *class,
+				    const struct class_attribute *attr,
 				    char *buf)
 {
 	int i;
@@ -1343,8 +1348,8 @@ static ssize_t show_vsync_cfg_count(struct class *class,
 	return snprintf(buf, PAGE_SIZE, "vsync_cfg_count: %s\n", buf_str);
 }
 
-static ssize_t store_vsync_cfg_count(struct class *class,
-				     struct class_attribute *attr,
+static ssize_t store_vsync_cfg_count(const struct class *class,
+				     const struct class_attribute *attr,
 				     const char *buf, size_t count)
 {
 	int i = 0;
@@ -1365,8 +1370,8 @@ static ssize_t store_vsync_cfg_count(struct class *class,
 	return count;
 }
 
-static ssize_t show_force_rdma_config(struct class *class,
-				      struct class_attribute *attr,
+static ssize_t show_force_rdma_config(const struct class *class,
+				      const struct class_attribute *attr,
 				      char *buf)
 {
 	int i;
@@ -1381,8 +1386,8 @@ static ssize_t show_force_rdma_config(struct class *class,
 	return snprintf(buf, PAGE_SIZE, "force_rdma_config: %s\n", buf_str);
 }
 
-static ssize_t store_force_rdma_config(struct class *class,
-				       struct class_attribute *attr,
+static ssize_t store_force_rdma_config(const struct class *class,
+				       const struct class_attribute *attr,
 				       const char *buf, size_t count)
 {
 	int rdma_type = VSYNC_RDMA;
@@ -1403,8 +1408,8 @@ static ssize_t store_force_rdma_config(struct class *class,
 	return count;
 }
 
-static ssize_t show_rdma_done_detect(struct class *class,
-				     struct class_attribute *attr,
+static ssize_t show_rdma_done_detect(const struct class *class,
+				     const struct class_attribute *attr,
 				     char *buf)
 {
 	return snprintf(buf, PAGE_SIZE,
@@ -1412,8 +1417,8 @@ static ssize_t show_rdma_done_detect(struct class *class,
 			use_rdma_done_detect, no_rdma_done_max_cnt);
 }
 
-static ssize_t store_rdma_done_detect(struct class *class,
-				      struct class_attribute *attr,
+static ssize_t store_rdma_done_detect(const struct class *class,
+				      const struct class_attribute *attr,
 				      const char *buf, size_t count)
 {
 	int parsed[2];
@@ -1452,7 +1457,7 @@ static int create_rdma_class(void)
 {
 	int i;
 
-	rdma_class = class_create(THIS_MODULE, "rdma");
+	rdma_class = class_create("rdma");
 	if (IS_ERR_OR_NULL(rdma_class)) {
 		pr_err("create rdma_class failed\n");
 		return -1;

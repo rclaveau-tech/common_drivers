@@ -43,4 +43,9 @@ struct vfmctl {
 #define VFM_IOCTL_CMD_SET   _IOW(VFM_IOC_MAGIC, 0x04, struct vfmctl)
 #define VFM_IOCTL_CMD_GET   _IOWR(VFM_IOC_MAGIC, 0x05, struct vfmctl)
 
+int __init vfm_class_init(void);
+void __exit vfm_class_exit(void);
+void vfm_dump_one(const char *name);
+bool vf_check_node(const char *name);
+
 #endif

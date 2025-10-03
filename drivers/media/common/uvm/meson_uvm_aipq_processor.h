@@ -42,5 +42,5 @@ struct ge2d_output_t {
 int attach_aipq_hook_mod_info(int shared_fd,
 		char *buf, struct uvm_hook_mod_info *mod_info);
 int aipq_setinfo(void *arg, char *buf);
-int aipq_getinfo(void *arg, char *buf);
+//int aipq_getinfo(void *arg, char *buf);
 

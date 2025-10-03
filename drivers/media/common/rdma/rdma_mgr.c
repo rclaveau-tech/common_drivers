@@ -683,7 +683,7 @@ unsigned int rdma_hw_done_bit(void)
 }
 
 static int rdma_isr_count;
-irqreturn_t rdma_mgr_isr(int irq, void *dev_id)
+static irqreturn_t rdma_mgr_isr(int irq, void *dev_id)
 {
 	struct rdma_device_info *info = &rdma_info;
 	int retry_count = 0;
@@ -1780,15 +1780,15 @@ int rdma_end_addr_msb(int handle)
 }
 EXPORT_SYMBOL(rdma_end_addr_msb);
 
-static ssize_t show_debug_flag(struct class *class,
-			       struct class_attribute *attr,
+static ssize_t show_debug_flag(const struct class *class,
+			       const struct class_attribute *attr,
 			       char *buf)
 {
 	return snprintf(buf, 40, "%d\n", debug_flag);
 }
 
-static ssize_t store_debug_flag(struct class *class,
-				struct class_attribute *attr,
+static ssize_t store_debug_flag(const struct class *class,
+				const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	int res = 0;
@@ -1801,15 +1801,15 @@ static ssize_t store_debug_flag(struct class *class,
 	return count;
 }
 
-static ssize_t show_rdma_watchdog(struct class *class,
-				  struct class_attribute *attr,
+static ssize_t show_rdma_watchdog(const struct class *class,
+				  const struct class_attribute *attr,
 				  char *buf)
 {
 	return snprintf(buf, 40, "%d\n", rdma_watchdog);
 }
 
-static ssize_t store_rdma_watchdog(struct class *class,
-				   struct class_attribute *attr,
+static ssize_t store_rdma_watchdog(const struct class *class,
+				   const struct class_attribute *attr,
 				   const char *buf, size_t count)
 {
 	int res = 0;
@@ -1822,15 +1822,15 @@ static ssize_t store_rdma_watchdog(struct class *class,
 	return count;
 }
 
-static ssize_t show_reset_count(struct class *class,
-				struct class_attribute *attr,
+static ssize_t show_reset_count(const struct class *class,
+				const struct class_attribute *attr,
 				char *buf)
 {
 	return snprintf(buf, 40, "%d\n", reset_count);
 }
 
-static ssize_t store_reset_count(struct class *class,
-				 struct class_attribute *attr,
+static ssize_t store_reset_count(const struct class *class,
+				 const struct class_attribute *attr,
 				 const char *buf, size_t count)
 {
 	int res = 0;
@@ -1843,15 +1843,15 @@ static ssize_t store_reset_count(struct class *class,
 	return count;
 }
 
-static ssize_t show_ctrl_ahb_rd_burst_size(struct class *class,
-					   struct class_attribute *attr,
+static ssize_t show_ctrl_ahb_rd_burst_size(const struct class *class,
+					   const struct class_attribute *attr,
 					   char *buf)
 {
 	return snprintf(buf, 40, "%d\n", ctrl_ahb_rd_burst_size);
 }
 
-static ssize_t store_ctrl_ahb_rd_burst_size(struct class *class,
-					    struct class_attribute *attr,
+static ssize_t store_ctrl_ahb_rd_burst_size(const struct class *class,
+					    const struct class_attribute *attr,
 					    const char *buf, size_t count)
 {
 	int res = 0;
@@ -1865,15 +1865,15 @@ static ssize_t store_ctrl_ahb_rd_burst_size(struct class *class,
 	return count;
 }
 
-static ssize_t show_ctrl_ahb_wr_burst_size(struct class *class,
-					   struct class_attribute *attr,
+static ssize_t show_ctrl_ahb_wr_burst_size(const struct class *class,
+					   const struct class_attribute *attr,
 					   char *buf)
 {
 	return snprintf(buf, 40, "%d\n", ctrl_ahb_wr_burst_size);
 }
 
-static ssize_t store_ctrl_ahb_wr_burst_size(struct class *class,
-					    struct class_attribute *attr,
+static ssize_t store_ctrl_ahb_wr_burst_size(const struct class *class,
+					    const struct class_attribute *attr,
 					    const char *buf, size_t count)
 {
 	int res = 0;
@@ -1926,15 +1926,15 @@ static int parse_para(const char *para, int para_num, int *result)
 	return count;
 }
 
-static ssize_t rdma_mgr_trace_enable_show(struct class *cla,
-					  struct class_attribute *attr,
+static ssize_t rdma_mgr_trace_enable_show(const struct class *cla,
+					  const struct class_attribute *attr,
 					  char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%x\n", rdma_trace_enable);
 }
 
-static ssize_t rdma_mgr_trace_enable_stroe(struct class *cla,
-					   struct class_attribute *attr,
+static ssize_t rdma_mgr_trace_enable_stroe(const struct class *cla,
+					   const struct class_attribute *attr,
 					   const char *buf, size_t count)
 {
 	int ret = 0;
@@ -1945,8 +1945,8 @@ static ssize_t rdma_mgr_trace_enable_stroe(struct class *cla,
 	return count;
 }
 
-static ssize_t rdma_mgr_trace_reg_show(struct class *cla,
-				       struct class_attribute *attr, char *buf)
+static ssize_t rdma_mgr_trace_reg_show(const struct class *cla,
+				       const struct class_attribute *attr, char *buf)
 {
 	int i;
 	char reg_info[16];
@@ -1966,8 +1966,8 @@ static ssize_t rdma_mgr_trace_reg_show(struct class *cla,
 	return i;
 }
 
-static ssize_t rdma_mgr_trace_reg_stroe(struct class *cla,
-					struct class_attribute *attr,
+static ssize_t rdma_mgr_trace_reg_stroe(const struct class *cla,
+					const struct class_attribute *attr,
 					const char *buf, size_t count)
 {
 	int parsed[MAX_TRACE_NUM];
@@ -1986,16 +1986,16 @@ static ssize_t rdma_mgr_trace_reg_stroe(struct class *cla,
 	return count;
 }
 
-static ssize_t show_ex_vsync_rdma(struct class *class,
-			       struct class_attribute *attr,
+static ssize_t show_ex_vsync_rdma(const struct class *class,
+			       const struct class_attribute *attr,
 			       char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%d\n",
 			get_ex_vsync_rdma_enable());
 }
 
-static ssize_t store_ex_vsync_rdma(struct class *class,
-				struct class_attribute *attr,
+static ssize_t store_ex_vsync_rdma(const struct class *class,
+				const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	int res = 0;
@@ -2008,8 +2008,8 @@ static ssize_t store_ex_vsync_rdma(struct class *class,
 	return count;
 }
 
-static ssize_t rdma_irq_count_show(struct class *cla,
-				       struct class_attribute *attr, char *buf)
+static ssize_t rdma_irq_count_show(const struct class *cla,
+				       const struct class_attribute *attr, char *buf)
 {
 	int i;
 	char str_info[1024];
@@ -2033,15 +2033,15 @@ static ssize_t rdma_irq_count_show(struct class *cla,
 	return i;
 }
 
-static ssize_t rdma_mgr_trace_channel_show(struct class *cla,
-					  struct class_attribute *attr,
+static ssize_t rdma_mgr_trace_channel_show(const struct class *cla,
+					  const struct class_attribute *attr,
 					  char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%x\n", rdma_trace_channel);
 }
 
-static ssize_t rdma_mgr_trace_channel_stroe(struct class *cla,
-					   struct class_attribute *attr,
+static ssize_t rdma_mgr_trace_channel_stroe(const struct class *cla,
+					   const struct class_attribute *attr,
 					   const char *buf, size_t count)
 {
 	int ret = 0;
@@ -2052,8 +2052,8 @@ static ssize_t rdma_mgr_trace_channel_stroe(struct class *cla,
 	return count;
 }
 
-static ssize_t store_rdma_reset(struct class *class,
-				 struct class_attribute *attr,
+static ssize_t store_rdma_reset(const struct class *class,
+				 const struct class_attribute *attr,
 				 const char *buf, size_t count)
 {
 	int res = 0;
@@ -2065,8 +2065,8 @@ static ssize_t store_rdma_reset(struct class *class,
 	return count;
 }
 
-static ssize_t show_enable(struct class *class,
-			   struct class_attribute *attr,
+static ssize_t show_enable(const struct class *class,
+			   const struct class_attribute *attr,
 			   char *buf)
 {
 	int i;
@@ -2080,8 +2080,8 @@ static ssize_t show_enable(struct class *class,
 			enable_flag);
 }
 
-static ssize_t store_enable(struct class *class,
-			    struct class_attribute *attr,
+static ssize_t store_enable(const struct class *class,
+			    const struct class_attribute *attr,
 			    const char *buf, size_t count)
 {
 	int i = 0;
@@ -2127,7 +2127,7 @@ static int create_rdma_mgr_class(void)
 {
 	int i;
 
-	rdma_mgr_class = class_create(THIS_MODULE, RDMA_MGR_CLASS_NAME);
+	rdma_mgr_class = class_create(RDMA_MGR_CLASS_NAME);
 	if (IS_ERR_OR_NULL(rdma_mgr_class)) {
 		pr_err("create rdma_mgr_class failed\n");
 		return -1;
@@ -2385,7 +2385,7 @@ static const struct dev_pm_ops rdma_pm_ops = {
 #endif
 
 /* static int __devexit rdma_remove(struct platform_device *pdev) */
-static int rdma_remove(struct platform_device *pdev)
+static void rdma_remove(struct platform_device *pdev)
 {
 	pr_error("RDMA driver removed.\n");
 	remove_rdma_mgr_class();
@@ -2394,7 +2394,6 @@ static int rdma_remove(struct platform_device *pdev)
 	vpu_dev_mem_power_down(rdma_vpu_dev);
 	vpu_dev_unregister(rdma_vpu_dev);
 #endif
-	return 0;
 }
 
 static struct platform_driver rdma_driver = {
@@ -2406,11 +2405,13 @@ static struct platform_driver rdma_driver = {
 	},
 };
 
+int __init amrdma_init(void);
 int __init amrdma_init(void)
 {
 	return platform_driver_probe(&rdma_driver, rdma_probe);
 }
 
+void __exit amrdma_exit(void);
 void __exit amrdma_exit(void)
 {
 	platform_driver_unregister(&rdma_driver);

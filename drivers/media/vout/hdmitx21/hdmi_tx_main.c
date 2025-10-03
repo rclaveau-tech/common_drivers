@@ -36,6 +36,7 @@
 #include <linux/reboot.h>
 #include <linux/i2c.h>
 #include <linux/miscdevice.h>
+#include <linux/of_device.h>
 //#include <linux/amlogic/cpu_version.h>
 #include <linux/amlogic/media/vout/vinfo.h>
 #include <linux/amlogic/media/vout/vout_notify.h>
@@ -203,16 +204,16 @@ static struct vout_device_s hdmitx_vdev = {
 	.fresh_tx_emp_pkt = hdmitx_set_emp_pkt,
 };
 
-int hdmitx21_set_uevent_state(enum hdmitx_event type, int state)
+/*int hdmitx21_set_uevent_state(enum hdmitx_event type, int state)
 {
 	struct hdmitx_dev *hdev = get_hdmitx21_device();
 
 	return hdmitx_event_mgr_set_uevent_state(hdev->tx_comm.event_mgr,
 				type, state);
-}
+}*/
 
 static u32 is_passthrough_switch;
-int hdmitx21_set_uevent(enum hdmitx_event type, int val)
+static int hdmitx21_set_uevent(enum hdmitx_event type, int val)
 {
 	struct hdmitx_dev *hdev = get_hdmitx21_device();
 
@@ -1764,7 +1765,7 @@ static void hdmitx_set_cuva_hdr_vs_emds(struct cuva_hdr_vs_emds_para *data)
 }
 
 //SBTM PKT test
-void hdmitx21_send_sbtm_pkt(void)
+static void hdmitx21_send_sbtm_pkt(void)
 {
 	u8 hb[3] = {0x0};
 	u8 pb[28] = {0x0};
@@ -2344,6 +2345,7 @@ static ssize_t ll_user_mode_store(struct device *dev,
  * interface for hdmirx module
  * ret: false if not update, true if updated
  */
+bool hdmitx_update_latency_info(struct tvin_latency_s *latency_info);
 bool hdmitx_update_latency_info(struct tvin_latency_s *latency_info)
 {
 	struct hdmitx_dev *hdev = get_hdmitx21_device();
@@ -4337,18 +4339,18 @@ static int amhdmitx_get_dt_info(struct platform_device *pdev, struct hdmitx_dev 
 	}
 
 	tx_hw_base = &hdev->tx_hw.base;
-	tx_hw_base->hdmitx_gpios_hpd = of_get_named_gpio_flags(pdev->dev.of_node,
-		"hdmitx-gpios-hpd", 0, NULL);
+	tx_hw_base->hdmitx_gpios_hpd = of_get_named_gpio(pdev->dev.of_node,
+		"hpd-gpios", 0);
 	if (tx_hw_base->hdmitx_gpios_hpd == -EPROBE_DEFER)
-		HDMITX_ERROR("get hdmitx-gpios-hpd error\n");
-	tx_hw_base->hdmitx_gpios_scl = of_get_named_gpio_flags(pdev->dev.of_node,
-		"hdmitx-gpios-scl", 0, NULL);
+		HDMITX_ERROR("get hpd-gpios error\n");
+	tx_hw_base->hdmitx_gpios_scl = of_get_named_gpio(pdev->dev.of_node,
+		"scl-gpios", 0);
 	if (tx_hw_base->hdmitx_gpios_scl == -EPROBE_DEFER)
-		HDMITX_ERROR("get hdmitx-gpios-scl error\n");
-	tx_hw_base->hdmitx_gpios_sda = of_get_named_gpio_flags(pdev->dev.of_node,
-		"hdmitx-gpios-sda", 0, NULL);
+		HDMITX_ERROR("get scl-gpios error\n");
+	tx_hw_base->hdmitx_gpios_sda = of_get_named_gpio(pdev->dev.of_node,
+		"sda-gpios", 0);
 	if (tx_hw_base->hdmitx_gpios_sda == -EPROBE_DEFER)
-		HDMITX_ERROR("get hdmitx-gpios-sda error\n");
+		HDMITX_ERROR("get sda-gpios error\n");
 
 #ifdef CONFIG_OF
 	if (pdev->dev.of_node) {
@@ -4443,10 +4445,8 @@ static int amhdmitx_get_dt_info(struct platform_device *pdev, struct hdmitx_dev 
 		ret = of_property_read_u32(pdev->dev.of_node,
 					   "hdcp_type_policy", &val);
 		if (!ret) {
-			if (val == 2)
-				;
-			if (val == 1)
-				;
+			if (val == 2) {}
+			if (val == 1) {}
 		}
 		ret = of_property_read_u32(pdev->dev.of_node,
 					   "enc_idx", &val);
@@ -4587,7 +4587,7 @@ static void amhdmitx_clktree_probe(struct device *hdmitx_dev, struct hdmitx_dev 
 		hdev->hdmitx_clk_tree.venci_1_gate = venci_1_gate;
 }
 
-void amhdmitx21_vpu_dev_register(struct hdmitx_dev *hdev)
+static void amhdmitx21_vpu_dev_register(struct hdmitx_dev *hdev)
 {
 	hdev->hdmitx_vpu_clk_gate_dev =
 	vpu_dev_register(VPU_VENCI, DEVICE_NAME);
@@ -4741,7 +4741,7 @@ static int amhdmitx_probe(struct platform_device *pdev)
 	hdev->cdev.owner = THIS_MODULE;
 	r = cdev_add(&hdev->cdev, hdev->hdmitx_id, HDMI_TX_COUNT);
 
-	hdmitx_class = class_create(THIS_MODULE, "amhdmitx");
+	hdmitx_class = class_create("amhdmitx");
 	if (IS_ERR(hdmitx_class)) {
 		unregister_chrdev_region(hdev->hdmitx_id, HDMI_TX_COUNT);
 		return -1;
@@ -4918,7 +4918,7 @@ static int amhdmitx_probe(struct platform_device *pdev)
 	return r;
 }
 
-static int amhdmitx_remove(struct platform_device *pdev)
+static void amhdmitx_remove(struct platform_device *pdev)
 {
 	struct hdmitx_dev *hdev = dev_get_drvdata(&pdev->dev);
 	struct device *dev = hdev->hdtx_dev;
@@ -4999,7 +4999,6 @@ static int amhdmitx_remove(struct platform_device *pdev)
 
 	unregister_chrdev_region(hdev->hdmitx_id, HDMI_TX_COUNT);
 	hdmitx_common_destroy(&hdev->tx_comm);
-	return 0;
 }
 
 static void hdmitx_clk_ctrl(struct hdmitx_dev *hdev, bool en)
@@ -5124,6 +5123,7 @@ static struct platform_driver amhdmitx_driver = {
 	}
 };
 
+int  __init amhdmitx21_init(void);
 int  __init amhdmitx21_init(void)
 {
 	struct hdmitx_boot_param *param = get_hdmitx_boot_params();
@@ -5135,6 +5135,7 @@ int  __init amhdmitx21_init(void)
 	return platform_driver_register(&amhdmitx_driver);
 }
 
+void __exit amhdmitx21_exit(void);
 void __exit amhdmitx21_exit(void)
 {
 	HDMITX_INFO("%s\n", __func__);

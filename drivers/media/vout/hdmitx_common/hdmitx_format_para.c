@@ -72,6 +72,10 @@ void hdmitx_parse_color_attr(char const *attr_str,
 int hdmitx_format_para_init(struct hdmi_format_para *para,
 		enum hdmi_vic vic, u32 frac_rate_policy,
 		enum hdmi_colorspace cs, enum hdmi_color_depth cd,
+		enum hdmi_quantization_range cr);
+int hdmitx_format_para_init(struct hdmi_format_para *para,
+		enum hdmi_vic vic, u32 frac_rate_policy,
+		enum hdmi_colorspace cs, enum hdmi_color_depth cd,
 		enum hdmi_quantization_range cr)
 {
 	int ret = 0;

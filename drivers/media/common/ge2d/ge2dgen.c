@@ -5,6 +5,7 @@
 
 /* Amlogic Headers */
 #include <linux/amlogic/media/ge2d/ge2d.h>
+#include "ge2dgen.h"
 
 static inline void _set_src1_format(struct ge2d_src1_data_s *src1_data_cfg,
 				    struct ge2d_src1_gen_s *src1_gen_cfg,

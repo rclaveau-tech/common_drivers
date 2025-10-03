@@ -24,9 +24,9 @@
 
 #include "meson_uvm_aiface_processor.h"
 
-static int aiface_canvas[4] = {-1, -1, -1, -1};
-static struct ge2d_context_s *context;
-static struct mutex ge2d_canvas_mutex;
+//static int aiface_canvas[4] = {-1, -1, -1, -1};
+//static struct ge2d_context_s *context;
+//static struct mutex ge2d_canvas_mutex;
 
 static int uvm_aiface_debug;
 module_param(uvm_aiface_debug, int, 0644);
@@ -51,7 +51,7 @@ struct ge2d_output_t {
 	phys_addr_t addr;
 };
 
-int aiface_print(int debug_flag, const char *fmt, ...)
+static int aiface_print(int debug_flag, const char *fmt, ...)
 {
 	if ((uvm_aiface_debug & debug_flag) ||
 	    debug_flag == PRINT_ERROR) {
@@ -68,7 +68,7 @@ int aiface_print(int debug_flag, const char *fmt, ...)
 	return 0;
 }
 
-struct vframe_s *aiface_get_dw_vf(struct uvm_aiface_info *aiface_info)
+static struct vframe_s *aiface_get_dw_vf(struct uvm_aiface_info *aiface_info)
 {
 	struct uvm_hook_mod *uhmod = NULL;
 	struct dma_buf *dmabuf = NULL;
@@ -154,7 +154,7 @@ struct vframe_s *aiface_get_dw_vf(struct uvm_aiface_info *aiface_info)
 	return vf;
 }
 
-static int get_canvas(u32 index)
+/*static int get_canvas(u32 index)
 {
 	const char *owner = "aiface";
 
@@ -164,9 +164,9 @@ static int get_canvas(u32 index)
 	if (aiface_canvas[index] < 0)
 		aiface_print(PRINT_ERROR, "no canvas\n");
 	return aiface_canvas[index];
-}
+}*/
 
-static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
+/*static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 {
 	struct config_para_ex_s ge2d_config_s;
 	struct config_para_ex_s *ge2d_config = &ge2d_config_s;
@@ -250,7 +250,7 @@ static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 	    interlace_mode == VIDTYPE_INTERLACE_TOP) {
 		input_height >>= 1;
 	} else if (vf->height > uvm_aiface_skip_height) {
-		/*used to reduce bandwidth by change format to interlace*/
+		*//*used to reduce bandwidth by change format to interlace*//*
 		aiface_print(PRINT_OTHER, "use interlace format.\n");
 		input_height >>= 1;
 		src_format |= (GE2D_FMT_M24_YUV420T & (3 << 3));
@@ -294,7 +294,7 @@ static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 	ge2d_config->src_para.height = input_height;
 	ge2d_config->alu_const_color = 0;
 	ge2d_config->bitmask_en = 0;
-	ge2d_config->src1_gb_alpha = 0;/* 0xff; */
+	ge2d_config->src1_gb_alpha = 0;*//* 0xff; *//*
 	ge2d_config->src2_para.mem_type = CANVAS_TYPE_INVALID;
 	ge2d_config->dst_para.canvas_index = output_canvas;
 
@@ -321,12 +321,12 @@ static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 			   0, 0, output->width, output->height);
 
 	return 0;
-}
+}*/
 
-void free_aiface_data(void *arg)
+static void free_aiface_data(void *arg)
 {
 	if (arg)
-		vfree(arg);
+		kvfree(arg);
 	else
 		aiface_print(PRINT_ERROR, "%s NULL\n", __func__);
 }
@@ -388,7 +388,7 @@ int attach_aiface_hook_mod_info(int shared_fd,
 	handle = dmabuf->priv;
 	uhmod = uvm_get_hook_mod(dmabuf, PROCESS_AIFACE);
 	if (IS_ERR_OR_NULL(uhmod)) {
-		nn_aiface = vmalloc(sizeof(*nn_aiface));
+		nn_aiface = kvmalloc(sizeof(*nn_aiface), GFP_KERNEL);
 		memset(nn_aiface, 0, sizeof(*nn_aiface));
 		aiface_print(PRINT_OTHER, "attach:first attach, need alloc\n");
 		if (!nn_aiface) {
@@ -427,7 +427,7 @@ int attach_aiface_hook_mod_info(int shared_fd,
 	info->arg = nn_aiface;
 	info->free = free_aiface_data;
 	info->acquire_fence = NULL;
-	info->getinfo = aiface_getinfo;
+	//info->getinfo = aiface_getinfo;
 	info->setinfo = aiface_setinfo;
 
 	return 0;
@@ -481,7 +481,7 @@ int aiface_setinfo(void *arg, char *buf)
 	return 0;
 }
 
-static void dump_vf(struct vframe_s *vf, phys_addr_t addr, struct uvm_aiface_info *info, int num)
+/*static void dump_vf(struct vframe_s *vf, phys_addr_t addr, struct uvm_aiface_info *info, int num)
 {
 #ifdef CONFIG_AMLOGIC_ENABLE_VIDEO_PIPELINE_DUMP_DATA
 	struct file *fp;
@@ -545,9 +545,9 @@ static void dump_vf(struct vframe_s *vf, phys_addr_t addr, struct uvm_aiface_inf
 	codec_mm_unmap_phyaddr(data_uv);
 	filp_close(fp, NULL);
 #endif
-}
+}*/
 
-int aiface_getinfo(void *arg, char *buf)
+/*int aiface_getinfo(void *arg, char *buf)
 {
 	struct uvm_aiface_info *aiface_info = NULL;
 	int ret = -1;
@@ -655,5 +655,5 @@ int aiface_getinfo(void *arg, char *buf)
 		}
 	}
 	return 0;
-}
+}*/
 

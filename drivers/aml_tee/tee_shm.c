@@ -50,7 +50,11 @@ static int shm_get_kernel_pages(unsigned long start, size_t page_count,
 			kiov[n].iov_len = PAGE_SIZE;
 		}
 
-		rc = get_kernel_pages(kiov, page_count, 0, pages);
+		size_t n;
+
+		for (n = 0; n < page_count; n++)
+			get_page(pages[n]);
+
 		kfree(kiov);
 	}
 
@@ -274,7 +278,7 @@ register_shm_helper(struct tee_context *ctx, unsigned long addr,
 
 	if (flags & TEE_SHM_USER_MAPPED)
 		rc = pin_user_pages(start, num_pages, FOLL_WRITE | FOLL_LONGTERM,
-					 shm->pages, NULL);
+					 shm->pages);
 	else
 		rc = shm_get_kernel_pages(start, num_pages, shm->pages);
 	if (rc > 0)

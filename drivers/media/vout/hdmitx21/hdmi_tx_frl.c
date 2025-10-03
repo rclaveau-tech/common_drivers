@@ -271,12 +271,12 @@ static void poll_update_flags(struct frl_train_t *p)
 #define FRL_EVENT_CHANGE    BIT(7) /* Change FRL Rate */
 
 /* TODO */
-void frl_tx_callback(u8 event)
+static void frl_tx_callback(u8 event)
 {
 }
 
 /* init the FRL mode */
-bool frl_tx_frl_mode_init(struct frl_train_t *p,
+static bool frl_tx_frl_mode_init(struct frl_train_t *p,
 	struct rx_cap *rxcap, bool force_legacy)
 {
 	u8 sink_ver;

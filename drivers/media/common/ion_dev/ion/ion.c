@@ -62,7 +62,7 @@ static void ion_plist_check_head(struct plist_head *head)
 	ion_plist_check_list(&head->node_list);
 }
 
-void ion_plist_add(struct plist_node *node, struct plist_head *head)
+static void ion_plist_add(struct plist_node *node, struct plist_head *head)
 {
 	struct plist_node *first, *iter, *prev = NULL;
 	struct list_head *node_next = &head->node_list;
@@ -655,7 +655,6 @@ DEFINE_SIMPLE_ATTRIBUTE(debug_shrink_fops, debug_shrink_get,
 void ion_device_add_heap(struct ion_heap *heap)
 {
 	struct ion_device *dev = internal_dev;
-	int ret;
 	struct dentry *heap_root;
 	char debug_name[64];
 
@@ -670,11 +669,11 @@ void ion_device_add_heap(struct ion_heap *heap)
 	if (heap->flags & ION_HEAP_FLAG_DEFER_FREE)
 		ion_heap_init_deferred_free(heap);
 
-	if ((heap->flags & ION_HEAP_FLAG_DEFER_FREE) || heap->ops->shrink) {
+	/*if ((heap->flags & ION_HEAP_FLAG_DEFER_FREE) || heap->ops->shrink) {
 		ret = ion_heap_init_shrinker(heap);
 		if (ret)
 			pr_err("%s: Failed to register shrinker\n", __func__);
-	}
+	}*/
 
 	heap->dev = dev;
 	heap->num_of_buffers = 0;
@@ -745,6 +744,7 @@ static int ion_device_create(void)
 	return 0;
 }
 
+int __init ion_device_create_init(void);
 int __init ion_device_create_init(void)
 {
 	return ion_device_create();

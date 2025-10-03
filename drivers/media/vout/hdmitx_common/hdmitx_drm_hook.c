@@ -111,7 +111,7 @@ int hdmitx_common_get_vic_list(int **vics)
 	enum hdmi_vic prefer_vic = HDMI_0_UNKNOWN;
 
 	viclist = kcalloc(len, sizeof(int),  GFP_KERNEL);
-	edid_vics = vmalloc(len * sizeof(int));
+	edid_vics = kvmalloc(len * sizeof(int), GFP_KERNEL);
 	memset(edid_vics, 0, len * sizeof(int));
 
 	/* step1: only select VIC which is supported in EDID */
@@ -151,7 +151,7 @@ int hdmitx_common_get_vic_list(int **vics)
 		count++;
 	}
 
-	vfree(edid_vics);
+	kvfree(edid_vics);
 
 	if (count == 0)
 		kfree(viclist);

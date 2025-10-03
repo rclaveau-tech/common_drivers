@@ -6,7 +6,8 @@
 #ifndef _VIDEOBUF_RES_H
 #define _VIDEOBUF_RES_H
 
-#include <media/videobuf-core.h>
+#include <media/videobuf2-core.h>
+#include <media/videobuf2-v4l2.h>
 
 struct videobuf_res_privdata {
 	/* const* char dev_name; */
@@ -16,8 +17,8 @@ struct videobuf_res_privdata {
 	void *priv;
 };
 
-void videobuf_queue_res_init(struct videobuf_queue *q,
-			     const struct videobuf_queue_ops *ops,
+void videobuf_queue_res_init(struct vb2_queue *q,
+			     const struct vb2_ops *ops,
 			     struct device *dev,
 			     spinlock_t *irqlock,
 			     enum v4l2_buf_type type,
@@ -27,8 +28,8 @@ void videobuf_queue_res_init(struct videobuf_queue *q,
 			     /* mutex lock */
 			     struct mutex *ext_lock);
 
-resource_size_t videobuf_to_res(struct videobuf_buffer *buf);
-void videobuf_res_free(struct videobuf_queue *q,
-		       struct videobuf_buffer *buf);
+resource_size_t videobuf_to_res(struct vb2_buffer *buf);
+void videobuf_res_free(struct vb2_queue *q,
+		       struct vb2_buffer *buf);
 
 #endif /* _VIDEOBUF_RES_H */

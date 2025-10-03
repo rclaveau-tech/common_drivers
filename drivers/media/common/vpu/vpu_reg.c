@@ -9,6 +9,7 @@
 #include <linux/slab.h>
 #include <linux/err.h>
 #include <linux/delay.h>
+#include <linux/amlogic/media/vpu/vpu.h>
 #include "vpu_reg.h"
 #include "vpu.h"
 
@@ -385,7 +386,7 @@ void vpu_vcbus_clr_mask(unsigned int _reg, unsigned int _mask)
 }
 EXPORT_SYMBOL(vpu_vcbus_clr_mask);
 
-unsigned int vpu_cbus_read(unsigned int _reg)
+static unsigned int vpu_cbus_read(unsigned int _reg)
 {
 	void __iomem *p;
 
@@ -396,7 +397,7 @@ unsigned int vpu_cbus_read(unsigned int _reg)
 		return -1;
 };
 
-void vpu_cbus_write(unsigned int _reg, unsigned int _value)
+static void vpu_cbus_write(unsigned int _reg, unsigned int _value)
 {
 	void __iomem *p;
 
@@ -405,13 +406,13 @@ void vpu_cbus_write(unsigned int _reg, unsigned int _value)
 		writel(_value, p);
 };
 
-void vpu_cbus_setb(unsigned int _reg, unsigned int _value,
+/*void vpu_cbus_setb(unsigned int _reg, unsigned int _value,
 		   unsigned int _start, unsigned int _len)
 {
 	vpu_cbus_write(_reg, ((vpu_cbus_read(_reg) &
 			~(((1L << (_len)) - 1) << (_start))) |
 			(((_value) & ((1L << (_len)) - 1)) << (_start))));
-}
+}*/
 
 void vpu_cbus_set_mask(unsigned int _reg, unsigned int _mask)
 {

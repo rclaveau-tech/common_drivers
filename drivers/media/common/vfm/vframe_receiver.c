@@ -68,7 +68,7 @@ struct vframe_receiver_s *vf_get_receiver(const char *provider_name)
 }
 EXPORT_SYMBOL(vf_get_receiver);
 
-struct vframe_receiver_s *vf_get_receiver_by_name(const char *receiver_name)
+static struct vframe_receiver_s *vf_get_receiver_by_name(const char *receiver_name)
 {
 	struct vframe_receiver_s *r = NULL;
 	int i = 0;

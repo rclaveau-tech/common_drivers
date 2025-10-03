@@ -1660,8 +1660,8 @@ static const char *dummy_venc_debug_usage_str = {
 "    echo reg > /sys/class/dummy_venc/encl ; dump regs for encl\n"
 };
 
-static ssize_t dummy_venc_debug_show(struct class *class,
-				     struct class_attribute *attr, char *buf)
+static ssize_t dummy_venc_debug_show(const struct class *class,
+				     const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "%s\n", dummy_venc_debug_usage_str);
 }
@@ -1742,8 +1742,8 @@ static unsigned int dummy_encl_reg_dump[] = {
 	0xffff
 };
 
-static ssize_t dummy_encp_debug_store(struct class *class,
-				      struct class_attribute *attr,
+static ssize_t dummy_encp_debug_store(const struct class *class,
+				      const struct class_attribute *attr,
 				      const char *buf, size_t count)
 {
 	unsigned int offset, reg, i;
@@ -1777,8 +1777,8 @@ static ssize_t dummy_encp_debug_store(struct class *class,
 	return count;
 }
 
-static ssize_t dummy_encp_projector_fps_store(struct class *class,
-				      struct class_attribute *attr,
+static ssize_t dummy_encp_projector_fps_store(const struct class *class,
+				      const struct class_attribute *attr,
 				      const char *buf, size_t count)
 {
 	int ret;
@@ -1799,14 +1799,14 @@ static ssize_t dummy_encp_projector_fps_store(struct class *class,
 	return count;
 }
 
-static ssize_t dummy_encp_projector_fps_show(struct class *class,
-				     struct class_attribute *attr, char *buf)
+static ssize_t dummy_encp_projector_fps_show(const struct class *class,
+				     const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "%d\n", vout_vcbus_getb(VIU_MISC_CTRL0, 12, 1));
 }
 
-static ssize_t dummy_enci_debug_store(struct class *class,
-				      struct class_attribute *attr,
+static ssize_t dummy_enci_debug_store(const struct class *class,
+				      const struct class_attribute *attr,
 				      const char *buf, size_t count)
 {
 	unsigned int offset, reg, i;
@@ -1840,8 +1840,8 @@ static ssize_t dummy_enci_debug_store(struct class *class,
 	return count;
 }
 
-static ssize_t dummy_encl_debug_store(struct class *class,
-				      struct class_attribute *attr,
+static ssize_t dummy_encl_debug_store(const struct class *class,
+				      const struct class_attribute *attr,
 				      const char *buf, size_t count)
 {
 	unsigned int offset, reg, i;
@@ -1891,7 +1891,7 @@ static int dummy_venc_creat_class(void)
 {
 	int i;
 
-	debug_class = class_create(THIS_MODULE, "dummy_venc");
+	debug_class = class_create("dummy_venc");
 	if (IS_ERR(debug_class)) {
 		VOUTERR("create debug class failed\n");
 		return -1;
@@ -2446,14 +2446,14 @@ static int dummy_venc_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int dummy_venc_remove(struct platform_device *pdev)
+static void dummy_venc_remove(struct platform_device *pdev)
 {
 	if (!dummy_encp_drv || !dummy_encp_drv->vdata)
-		return 0;
+		return;
 	if (!dummy_enci_drv)
-		return 0;
+		return;
 	if (!dummy_encl_drv)
-		return 0;
+		return;
 
 	dummy_venc_remove_class();
 	vout_unregister_client(&dummy_encp_vout_notifier);
@@ -2474,7 +2474,6 @@ static int dummy_venc_remove(struct platform_device *pdev)
 	dummy_encl_drv = NULL;
 
 	VOUTPR("%s\n", __func__);
-	return 0;
 }
 
 static int dummy_venc_resume(struct platform_device *pdev)
@@ -2530,6 +2529,7 @@ static struct platform_driver dummy_venc_platform_driver = {
 	},
 };
 
+int __init dummy_venc_init(void);
 int __init dummy_venc_init(void)
 {
 	if (platform_driver_register(&dummy_venc_platform_driver)) {
@@ -2540,6 +2540,7 @@ int __init dummy_venc_init(void)
 	return 0;
 }
 
+void __exit dummy_venc_exit(void);
 void __exit dummy_venc_exit(void)
 {
 	platform_driver_unregister(&dummy_venc_platform_driver);

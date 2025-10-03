@@ -20,7 +20,7 @@ struct hdmitx_tracer {
 	struct work_struct uevent_work;
 };
 
-const char *hdmitx_event_to_str(enum hdmitx_event_log_bits event)
+static const char *hdmitx_event_to_str(enum hdmitx_event_log_bits event)
 {
 	switch (event) {
 	case HDMITX_HPD_PLUGOUT:
@@ -112,6 +112,7 @@ static void hdmitx_logevents_handler(struct work_struct *work)
 		HDMITX_CUR_ST_EVENT, ++cnt, false);
 }
 
+struct hdmitx_tracer *hdmitx_tracer_create(struct hdmitx_event_mgr *event_mgr);
 struct hdmitx_tracer *hdmitx_tracer_create(struct hdmitx_event_mgr *event_mgr)
 {
 	struct hdmitx_tracer *instance = vmalloc(sizeof(*instance));

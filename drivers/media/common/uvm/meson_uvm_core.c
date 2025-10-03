@@ -41,6 +41,9 @@ module_param(force_skip_realloc, int, 0644);
 static void uvm_hook_mod_release(struct kref *kref);
 static struct uvm_hook_mod *uvm_find_hook_mod(struct uvm_handle *handle,
 					      int type);
+#ifdef CONFIG_AMLOGIC_UVM_ALLOCATOR
+extern struct mua_device *mdev;
+#endif
 
 static void uvm_handle_destroy(struct kref *kref)
 {
@@ -223,7 +226,7 @@ static void meson_uvm_detach(struct dma_buf *dmabuf,
 	/* TODO */
 }
 
-static int meson_uvm_vmap(struct dma_buf *dmabuf, struct dma_buf_map *map)
+static int meson_uvm_vmap(struct dma_buf *dmabuf, struct iosys_map *map)
 {
 	struct uvm_handle *handle;
 	struct sg_table *sgt;
@@ -272,12 +275,12 @@ static int meson_uvm_vmap(struct dma_buf *dmabuf, struct dma_buf_map *map)
 	handle->ua->vaddr = vaddr;
 	UVM_PRINTK(UVM_INFO, "%s called.\n", __func__);
 
-	dma_buf_map_set_vaddr(map, vaddr);
+	iosys_map_set_vaddr(map, vaddr);
 
 	return 0;
 }
 
-static void meson_uvm_vunmap(struct dma_buf *dmabuf, struct dma_buf_map *map)
+static void meson_uvm_vunmap(struct dma_buf *dmabuf, struct iosys_map *map)
 {
 	struct uvm_handle *handle = dmabuf->priv;
 
@@ -542,21 +545,12 @@ EXPORT_SYMBOL(dmabuf_bind_uvm_delay_alloc);
 static int do_fbc_decoder(struct dma_buf *dmabuf,
 				   struct uvm_buf_obj *obj, struct uvm_handle *handle)
 {
-	int i, j, num_pages;
-	struct dma_buf *idmabuf = NULL;
-	struct ion_buffer *ibuffer;
+	int i, num_pages;
 	struct uvm_alloc_info info;
 	struct mua_buffer *buffer;
-	struct page *page;
-	struct page **tmp;
 	struct page **page_array;
 	pgprot_t pgprot;
 	void *vaddr;
-	struct sg_table *src_sgt = NULL;
-	struct scatterlist *sg = NULL;
-	struct dma_heap *heap;
-	struct dma_buf_attachment *attachment = NULL;
-	int ret = 0;
 
 	buffer = container_of(obj, struct mua_buffer, base);
 	UVM_PRINTK(UVM_INFO, "%s. WxH: %dx%d\n",
@@ -566,137 +560,50 @@ static int do_fbc_decoder(struct dma_buf *dmabuf,
 	dmabuf->size = mua_calc_real_dmabuf_size(buffer);
 	UVM_PRINTK(UVM_INFO, "buffer(0x%p)->size:%zu realloc dmabuf->size=%zu\n",
 			buffer, buffer->size, dmabuf->size);
-	heap = dma_heap_find(CODECMM_HEAP_NAME);
-	if (!heap) {
-		UVM_PRINTK(UVM_ERROR, "%s: dma_heap_find fail. heap name is %s\n",
-			__func__, CODECMM_HEAP_NAME);
-		return -ENOMEM;
-	}
 
-	if (!buffer->idmabuf[1]) {
-		idmabuf = dma_heap_buffer_alloc(heap, dmabuf->size,
-			O_RDWR, DMA_HEAP_VALID_HEAP_FLAGS);
-		if (IS_ERR(idmabuf)) {
-			UVM_PRINTK(UVM_ERROR, "%s: dma_heap_buffer_alloc fail.\n", __func__);
-			return -ENOMEM;
-		}
-		UVM_PRINTK(UVM_INFO, "%s: idmabuf(%p) alloc success.\n", __func__, idmabuf);
-
-		ibuffer = idmabuf->priv;
-		if (ibuffer) {
-			attachment = dma_buf_attach(idmabuf, dma_heap_get_dev(heap));
-			if (!attachment) {
-				UVM_PRINTK(UVM_ERROR, "%s: Failed to set dma attach", __func__);
-				return -ENOMEM;
-			}
-
-			src_sgt = dma_buf_map_attachment(attachment, DMA_BIDIRECTIONAL);
-			if (!src_sgt) {
-				UVM_PRINTK(UVM_ERROR, "%s: Failed to get dma sg", __func__);
-				dma_buf_detach(idmabuf, attachment);
-				return -ENOMEM;
-			}
-
-			ret = dma_buf_begin_cpu_access(idmabuf, DMA_BIDIRECTIONAL);
-			if (ret) {
-				UVM_PRINTK(UVM_ERROR, "%s: Failed to get dma sg", __func__);
-				dma_buf_unmap_attachment(attachment,
-									src_sgt,
-									DMA_BIDIRECTIONAL);
-				dma_buf_detach(idmabuf, attachment);
-				return -ENOMEM;
-			}
-
-			UVM_PRINTK(UVM_INFO, "%s: src_sgt(%p). nents = %u, length=%u\n",
-				__func__, src_sgt, src_sgt->nents, src_sgt->sgl->length);
-			page = sg_page(src_sgt->sgl);
-			buffer->paddr = PFN_PHYS(page_to_pfn(page));
-			buffer->ibuffer[1] = ibuffer;
-			buffer->idmabuf[1] = idmabuf;
-			buffer->sg_table = src_sgt;
-
-			info.sgt = src_sgt;
-			dmabuf_bind_uvm_delay_alloc(dmabuf, &info);
-		}
-	} else {
-		idmabuf = buffer->idmabuf[1];
-		attachment = dma_buf_attach(idmabuf, dma_heap_get_dev(heap));
-		if (!attachment) {
-			UVM_PRINTK(UVM_ERROR, "%s(%d): Failed to set dma attach",
-				__func__, __LINE__);
-			return -ENOMEM;
-		}
-
-		src_sgt = dma_buf_map_attachment(attachment, DMA_BIDIRECTIONAL);
-		if (!src_sgt) {
-			UVM_PRINTK(UVM_ERROR, "%s(%d): Failed to get dma sg", __func__, __LINE__);
-			dma_buf_detach(idmabuf, attachment);
-			return -ENOMEM;
-		}
-
-		ret = dma_buf_begin_cpu_access(idmabuf, DMA_BIDIRECTIONAL);
-		if (ret) {
-			UVM_PRINTK(UVM_ERROR, "%s: Failed to get dma sg", __func__);
-			dma_buf_unmap_attachment(attachment, src_sgt, DMA_BIDIRECTIONAL);
-			dma_buf_detach(idmabuf, attachment);
-			return -ENOMEM;
-		}
-
-		UVM_PRINTK(UVM_INFO, "%s(%d): src_sgt(%p). nents = %u, length=%u\n",
-			__func__, __LINE__, src_sgt, src_sgt->nents, src_sgt->sgl->length);
-		page = sg_page(src_sgt->sgl);
-		buffer->paddr = PFN_PHYS(page_to_pfn(page));
-		buffer->sg_table = src_sgt;
-
-		info.sgt = src_sgt;
-		dmabuf_bind_uvm_delay_alloc(dmabuf, &info);
-	}
-
-	//start to do vmap
-	if (!buffer->sg_table) {
-		UVM_PRINTK(UVM_ERROR, "none uvm buffer allocated.\n");
+	struct device *dev = mdev ? mdev->dev.this_device : NULL;
+	if (!dev) {
+		UVM_PRINTK(UVM_ERROR, "%s: device not initialized\n", __func__);
 		return -ENODEV;
 	}
-	src_sgt = buffer->sg_table;
-	num_pages = PAGE_ALIGN(dmabuf->size) / PAGE_SIZE;
-	tmp = vmalloc(sizeof(struct page *) * num_pages);
-	page_array = tmp;
 
-	pgprot = pgprot_writecombine(PAGE_KERNEL);
+	void *cpu_addr;
+	dma_addr_t dma_handle;
 
-	for_each_sg(src_sgt->sgl, sg, src_sgt->nents, i) {
-		int npages_this_entry =
-			PAGE_ALIGN(sg->length) / PAGE_SIZE;
-		struct page *page = sg_page(sg);
-
-		for (j = 0; j < npages_this_entry; j++)
-			*(tmp++) = page++;
-	}
-
-	vaddr = vmap(page_array, num_pages, VM_MAP, pgprot);
-	if (!vaddr) {
-		UVM_PRINTK(UVM_ERROR, "vmap fail, size: %d\n",
-			   num_pages << PAGE_SHIFT);
-		vfree(page_array);
-		if (src_sgt && attachment) {
-			dma_buf_unmap_attachment(attachment, src_sgt, DMA_BIDIRECTIONAL);
-			dma_buf_detach(idmabuf, attachment);
-		}
-
+	cpu_addr = dma_alloc_coherent(dev, dmabuf->size, &dma_handle, GFP_KERNEL);
+	if (!cpu_addr) {
+		UVM_PRINTK(UVM_ERROR, "%s: dma_alloc_coherent fail.\n", __func__);
 		return -ENOMEM;
 	}
-	vfree(page_array);
-	UVM_PRINTK(UVM_INFO, "buffer vaddr: %p.\n", vaddr);
 
-	//start to filldata
-	meson_uvm_fill_pattern(buffer, dmabuf, vaddr);
-	dma_buf_end_cpu_access(idmabuf, DMA_BIDIRECTIONAL);
-	vunmap(vaddr);
+	buffer->paddr = dma_handle;
 
-	if (src_sgt && attachment) {
-		dma_buf_unmap_attachment(attachment, src_sgt, DMA_BIDIRECTIONAL);
-		dma_buf_detach(idmabuf, attachment);
+	num_pages = PAGE_ALIGN(dmabuf->size) / PAGE_SIZE;
+	page_array = vmalloc(sizeof(struct page *) * num_pages);
+	if (!page_array) {
+		dma_free_coherent(dev, dmabuf->size, cpu_addr, dma_handle);
+		return -ENOMEM;
 	}
+
+	for (i = 0; i < num_pages; i++)
+		page_array[i] = virt_to_page(cpu_addr + i * PAGE_SIZE);
+
+	pgprot = pgprot_writecombine(PAGE_KERNEL);
+	vaddr = vmap(page_array, num_pages, VM_MAP, pgprot);
+	if (!vaddr) {
+		UVM_PRINTK(UVM_ERROR, "%s: vmap fail, size=%zu\n", __func__, dmabuf->size);
+		vfree(page_array);
+		dma_free_coherent(dev, dmabuf->size, cpu_addr, dma_handle);
+		return -ENOMEM;
+	}
+
+	meson_uvm_fill_pattern(buffer, dmabuf, vaddr);
+
+	vunmap(vaddr);
+	vfree(page_array);
+
+	UVM_PRINTK(UVM_INFO, "%s: buffer CPU addr %p, DMA addr 0x%lx\n",
+			   __func__, cpu_addr, (unsigned long)dma_handle);
 
 	return 0;
 }

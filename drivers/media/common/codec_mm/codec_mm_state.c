@@ -36,7 +36,7 @@ static struct codec_state_mgr *get_cs_mgr(void)
 	return &mgr;
 };
 
-void *cs_seq_start(struct seq_file *m, loff_t *pos)
+static void *cs_seq_start(struct seq_file *m, loff_t *pos)
 {
 	struct codec_state_mgr *mgr = get_cs_mgr();
 
@@ -44,14 +44,14 @@ void *cs_seq_start(struct seq_file *m, loff_t *pos)
 	return seq_list_start(&mgr->cs_head, *pos);
 }
 
-void *cs_seq_next(struct seq_file *m, void *v, loff_t *pos)
+static void *cs_seq_next(struct seq_file *m, void *v, loff_t *pos)
 {
 	struct codec_state_mgr *mgr = get_cs_mgr();
 
 	return seq_list_next(v, &mgr->cs_head, pos);
 }
 
-void cs_seq_stop(struct seq_file *m, void *v)
+static void cs_seq_stop(struct seq_file *m, void *v)
 {
 	struct codec_state_mgr *mgr = get_cs_mgr();
 
@@ -235,12 +235,12 @@ static ssize_t cs_seq_write(struct file *file, const char __user *buffer,
 	return cs_parse_cmd(file, buffer, count, ppos, do_store);
 }
 
-void cs_seq_list_read(struct seq_file *m, void *v)
+/*void cs_seq_list_read(struct seq_file *m, void *v)
 {
 	struct codec_state_mgr *mgr = get_cs_mgr();
 
 	mutex_unlock(&mgr->cs_lock);
-}
+}*/
 
 int codec_state_register(struct codec_state_node *cs, struct codec_state_ops *ops)
 {

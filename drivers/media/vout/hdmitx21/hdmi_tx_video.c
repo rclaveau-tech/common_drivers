@@ -126,8 +126,7 @@ int hdmitx21_set_display(struct hdmitx_dev *hdev, enum hdmi_vic videocode)
 		} else if ((!hdev->flag_3dfp) && (!hdev->flag_3dtb) &&
 			 (!hdev->flag_3dss))
 			hdmi_set_vend_spec_infofram(hdev, 0);
-		else
-			;
+		else {}
 
 		if (hdev->tx_comm.allm_mode) {
 			hdmitx_common_setup_vsif_packet(&hdev->tx_comm, VT_ALLM, 1, NULL);

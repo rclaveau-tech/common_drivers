@@ -364,7 +364,7 @@ static void get_canvas_info(u32 canvas_index, ulong *addr, u32 *stride,
 }
 #endif
 
-void ge2d_lut_init(struct ge2d_config_s *cfg)
+static void ge2d_lut_init(struct ge2d_config_s *cfg)
 {
 	u32 data, i, table_count;
 	u32 *table_data;

@@ -456,7 +456,7 @@ int vpu_rdarb0_2_bind_l2(enum vpu_arb_mod_e level2_module, u32 vpu_read_port)
 	return 0;
 }
 
-int vpu_rdarb1_bind(enum vpu_arb_mod_e rdarb1_module, u32 vpu_read_port)
+static int vpu_rdarb1_bind(enum vpu_arb_mod_e rdarb1_module, u32 vpu_read_port)
 {
 	struct vpu_arb_table_s *vpu1_rdarb_module = vpu_rdarb_vpu1_tables;
 
@@ -492,7 +492,7 @@ int vpu_rdarb1_bind(enum vpu_arb_mod_e rdarb1_module, u32 vpu_read_port)
 	return 0;
 }
 
-int vpu_wrarb0_bind(enum vpu_arb_mod_e wrarb0_module, u32 vpu_write_port)
+static int vpu_wrarb0_bind(enum vpu_arb_mod_e wrarb0_module, u32 vpu_write_port)
 {
 	struct vpu_arb_table_s *vpu0_wrarb_module = vpu_wrarb_vpu0_tables;
 
@@ -527,7 +527,7 @@ int vpu_wrarb0_bind(enum vpu_arb_mod_e wrarb0_module, u32 vpu_write_port)
 	return 0;
 }
 
-int vpu_wrarb1_bind(enum vpu_arb_mod_e wrarb1_module, u32 vpu_write_port)
+/*int vpu_wrarb1_bind(enum vpu_arb_mod_e wrarb1_module, u32 vpu_write_port)
 {
 	struct vpu_arb_table_s *vpu1_wrarb_module = vpu_wrarb_vpu1_tables;
 
@@ -558,7 +558,7 @@ int vpu_wrarb1_bind(enum vpu_arb_mod_e wrarb1_module, u32 vpu_write_port)
 	vpu_pr_debug(MODULE_ARB_MODE, "%s bind to vpu_write1\n",
 		vpu1_wrarb_module->name);
 	return 0;
-}
+}*/
 
 void get_rdarb0_2_module_info(void)
 {
@@ -680,7 +680,7 @@ struct vpu_urgent_ctrl_s {
 	unsigned int urgent;
 };
 
-int vpu_rdarb0_2_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
+static int vpu_rdarb0_2_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
 {
 	u32 val;
 	struct vpu_urgent_table_s *rd_vpu0_2_level2_urgent_tables =
@@ -712,7 +712,7 @@ int vpu_rdarb0_2_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
 	return 0;
 }
 
-int vpu_rdarb1_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
+static int vpu_rdarb1_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
 {
 	u32 val;
 	struct vpu_urgent_table_s *rd_vpu1_urgent_tables =
@@ -744,7 +744,7 @@ int vpu_rdarb1_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
 	return 0;
 }
 
-int vpu_wrarb0_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
+static int vpu_wrarb0_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
 {
 	u32 val;
 	struct vpu_urgent_table_s *wr_vpu0_urgent_tables =
@@ -776,7 +776,7 @@ int vpu_wrarb0_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
 	return 0;
 }
 
-int vpu_wrarb1_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
+static int vpu_wrarb1_urgent_set(enum vpu_arb_mod_e vmod, u32 urgent_value)
 {
 	u32 val;
 	struct vpu_urgent_table_s *wr_vpu1_urgent_tables =
@@ -1375,7 +1375,7 @@ int vpu_arb_config(enum vpu_arb_mod_e module, u32 urgent_value)
 }
 EXPORT_SYMBOL(vpu_arb_config);
 
-void init_read0_2_bind(void)
+static void init_read0_2_bind(void)
 {
 	struct vpu_arb_table_s *vpu_rdarb_vpu0_2_level1 = vpu_rdarb_vpu0_2_level1_tables;
 	struct vpu_arb_table_s *vpu_rdarb_vpu0_2_level2 = vpu_rdarb_vpu0_2_level2_tables;
@@ -1400,7 +1400,7 @@ void init_read0_2_bind(void)
 	}
 }
 
-void init_read1_bind(void)
+static void init_read1_bind(void)
 {
 	struct vpu_arb_table_s *vpu_rdarb_vpu1 = vpu_rdarb_vpu1_tables;
 
@@ -1415,7 +1415,7 @@ void init_read1_bind(void)
 	}
 }
 
-void init_write0_bind(void)
+static void init_write0_bind(void)
 {
 	struct vpu_arb_table_s *vpu_wrarb_vpu0 = vpu_wrarb_vpu0_tables;
 
@@ -1430,7 +1430,7 @@ void init_write0_bind(void)
 	}
 }
 
-void init_write1_bind(void)
+static void init_write1_bind(void)
 {
 	struct vpu_arb_table_s *vpu_wrarb_vpu1 = vpu_wrarb_vpu1_tables;
 
@@ -1445,7 +1445,7 @@ void init_write1_bind(void)
 	}
 }
 
-void init_read0_2_write1_urgent(void)
+static void init_read0_2_write1_urgent(void)
 {
 	struct vpu_urgent_table_s *vpu_urgent_table_rd_vpu0_2 =
 				vpu_urgent_table_rd_vpu0_2_level2_tables;
@@ -1469,7 +1469,7 @@ void init_read0_2_write1_urgent(void)
 	}
 }
 
-void init_read1_write1_urgent(void)
+static void init_read1_write1_urgent(void)
 {
 	struct vpu_urgent_table_s *vpu_urgent_table_rd_vpu1 =
 				vpu_urgent_table_rd_vpu1_tables;

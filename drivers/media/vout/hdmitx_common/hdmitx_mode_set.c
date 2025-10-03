@@ -11,14 +11,14 @@
 #include "hdmitx_log.h"
 
 const struct hdmi_timing *hdmitx_mode_match_timing_name(const char *name);
-static int hdmitx_module_disable(enum vmode_e cur_vmod, void *data);
+//static int hdmitx_module_disable(enum vmode_e cur_vmod, void *data);
 
 /*!!Only one instance supported.*/
 static struct hdmitx_common *global_tx_common;
 static struct hdmitx_hw_common *global_tx_hw;
 static const struct dv_info dv_dummy;
 
-void hdmi_physical_size_to_vinfo(struct hdmitx_common *tx_comm)
+static void hdmi_physical_size_to_vinfo(struct hdmitx_common *tx_comm)
 {
 	u32 width, height;
 	struct vinfo_s *info = &tx_comm->hdmitx_vinfo;
@@ -49,7 +49,7 @@ void hdrinfo_to_vinfo(struct hdr_info *hdrinfo, struct hdmitx_common *tx_comm)
 	hdrinfo->colorimetry_support = tx_comm->rxcap.colorimetry_data;
 }
 
-void rxlatency_to_vinfo(struct hdmitx_common *tx_comm)
+static void rxlatency_to_vinfo(struct hdmitx_common *tx_comm)
 {
 	struct vinfo_s *info = &tx_comm->hdmitx_vinfo;
 
@@ -372,9 +372,12 @@ fail:
 	return ret;
 }
 
+static int hdmitx_module_disable(enum vmode_e cur_vmod, void *data);
 static void hdmitx_common_disable_mode_test(void)
 {
+#ifdef CONFIG_AMLOGIC_VOUT_SERVE
 	hdmitx_module_disable(VMODE_HDMI, NULL);
+#endif
 }
 
 int set_disp_mode(struct hdmitx_common *tx_comm, const char *mode)
@@ -609,11 +612,11 @@ static struct vout_server_s hdmitx_vout_server = {
 	},
 	.data = NULL,
 };
-#else
+/*#else
 static struct vinfo_s *hdmitx_get_current_vinfo(void *data)
 {
 	return NULL;
-}
+}*/
 #endif
 
 #ifdef CONFIG_AMLOGIC_VOUT2_SERVE

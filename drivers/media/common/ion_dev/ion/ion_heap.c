@@ -232,7 +232,7 @@ int ion_heap_init_deferred_free(struct ion_heap *heap)
 	return 0;
 }
 
-static unsigned long ion_heap_shrink_count(struct shrinker *shrinker,
+/*static unsigned long ion_heap_shrink_count(struct shrinker *shrinker,
 					   struct shrink_control *sc)
 {
 	struct ion_heap *heap = container_of(shrinker, struct ion_heap,
@@ -245,9 +245,9 @@ static unsigned long ion_heap_shrink_count(struct shrinker *shrinker,
 		total += heap->ops->shrink(heap, sc->gfp_mask, 0);
 
 	return total;
-}
+}*/
 
-static unsigned long ion_heap_shrink_scan(struct shrinker *shrinker,
+/*static unsigned long ion_heap_shrink_scan(struct shrinker *shrinker,
 					  struct shrink_control *sc)
 {
 	struct ion_heap *heap = container_of(shrinker, struct ion_heap,
@@ -258,10 +258,10 @@ static unsigned long ion_heap_shrink_scan(struct shrinker *shrinker,
 	if (to_scan == 0)
 		return 0;
 
-	/*
+	*//*
 	 * shrink the free list first, no point in zeroing the memory if we're
 	 * just going to reclaim it. Also, skip any possible page pooling.
-	 */
+	 *//*
 	if (heap->flags & ION_HEAP_FLAG_DEFER_FREE)
 		freed = ion_heap_freelist_shrink(heap, to_scan * PAGE_SIZE) /
 				PAGE_SIZE;
@@ -274,9 +274,9 @@ static unsigned long ion_heap_shrink_scan(struct shrinker *shrinker,
 		freed += heap->ops->shrink(heap, sc->gfp_mask, to_scan);
 
 	return freed;
-}
+}*/
 
-int ion_heap_init_shrinker(struct ion_heap *heap)
+/*int ion_heap_init_shrinker(struct ion_heap *heap)
 {
 	heap->shrinker.count_objects = ion_heap_shrink_count;
 	heap->shrinker.scan_objects = ion_heap_shrink_scan;
@@ -284,4 +284,4 @@ int ion_heap_init_shrinker(struct ion_heap *heap)
 	heap->shrinker.batch = 0;
 
 	return register_shrinker(&heap->shrinker);
-}
+}*/

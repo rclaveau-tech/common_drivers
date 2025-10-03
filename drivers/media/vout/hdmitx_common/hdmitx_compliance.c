@@ -6,6 +6,7 @@
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/string.h>
+#include "hdmitx_compliance.h"
 
 /* Base Block, Vendor/Product Information, byte[8]~[17] */
 struct edid_venddat_t {

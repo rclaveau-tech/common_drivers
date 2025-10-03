@@ -109,6 +109,7 @@ static int ion_system_contig_heap_create(void)
 	return 0;
 }
 
+int __init ion_system_contig_heap_create_init(void);
 int __init ion_system_contig_heap_create_init(void)
 {
 	return ion_system_contig_heap_create();

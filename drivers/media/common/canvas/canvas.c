@@ -173,6 +173,7 @@ static void canvas_config_locked(u32 index, struct canvas_s *p)
 	p->dataH = datah;
 }
 
+int canvas_read_hw(u32 index, struct canvas_s *canvas);
 int canvas_read_hw(u32 index, struct canvas_s *canvas)
 {
 	struct canvas_device_info *info = canvas_info;
@@ -379,7 +380,7 @@ err1:
 }
 
 /* static int __devexit canvas_remove(struct platform_device *pdev) */
-static int canvas_remove(struct platform_device *pdev)
+static void canvas_remove(struct platform_device *pdev)
 {
 	int i;
 	struct canvas_device_info *info = canvas_info;
@@ -394,8 +395,6 @@ static int canvas_remove(struct platform_device *pdev)
 	kfree(info);
 	info = NULL;
 	pr_error("Canvas driver removed.\n");
-
-	return 0;
 }
 
 static const struct of_device_id canvas_dt_match[] = {
@@ -413,6 +412,7 @@ static struct platform_driver canvas_driver = {
 	},
 };
 
+int __init amcanvas_init(void);
 int __init amcanvas_init(void)
 {
 	int r;
@@ -425,6 +425,7 @@ int __init amcanvas_init(void)
 	return 0;
 }
 
+void __exit amcanvas_exit(void);
 void __exit amcanvas_exit(void)
 {
 	platform_driver_unregister(&canvas_driver);

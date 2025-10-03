@@ -44,7 +44,7 @@ void provide_table_init(void)
 }
 EXPORT_SYMBOL(provide_table_init);
 
-void provider_update_caller(const char *receiver,
+static void provider_update_caller(const char *receiver,
 			    const char *provider)
 {
 	unsigned long flags;
@@ -57,7 +57,7 @@ void provider_update_caller(const char *receiver,
 	spin_unlock_irqrestore(&provider_lock, flags);
 }
 
-void provider_print_last_info(void)
+static void provider_print_last_info(void)
 {
 	unsigned long flags;
 	struct vframe_provider_s *p;

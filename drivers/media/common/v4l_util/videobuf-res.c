@@ -39,7 +39,7 @@ module_param(debug, int, 0644);
 			pr_dbg("vbuf-resource: " fmt, ## arg);		\
 	}
 
-static void *res_alloc(struct videobuf_queue *q, size_t boff,
+static void *res_alloc(struct vb2_queue *q, size_t boff,
 		       unsigned long size, resource_size_t *phy_addr)
 {
 	void __iomem *ret = NULL;
@@ -48,9 +48,9 @@ static void *res_alloc(struct videobuf_queue *q, size_t boff,
 
 	WARN_ON(!size);
 
-	WARN_ON(!q->priv_data);
+	WARN_ON(!q->drv_priv);
 
-	res  = (struct videobuf_res_privdata *)q->priv_data;
+	res  = (struct videobuf_res_privdata *)q->drv_priv;
 	MAGIC_CHECK(res->magic, MAGIC_RE_MEM);
 
 	res_size = res->end - res->start + 1;
@@ -90,7 +90,7 @@ videobuf_vm_open(struct vm_area_struct *vma)
 static void videobuf_vm_close(struct vm_area_struct *vma)
 {
 	struct videobuf_mapping *map = vma->vm_private_data;
-	struct videobuf_queue *q = map->q;
+	struct vb2_queue *q = map->q;
 	int i;
 
 	dprintk(2, "vm_close %p [count=%u,vma=%08lx-%08lx]\n",
@@ -107,7 +107,7 @@ static void videobuf_vm_close(struct vm_area_struct *vma)
 		if (q->streaming)
 			videobuf_queue_cancel(q);
 
-		for (i = 0; i < VIDEO_MAX_FRAME; i++) {
+		for (i = 0; i < VB2_MAX_FRAME; i++) {
 			if (!q->bufs[i])
 				continue;
 
@@ -148,7 +148,7 @@ static const struct vm_operations_struct videobuf_vm_ops = {
 static struct videobuf_buffer *__videobuf_alloc_vb(size_t size)
 {
 	struct videobuf_res_memory *mem;
-	struct videobuf_buffer *vb;
+	struct vb2_buffer *vb;
 
 	vb = kzalloc(size + sizeof(*mem), GFP_KERNEL);
 	if (vb) {
@@ -165,7 +165,7 @@ static struct videobuf_buffer *__videobuf_alloc_vb(size_t size)
 	return vb;
 }
 
-static void *__videobuf_to_vaddr(struct videobuf_buffer *buf)
+static void *__videobuf_to_vaddr(struct vb2_buffer *buf)
 {
 	struct videobuf_res_memory *mem = buf->priv;
 
@@ -175,8 +175,8 @@ static void *__videobuf_to_vaddr(struct videobuf_buffer *buf)
 	return mem->vaddr;
 }
 
-static int __videobuf_iolock(struct videobuf_queue *q,
-			     struct videobuf_buffer *vb,
+static int __videobuf_iolock(struct vb2_queue *q,
+			     struct vb2_buffer *vb,
 			     struct v4l2_framebuffer *fbuf)
 {
 	struct videobuf_res_memory *mem = vb->priv;
@@ -207,8 +207,8 @@ static int __videobuf_iolock(struct videobuf_queue *q,
 	return 0;
 }
 
-static int __videobuf_mmap_mapper(struct videobuf_queue *q,
-				  struct videobuf_buffer *buf,
+static int __videobuf_mmap_mapper(struct vb2_queue *q,
+				  struct vb2_buffer *buf,
 				  struct vm_area_struct *vma)
 {
 	struct videobuf_res_memory *mem;
@@ -289,8 +289,8 @@ static struct videobuf_qtype_ops qops = {
 	.vaddr        = __videobuf_to_vaddr,
 };
 
-void videobuf_queue_res_init(struct videobuf_queue *q,
-			     const struct videobuf_queue_ops *ops,
+void videobuf_queue_res_init(struct vb2_queue *q,
+			     const struct vb2_ops *ops,
 			     struct device *dev,
 			     spinlock_t *irqlock,
 			     enum v4l2_buf_type type,
@@ -314,7 +314,7 @@ void videobuf_queue_res_init(struct videobuf_queue *q,
 }
 EXPORT_SYMBOL_GPL(videobuf_queue_res_init);
 
-resource_size_t videobuf_to_res(struct videobuf_buffer *buf)
+resource_size_t videobuf_to_res(struct vb2_buffer *buf)
 {
 	struct videobuf_res_memory *mem = buf->priv;
 
@@ -325,8 +325,8 @@ resource_size_t videobuf_to_res(struct videobuf_buffer *buf)
 }
 EXPORT_SYMBOL_GPL(videobuf_to_res);
 
-void videobuf_res_free(struct videobuf_queue *q,
-		       struct videobuf_buffer *buf)
+void videobuf_res_free(struct vb2_queue *q,
+		       struct vb2_buffer *buf)
 {
 	struct videobuf_res_memory *mem = buf->priv;
 

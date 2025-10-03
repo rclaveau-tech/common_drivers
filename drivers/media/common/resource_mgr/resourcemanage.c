@@ -1946,8 +1946,8 @@ static long resman_ioctl_release_all(struct resman_session *sess,
 	size += snprintf(buf + size, PAGE_SIZE - size, format, args); \
 }
 
-static ssize_t usage_show(struct class *class,
-			  struct class_attribute *attr, char *buf)
+static ssize_t usage_show(const struct class *class,
+			  const struct class_attribute *attr, char *buf)
 {
 	struct list_head *pos1, *tmp1;
 	struct list_head *pos2, *tmp2;
@@ -2009,8 +2009,8 @@ static ssize_t usage_show(struct class *class,
 	return size;
 }
 
-static ssize_t config_show(struct class *class,
-			   struct class_attribute *attr,
+static ssize_t config_show(const struct class *class,
+			   const struct class_attribute *attr,
 			   char *buf)
 {
 	ssize_t size = 0;
@@ -2019,8 +2019,8 @@ static ssize_t config_show(struct class *class,
 	return size;
 }
 
-static ssize_t config_store(struct class *class,
-			    struct class_attribute *attr,
+static ssize_t config_store(const struct class *class,
+			    const struct class_attribute *attr,
 			    const char *buf, size_t size)
 {
 	all_resource_uninit();
@@ -2032,8 +2032,8 @@ static ssize_t config_store(struct class *class,
 	return size;
 }
 
-static ssize_t ver_show(struct class *class,
-			   struct class_attribute *attr,
+static ssize_t ver_show(const struct class *class,
+			   const struct class_attribute *attr,
 			   char *buf)
 {
 	ssize_t size = 0;
@@ -2042,8 +2042,8 @@ static ssize_t ver_show(struct class *class,
 	return RESMAN_VERSION;
 }
 
-static ssize_t res_show(struct class *class,
-			   struct class_attribute *attr,
+static ssize_t res_show(const struct class *class,
+			   const struct class_attribute *attr,
 			   char *buf)
 {
 	ssize_t size = 0;
@@ -2072,8 +2072,8 @@ static ssize_t res_show(struct class *class,
 	return size;
 }
 
-static ssize_t res_report_show(struct class *class,
-			   struct class_attribute *attr,
+static ssize_t res_report_show(const struct class *class,
+			   const struct class_attribute *attr,
 			   char *buf)
 {
 	struct resman_session *sess = NULL;
@@ -2092,8 +2092,8 @@ static ssize_t res_report_show(struct class *class,
 	return 0;
 }
 
-static ssize_t res_sys_debug_show(struct class *class,
-			   struct class_attribute *attr,
+static ssize_t res_sys_debug_show(const struct class *class,
+			   const struct class_attribute *attr,
 			   char *buf)
 {
 	ssize_t size = 0;
@@ -2106,8 +2106,8 @@ static ssize_t res_sys_debug_show(struct class *class,
 	return size;
 }
 
-static ssize_t res_sys_debug_store(struct class *class,
-			    struct class_attribute *attr,
+static ssize_t res_sys_debug_store(const struct class *class,
+			    const struct class_attribute *attr,
 			    const char *buf, size_t size)
 {
 	struct module_debug_node *node = NULL;
@@ -2159,7 +2159,7 @@ static ssize_t res_sys_debug_store(struct class *class,
  * File operations for the device
  * ------------------------------------------------------------------
  */
-int resman_open(struct inode *inode, struct file *filp)
+static int resman_open(struct inode *inode, struct file *filp)
 {
 	struct resman_session *sess;
 
@@ -2173,7 +2173,7 @@ int resman_open(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-ssize_t resman_read(struct file *filp, char *buf, size_t len, loff_t *off)
+static ssize_t resman_read(struct file *filp, char *buf, size_t len, loff_t *off)
 {
 	ssize_t ret = -EFAULT;
 	struct resman_session *sess;
@@ -2196,7 +2196,7 @@ ssize_t resman_read(struct file *filp, char *buf, size_t len, loff_t *off)
 	return ret;
 }
 
-unsigned int resman_poll(struct file *filp, struct poll_table_struct *wait)
+static unsigned int resman_poll(struct file *filp, struct poll_table_struct *wait)
 {
 	unsigned int mask = 0;
 	struct resman_session *sess;
@@ -2229,7 +2229,7 @@ static long resman_get_sys_debug_level(struct resman_session *sess, unsigned lon
 	return len;
 }
 
-long resman_ioctl(struct file *filp, unsigned int cmd, unsigned long para)
+static long resman_ioctl(struct file *filp, unsigned int cmd, unsigned long para)
 {
 	long retval = 0;
 	struct resman_session *sess;
@@ -2284,7 +2284,7 @@ static long resman_compat_ioctl(struct file *file, unsigned int cmd, ulong arg)
 }
 #endif
 
-int resman_close(struct inode *inode, struct file *filp)
+static int resman_close(struct inode *inode, struct file *filp)
 {
 	struct resman_session *sess;
 
@@ -2437,7 +2437,7 @@ int __init resman_init(void)
 		return result;
 	}
 
-	resman_class = class_create(THIS_MODULE, DEVICE_CLASS_NAME);
+	resman_class = class_create(DEVICE_CLASS_NAME);
 
 	if (IS_ERR(resman_class)) {
 		result = PTR_ERR(resman_class);
@@ -2482,6 +2482,7 @@ fail1:
 	return result;
 }
 
+void __exit resman_exit(void);
 void __exit resman_exit(void)
 {
 	all_resource_uninit();

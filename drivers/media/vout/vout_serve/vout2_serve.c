@@ -192,6 +192,7 @@ static struct vout_server_s nulldisp_vout2_server = {
 
 /* ********************************************************** */
 
+char *get_vout2_mode_internal(void);
 char *get_vout2_mode_internal(void)
 {
 	return vout2_mode;
@@ -211,6 +212,7 @@ int get_vout2_mode_uboot_state(void)
 EXPORT_SYMBOL(get_vout2_mode_uboot_state);
 
 #define MAX_UEVENT_LEN 64
+int vout2_set_uevent(unsigned int vout_event, int val);
 int vout2_set_uevent(unsigned int vout_event, int val)
 {
 	char env[MAX_UEVENT_LEN];
@@ -236,6 +238,7 @@ int vout2_set_uevent(unsigned int vout_event, int val)
 }
 EXPORT_SYMBOL(vout2_set_uevent);
 
+int set_vout2_mode_name(char *name);
 int set_vout2_mode_name(char *name)
 {
 	if (!name)
@@ -335,8 +338,8 @@ static int set_vout2_init_mode(void)
 /* ************************************************************* */
 /* vout sysfs                                                    */
 /* ************************************************************* */
-static ssize_t vout2_mode_show(struct class *class,
-			       struct class_attribute *attr, char *buf)
+static ssize_t vout2_mode_show(const struct class *class,
+			       const struct class_attribute *attr, char *buf)
 {
 	int ret = 0;
 
@@ -345,8 +348,8 @@ static ssize_t vout2_mode_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout2_mode_store(struct class *class,
-				struct class_attribute *attr,
+static ssize_t vout2_mode_store(const struct class *class,
+				const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	char mode[64];
@@ -358,8 +361,8 @@ static ssize_t vout2_mode_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout2_fr_policy_show(struct class *class,
-				    struct class_attribute *attr, char *buf)
+static ssize_t vout2_fr_policy_show(const struct class *class,
+				    const struct class_attribute *attr, char *buf)
 {
 	int policy;
 	int ret = 0;
@@ -370,8 +373,8 @@ static ssize_t vout2_fr_policy_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout2_fr_policy_store(struct class *class,
-				     struct class_attribute *attr,
+static ssize_t vout2_fr_policy_store(const struct class *class,
+				     const struct class_attribute *attr,
 				     const char *buf, size_t count)
 {
 	int policy;
@@ -392,8 +395,8 @@ static ssize_t vout2_fr_policy_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout2_fr_hint_show(struct class *class,
-				  struct class_attribute *attr, char *buf)
+static ssize_t vout2_fr_hint_show(const struct class *class,
+				  const struct class_attribute *attr, char *buf)
 {
 	int fr_hint;
 	int ret = 0;
@@ -404,8 +407,8 @@ static ssize_t vout2_fr_hint_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout2_fr_hint_store(struct class *class,
-				   struct class_attribute *attr,
+static ssize_t vout2_fr_hint_store(const struct class *class,
+				   const struct class_attribute *attr,
 				   const char *buf, size_t count)
 {
 	int fr_hint;
@@ -423,8 +426,8 @@ static ssize_t vout2_fr_hint_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout2_fr_range_show(struct class *class,
-				   struct class_attribute *attr, char *buf)
+static ssize_t vout2_fr_range_show(const struct class *class,
+				   const struct class_attribute *attr, char *buf)
 {
 	const struct vinfo_s *info = NULL;
 
@@ -435,8 +438,8 @@ static ssize_t vout2_fr_range_show(struct class *class,
 	return sprintf(buf, "%d %d\n", info->vfreq_min, info->vfreq_max);
 }
 
-static ssize_t vout2_bist_show(struct class *class,
-			       struct class_attribute *attr, char *buf)
+static ssize_t vout2_bist_show(const struct class *class,
+			       const struct class_attribute *attr, char *buf)
 {
 	int ret = 0;
 
@@ -445,8 +448,8 @@ static ssize_t vout2_bist_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout2_bist_store(struct class *class,
-				struct class_attribute *attr,
+static ssize_t vout2_bist_store(const struct class *class,
+				const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	int ret = 0;
@@ -466,8 +469,8 @@ static ssize_t vout2_bist_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout2_bl_brightness_show(struct class *class,
-					struct class_attribute *attr, char *buf)
+static ssize_t vout2_bl_brightness_show(const struct class *class,
+					const struct class_attribute *attr, char *buf)
 {
 	unsigned int brightness;
 	int ret = 0;
@@ -480,8 +483,8 @@ static ssize_t vout2_bl_brightness_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout2_bl_brightness_store(struct class *class,
-					struct class_attribute *attr,
+static ssize_t vout2_bl_brightness_store(const struct class *class,
+					const struct class_attribute *attr,
 					const char *buf, size_t count)
 {
 	unsigned int brightness;
@@ -502,8 +505,8 @@ static ssize_t vout2_bl_brightness_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout2_vinfo_show(struct class *class,
-				struct class_attribute *attr, char *buf)
+static ssize_t vout2_vinfo_show(const struct class *class,
+				const struct class_attribute *attr, char *buf)
 {
 	const struct vinfo_s *info = NULL;
 	ssize_t len = 0;
@@ -598,8 +601,8 @@ static ssize_t vout2_vinfo_show(struct class *class,
 	return len;
 }
 
-static ssize_t vout2_cap_show(struct class *class,
-			      struct class_attribute *attr, char *buf)
+static ssize_t vout2_cap_show(const struct class *class,
+			      const struct class_attribute *attr, char *buf)
 {
 	int ret;
 
@@ -627,7 +630,7 @@ static int vout2_attr_create(void)
 	int ret = 0;
 
 	/* create vout class */
-	vout2_class = class_create(THIS_MODULE, VOUT_CLASS_NAME);
+	vout2_class = class_create(VOUT_CLASS_NAME);
 	if (IS_ERR(vout2_class)) {
 		VOUTERR("vout2: create vout2 class fail\n");
 		return -1;
@@ -967,7 +970,7 @@ static int aml_vout2_probe(struct platform_device *pdev)
 	return ret;
 }
 
-static int aml_vout2_remove(struct platform_device *pdev)
+static void aml_vout2_remove(struct platform_device *pdev)
 {
 #ifdef CONFIG_AMLOGIC_LEGACY_EARLY_SUSPEND
 	unregister_early_suspend(&early_suspend);
@@ -976,8 +979,6 @@ static int aml_vout2_remove(struct platform_device *pdev)
 	vout2_attr_remove();
 	vout2_fops_remove();
 	vout2_unregister_server(&nulldisp_vout2_server);
-
-	return 0;
 }
 
 static void aml_vout2_shutdown(struct platform_device *pdev)
@@ -1018,11 +1019,13 @@ static struct platform_driver vout2_driver = {
 	},
 };
 
+int __init vout2_init_module(void);
 int __init vout2_init_module(void)
 {
 	return platform_driver_register(&vout2_driver);
 }
 
+__exit void vout2_exit_module(void);
 __exit void vout2_exit_module(void)
 {
 	platform_driver_unregister(&vout2_driver);

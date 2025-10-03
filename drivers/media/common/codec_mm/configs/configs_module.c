@@ -38,8 +38,8 @@ struct mediaconfig_node {
 
 };
 
-static ssize_t all_show(struct class *class,
-			struct class_attribute *attr, char *buf)
+static ssize_t all_show(const struct class *class,
+			const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -50,8 +50,8 @@ static ssize_t all_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t media_show(struct class *class,
-			  struct class_attribute *attr, char *buf)
+static ssize_t media_show(const struct class *class,
+			  const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -62,8 +62,8 @@ static ssize_t media_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t video_show(struct class *class,
-			  struct class_attribute *attr, char *buf)
+static ssize_t video_show(const struct class *class,
+			  const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -74,8 +74,8 @@ static ssize_t video_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t decoder_show(struct class *class,
-			    struct class_attribute *attr, char *buf)
+static ssize_t decoder_show(const struct class *class,
+			    const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -86,8 +86,8 @@ static ssize_t decoder_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t vdec_show(struct class *class,
-			 struct class_attribute *attr, char *buf)
+static ssize_t vdec_show(const struct class *class,
+			 const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -98,8 +98,8 @@ static ssize_t vdec_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t tsync_show(struct class *class,
-			  struct class_attribute *attr, char *buf)
+static ssize_t tsync_show(const struct class *class,
+			  const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -110,8 +110,8 @@ static ssize_t tsync_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t amports_show(struct class *class,
-			    struct class_attribute *attr, char *buf)
+static ssize_t amports_show(const struct class *class,
+			    const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -122,8 +122,8 @@ static ssize_t amports_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t parser_show(struct class *class,
-			   struct class_attribute *attr, char *buf)
+static ssize_t parser_show(const struct class *class,
+			   const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -134,8 +134,8 @@ static ssize_t parser_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t config_show(struct class *class,
-			   struct class_attribute *attr, char *buf)
+static ssize_t config_show(const struct class *class,
+			   const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -146,8 +146,8 @@ static ssize_t config_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t config_store(struct class *class,
-			    struct class_attribute *attr,
+static ssize_t config_store(const struct class *class,
+			    const struct class_attribute *attr,
 			    const char *buf, size_t size)
 {
 	ssize_t ret;
@@ -158,22 +158,22 @@ static ssize_t config_store(struct class *class,
 	return ret;
 }
 
-static ssize_t debug_show(struct class *class,
-			  struct class_attribute *attr, char *buf)
+static ssize_t debug_show(const struct class *class,
+			  const struct class_attribute *attr, char *buf)
 {
 	return config_dump(buf, PAGE_SIZE);
 }
 
-static ssize_t debug_store(struct class *class,
-			   struct class_attribute *attr,
+static ssize_t debug_store(const struct class *class,
+			   const struct class_attribute *attr,
 			   const char *buf, size_t size)
 {
 	configs_config_setstr(buf);
 	return size;
 }
 
-static ssize_t audio_show(struct class *class,
-			  struct class_attribute *attr, char *buf)
+static ssize_t audio_show(const struct class *class,
+			  const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -184,8 +184,8 @@ static ssize_t audio_show(struct class *class,
 	return -EPERM;
 }
 
-static ssize_t vfm_show(struct class *class,
-			struct class_attribute *attr, char *buf)
+static ssize_t vfm_show(const struct class *class,
+			const struct class_attribute *attr, char *buf)
 {
 	ssize_t s;
 
@@ -436,6 +436,7 @@ static const struct file_operations configs_fops = {
 #endif
 };
 
+int __init configs_init_devices(void);
 int __init configs_init_devices(void)
 {
 	int i;
@@ -456,7 +457,7 @@ int __init configs_init_devices(void)
 	}
 	config_major = r;
 
-	config_dev_class = class_create(THIS_MODULE, MODULE_NAME);
+	config_dev_class = class_create(MODULE_NAME);
 	num = sizeof(mediaconfig_nodes) / sizeof(struct mediaconfig_node);
 	for (i = 0; i < num; i++) {
 		struct mediaconfig_node *mnode = &mediaconfig_nodes[i];
@@ -480,6 +481,7 @@ error1:
 	return r;
 }
 
+int __init media_configs_system_init(void);
 int __init media_configs_system_init(void)
 {
 	int i;

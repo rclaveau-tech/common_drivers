@@ -34,6 +34,7 @@ static void top_hpd_intr_stub_handler(struct intr_t *);
 static pf_callback earc_hdmitx_hpdst;
 
 static void ddc_stall_req_handler(struct intr_t *intr);
+void hdmitx21_earc_hpdst(pf_callback cb);
 void hdmitx21_earc_hpdst(pf_callback cb)
 {
 	struct hdmitx_dev *hdev = get_hdmitx21_device();

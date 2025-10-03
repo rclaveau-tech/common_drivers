@@ -280,7 +280,7 @@ static int get_queue_member_count(struct list_head *head)
 	return member_count;
 }
 
-ssize_t work_queue_status_show(struct class *cla, struct class_attribute *attr,
+ssize_t work_queue_status_show(const struct class *cla, const struct class_attribute *attr,
 			       char *buf)
 {
 	struct ge2d_context_s *wq = ge2d_manager.current_wq;
@@ -291,7 +291,7 @@ ssize_t work_queue_status_show(struct class *cla, struct class_attribute *attr,
 			get_queue_member_count(&wq->work_queue));
 }
 
-ssize_t free_queue_status_show(struct class *cla, struct class_attribute *attr,
+ssize_t free_queue_status_show(const struct class *cla, const struct class_attribute *attr,
 			       char *buf)
 {
 	struct ge2d_context_s *wq = ge2d_manager.current_wq;
@@ -885,7 +885,7 @@ static void update_canvas_cfg(struct ge2d_canvas_cfg_s *canvas_cfg,
 	canvas_cfg->height = height;
 }
 
-struct ge2d_canvas_cfg_s *ge2d_wq_get_canvas_cfg(struct ge2d_context_s *wq,
+static struct ge2d_canvas_cfg_s *ge2d_wq_get_canvas_cfg(struct ge2d_context_s *wq,
 						 unsigned int data_type,
 						 unsigned int plane_id)
 {
@@ -908,7 +908,7 @@ struct ge2d_canvas_cfg_s *ge2d_wq_get_canvas_cfg(struct ge2d_context_s *wq,
 	return canvas_cfg;
 }
 
-struct ge2d_dma_cfg_s *ge2d_wq_get_dma_cfg(struct ge2d_context_s *wq,
+static struct ge2d_dma_cfg_s *ge2d_wq_get_dma_cfg(struct ge2d_context_s *wq,
 					   unsigned int data_type,
 					   unsigned int plane_id)
 {
@@ -1069,13 +1069,9 @@ static int ge2d_monitor_thread(void *data)
 {
 	int ret;
 	struct ge2d_manager_s *manager = (struct ge2d_manager_s *)data;
-	struct sched_param param = {.sched_priority = 2};
 
-	ret = sched_setscheduler(current, SCHED_FIFO, &param);
-	if (ret) {
-		ge2d_log_err("could not set realtime priority (%d)\n", ret);
-		return -1;
-	}
+	sched_set_fifo(current);
+
 	ge2d_log_info("ge2d workqueue monitor start\n");
 	/* setup current_wq here. */
 	while (ge2d_manager.process_queue_state != GE2D_PROCESS_QUEUE_STOP) {

@@ -8,12 +8,12 @@
 
 static const char *ep;
 
-const char *cjson_geterrorptr(void)
+/*const char *cjson_geterrorptr(void)
 {
 	return ep;
-}
+}*/
 
-unsigned long mypow(unsigned long num, unsigned long n)
+static unsigned long mypow(unsigned long num, unsigned long n)
 {
 	unsigned long value = 1;
 	int i = 1;
@@ -27,7 +27,7 @@ unsigned long mypow(unsigned long num, unsigned long n)
 	return value;
 }
 
-int  mytolower(int c)
+static int  mytolower(int c)
 {
 	if (c >= 'A' && c <= 'Z')
 		return c + 32;
@@ -47,7 +47,7 @@ static int cjson_strcasecmp(const char *s1, const char *s2)
 	return mytolower(*(const unsigned char *)s1) - mytolower(*(const unsigned char *)s2);
 }
 
-void *cjson_malloc(size_t sz)
+static void *cjson_malloc(size_t sz)
 {
 	void *alloc = NULL;
 
@@ -55,7 +55,7 @@ void *cjson_malloc(size_t sz)
 	return alloc;
 }
 
-void cjson_free(void *ptr)
+static void cjson_free(void *ptr)
 {
 	kfree(ptr);
 	ptr = NULL;
@@ -349,7 +349,7 @@ static const char *get_pure_json_str(const char *in)
 }
 
 /* Parse an object - create a new root, and populate. */
-struct cjson *cjson_parsewithopts(const char *value, const char **return_parse_end,
+static struct cjson *cjson_parsewithopts(const char *value, const char **return_parse_end,
 									int require_null_terminated)
 {
 	const char *end = 0;
@@ -543,7 +543,7 @@ static const char *parse_object(struct cjson *item, const char *value)
 }
 
 /* Get Array size/item / object item. */
-int cjson_getarraysize(struct cjson *array)
+/*int cjson_getarraysize(struct cjson *array)
 {
 	struct cjson *c = array->child;
 	int i = 0;
@@ -551,16 +551,16 @@ int cjson_getarraysize(struct cjson *array)
 	while (c)
 		i++, c  = c->next;
 	return i;
-}
+}*/
 
-struct cjson *cjson_getarrayitem(struct cjson *array, int item)
+/*struct cjson *cjson_getarrayitem(struct cjson *array, int item)
 {
 	struct cjson *c = array->child;
 
 	while (c && item > 0)
 		item--, c = c->next;
 	return c;
-}
+}*/
 
 struct cjson *cjson_getobjectitem(struct cjson *object, const char *string)
 {

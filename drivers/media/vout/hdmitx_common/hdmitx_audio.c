@@ -468,6 +468,9 @@ static const struct hdmi_audio_fs_ncts *all_aud_paras[] = {
  */
 u32 hdmitx_hw_get_audio_n_paras(enum hdmi_audio_fs fs,
 				  enum hdmi_color_depth cd,
+				  u32 tmds_clk);
+u32 hdmitx_hw_get_audio_n_paras(enum hdmi_audio_fs fs,
+				  enum hdmi_color_depth cd,
 				  u32 tmds_clk)
 {
 	const struct hdmi_audio_fs_ncts *p = NULL;
@@ -535,6 +538,7 @@ u32 hdmitx_hw_get_audio_n_paras(enum hdmi_audio_fs fs,
 	return n * N_multiples;
 }
 
+int hdmitx_audio_para_print(struct aud_para *audio_para, char *log_buf);
 int hdmitx_audio_para_print(struct aud_para *audio_para, char *log_buf)
 {
 	char buf[256];
@@ -757,6 +761,7 @@ static enum hdmi_audio_sampsize aud_size_map(u32 bits)
 	return SS_MAX;
 }
 
+u32 aud_sr_idx_to_val(enum hdmi_audio_fs e_sr_idx);
 u32 aud_sr_idx_to_val(enum hdmi_audio_fs e_sr_idx)
 {
 	int i = 0;

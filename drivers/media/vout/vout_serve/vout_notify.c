@@ -104,6 +104,7 @@ enum vmode_e get_current_vmode(void)
 }
 EXPORT_SYMBOL(get_current_vmode);
 
+const char *get_name_by_vmode(enum vmode_e mode);
 const char *get_name_by_vmode(enum vmode_e mode)
 {
 	const char *str = NULL;

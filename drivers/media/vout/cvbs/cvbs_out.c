@@ -27,6 +27,7 @@
 #include <linux/interrupt.h>
 #include <linux/mutex.h>
 #include <linux/platform_device.h>
+#include <linux/of_address.h>
 #include <linux/of_device.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -60,7 +61,6 @@
 #include "wss.h"
 #endif
 #include <linux/component.h>
-#include <linux/amlogic/gki_module.h>
 #include <drm/amlogic/meson_drm_bind.h>
 #include <linux/amlogic/media/vout/cvbs.h>
 
@@ -191,21 +191,21 @@ static enum cvbs_mode_e local_cvbs_mode;
 static DEFINE_MUTEX(setmode_mutex);
 
 static int cvbs_vdac_power_level;
-static ssize_t aml_CVBS_attr_vdac_power_show(struct class *class,
-					     struct class_attribute *attr,
+static ssize_t aml_CVBS_attr_vdac_power_show(const struct class *class,
+					     const struct class_attribute *attr,
 					     char *buf);
-static ssize_t aml_CVBS_attr_vdac_power_store(struct class *class,
-					      struct class_attribute *attr,
+static ssize_t aml_CVBS_attr_vdac_power_store(const struct class *class,
+					      const struct class_attribute *attr,
 					      const char *buf, size_t count);
 struct class_attribute class_CVBS_attr_vdac_power_level =
 	__ATTR(vdac_power_level, 0644, aml_CVBS_attr_vdac_power_show,
 	       aml_CVBS_attr_vdac_power_store);
 
-static ssize_t aml_CVBS_attr_debug_show(struct class *class,
-					struct class_attribute *attr,
+static ssize_t aml_CVBS_attr_debug_show(const struct class *class,
+					const struct class_attribute *attr,
 					char *buf);
-static ssize_t aml_CVBS_attr_debug_store(struct class *class,
-					 struct class_attribute *attr,
+static ssize_t aml_CVBS_attr_debug_store(const struct class *class,
+					 const struct class_attribute *attr,
 					 const char *buf, size_t count);
 static int meson_cvbs_bind(struct device *dev,
 			      struct device *master, void *data);
@@ -649,7 +649,9 @@ int cvbs_set_current_vmode(enum vmode_e mode, void *data)
 		      cvbs_drv->vinfo->sync_duration_num);
 
 	/*set limit range for enci*/
+#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
 	amvecm_clip_range_limit(1);
+#endif
 	if (mode & VMODE_INIT_BIT_MASK) {
 		cvbs_out_vpu_power_ctrl(1);
 		cvbs_out_clk_gate_ctrl(1);
@@ -696,7 +698,9 @@ static int cvbs_module_disable(enum vmode_e cur_vmod, void *data)
 	cvbs_vdac_output(0);
 
 	/*restore full range for encp/encl*/
+#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
 	amvecm_clip_range_limit(0);
+#endif
 
 	cvbs_out_vpu_power_ctrl(0);
 	cvbs_out_clk_gate_ctrl(0);
@@ -920,8 +924,8 @@ void cvbs_video_mute(bool mute)
 	mutex_unlock(&setmode_mutex);
 }
 
-static ssize_t aml_CVBS_attr_vdac_power_show(struct class *class,
-					     struct class_attribute *attr,
+static ssize_t aml_CVBS_attr_vdac_power_show(const struct class *class,
+					     const struct class_attribute *attr,
 					     char *buf)
 {
 	return snprintf(buf, 40, "%s\n", "vdac_power_level");
@@ -936,8 +940,8 @@ static void vdac_power_level_store(const char *para)
 	cvbs_vdac_power_level = level;
 }
 
-static ssize_t aml_CVBS_attr_vdac_power_store(struct class *class,
-					      struct class_attribute *attr,
+static ssize_t aml_CVBS_attr_vdac_power_store(const struct class *class,
+					      const struct class_attribute *attr,
 					      const char *buf, size_t count)
 {
 	vdac_power_level_store(buf);
@@ -1124,8 +1128,8 @@ enum {
 	} \
 }
 
-static ssize_t aml_CVBS_attr_debug_show(struct class *class,
-					struct class_attribute *attr,
+static ssize_t aml_CVBS_attr_debug_show(const struct class *class,
+					const struct class_attribute *attr,
 					char *buf)
 {
 	return snprintf(buf, 40, "%s\n", "debug");
@@ -1445,8 +1449,8 @@ DEBUG_END:
 	kfree(p);
 }
 
-static ssize_t aml_CVBS_attr_debug_store(struct class *class,
-					 struct class_attribute *attr,
+static ssize_t aml_CVBS_attr_debug_store(const struct class *class,
+					 const struct class_attribute *attr,
 					 const char *buf, size_t count)
 {
 	cvbs_debug_store(buf);
@@ -1468,7 +1472,7 @@ static int create_cvbs_attr(struct cvbs_drv_s *cdrv)
 	int i;
 	int ret = 0;
 
-	cdrv->base_class = class_create(THIS_MODULE, CVBS_CLASS_NAME);
+	cdrv->base_class = class_create(CVBS_CLASS_NAME);
 	if (IS_ERR(cdrv->base_class)) {
 		ret = PTR_ERR(cdrv->base_class);
 		goto fail_create_class;
@@ -2073,11 +2077,10 @@ static int am_meson_cvbs_probe(struct platform_device *pdev)
 	return component_add(&pdev->dev, &meson_cvbs_bind_ops);
 }
 
-static int am_meson_cvbs_remove(struct platform_device *pdev)
+static void am_meson_cvbs_remove(struct platform_device *pdev)
 {
 	pr_info("[%s:%d] in\n", __func__, __LINE__);
 	component_del(&pdev->dev, &meson_cvbs_bind_ops);
-	return 0;
 }
 
 static const struct of_device_id am_meson_cvbs_dt_ids[] = {
@@ -2169,7 +2172,7 @@ cvbsout_probe_err:
 	return -1;
 }
 
-static int cvbsout_remove(struct platform_device *pdev)
+static void cvbsout_remove(struct platform_device *pdev)
 {
 	int i;
 
@@ -2198,7 +2201,6 @@ static int cvbsout_remove(struct platform_device *pdev)
 	//component_del(&pdev->dev, &meson_cvbs_bind_ops);
 	platform_driver_unregister(&am_meson_cvbs_pltfm_driver);
 	cvbs_log_info("%s\n", __func__);
-	return 0;
 }
 
 static void cvbsout_shutdown(struct platform_device *pdev)
@@ -2273,6 +2275,7 @@ static struct platform_driver cvbsout_driver = {
 	},
 };
 
+int __init cvbs_init_module(void);
 int __init cvbs_init_module(void)
 {
 	/* cvbs_log_info("%s module init\n", __func__); */
@@ -2287,6 +2290,7 @@ int __init cvbs_init_module(void)
 	return 0;
 }
 
+__exit void cvbs_exit_module(void);
 __exit void cvbs_exit_module(void)
 {
 	/* cvbs_log_info("%s module exit\n", __func__); */

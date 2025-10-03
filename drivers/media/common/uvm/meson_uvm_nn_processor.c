@@ -35,7 +35,7 @@ module_param(uvm_aisr_dump, int, 0644);
 #define PRINT_ERROR		0X0
 #define PRINT_OTHER		0X0001
 
-int nn_print(int debug_flag, const char *fmt, ...)
+static int nn_print(int debug_flag, const char *fmt, ...)
 {
 	if ((uvm_nn_debug & debug_flag) ||
 	    debug_flag == PRINT_ERROR) {
@@ -52,7 +52,7 @@ int nn_print(int debug_flag, const char *fmt, ...)
 	return 0;
 }
 
-struct vframe_s *nn_get_vframe(int shared_fd)
+static struct vframe_s *nn_get_vframe(int shared_fd)
 {
 	struct uvm_hook_mod *uhmod = NULL;
 	struct dma_buf *dmabuf = NULL;
@@ -114,7 +114,7 @@ struct vframe_s *nn_get_vframe(int shared_fd)
 	return vframe;
 }
 
-int nn_get_hf_info(int shared_fd, struct vf_nn_sr_t *nn_sr, int *di_flag)
+static int nn_get_hf_info(int shared_fd, struct vf_nn_sr_t *nn_sr, int *di_flag)
 {
 	struct uvm_hook_mod *uhmod = NULL;
 	struct dma_buf *dmabuf = NULL;
@@ -197,7 +197,7 @@ int nn_get_hf_info(int shared_fd, struct vf_nn_sr_t *nn_sr, int *di_flag)
 	return 0;
 }
 
-void free_nn_data(void *arg)
+static void free_nn_data(void *arg)
 {
 	struct vf_nn_sr_t *nn_sr = (struct vf_nn_sr_t *)arg;
 
@@ -245,7 +245,9 @@ int attach_nn_hook_mod_info(int shared_fd,
 		ai_sr_info->hf_height = nn_sr_t.hf_height;
 		ai_sr_info->need_do_aisr = 1;
 
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 		get_output_pcrscr_info(&output_pts_inc_scale, &output_pts_inc_scale_base);
+#endif
 		if (!output_pts_inc_scale_base) {
 			nn_print(PRINT_OTHER, "get output pcrscr info failed.\n");
 			output_fps = 0;
@@ -356,12 +358,12 @@ int attach_nn_hook_mod_info(int shared_fd,
 	info->free = free_nn_data;
 	info->acquire_fence = NULL;
 	info->getinfo = nn_mod_getinfo;
-	info->setinfo = nn_mod_setinfo;
+	//info->setinfo = nn_mod_setinfo;
 
 	return 0;
 }
 
-static void dump_vf(struct vframe_s *vf, int num)
+/*static void dump_vf(struct vframe_s *vf, int num)
 {
 #ifdef CONFIG_AMLOGIC_ENABLE_VIDEO_PIPELINE_DUMP_DATA
 	struct file *fp;
@@ -395,9 +397,9 @@ static void dump_vf(struct vframe_s *vf, int num)
 	codec_mm_unmap_phyaddr(data);
 	filp_close(fp, NULL);
 #endif
-}
+}*/
 
-int dump_hf(struct vf_nn_sr_t *nn_sr_dst, int num)
+/*static int dump_hf(struct vf_nn_sr_t *nn_sr_dst, int num)
 {
 #ifdef CONFIG_AMLOGIC_ENABLE_VIDEO_PIPELINE_DUMP_DATA
 	struct file *fp;
@@ -423,9 +425,9 @@ int dump_hf(struct vf_nn_sr_t *nn_sr_dst, int num)
 #else
 	return -1;
 #endif
-}
+}*/
 
-int nn_mod_setinfo(void *arg, char *buf)
+/*int nn_mod_setinfo(void *arg, char *buf)
 {
 	struct uvm_ai_sr_info *nn_sr_src = NULL;
 	struct vf_nn_sr_t *nn_sr_dst = NULL;
@@ -524,7 +526,7 @@ int nn_mod_setinfo(void *arg, char *buf)
 		nn_sr_dst->nn_out_file_count++;
 	}
 
-	nn_sr_dst->nn_status = nn_sr_src->nn_status;/*this must at the last line of this function*/
+	nn_sr_dst->nn_status = nn_sr_src->nn_status;*//*this must at the last line of this function*//*
 
 	nn_print(PRINT_OTHER,
 		"%s: shared_fd=%d,nn_fd=%d,status=%d,nn_index=%d,nn_mode=%d.\n",
@@ -534,7 +536,7 @@ int nn_mod_setinfo(void *arg, char *buf)
 		nn_sr_src->nn_index,
 		nn_sr_dst->nn_mode);
 	return 0;
-}
+}*/
 
 int nn_mod_getinfo(void *arg, char *buf)
 {

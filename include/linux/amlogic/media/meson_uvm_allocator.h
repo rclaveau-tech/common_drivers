@@ -54,6 +54,7 @@ struct mua_buffer {
 	struct ion_buffer *ibuffer[2];
 	struct dma_buf *idmabuf[2];
 	struct sg_table *sg_table;
+	void *cpu_addr;
 
 	int byte_stride;
 	u32 width;

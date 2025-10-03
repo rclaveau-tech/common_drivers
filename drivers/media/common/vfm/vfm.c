@@ -511,8 +511,8 @@ int dump_vfm_state(char *buf)
 	return len;
 }
 
-static ssize_t map_show(struct class *class,
-			struct class_attribute *attr, char *buf)
+static ssize_t map_show(const struct class *class,
+			const struct class_attribute *attr, char *buf)
 {
 	return (ssize_t)dump_vfm_state(buf);
 }
@@ -693,8 +693,8 @@ static void add_dummy_receiver(char *vfm_name_)
  * <name> the name of the path.
  * <node1 node2 ...> the name of the nodes in the path.
  */
-static ssize_t map_store(struct class *class,
-			 struct class_attribute *attr,
+static ssize_t map_store(const struct class *class,
+			 const struct class_attribute *attr,
 			 const char *buf,
 			 size_t count)
 {
@@ -747,8 +747,8 @@ static ssize_t map_store(struct class *class,
 	return count;
 }
 
-static ssize_t vfm_debug_flag_show(struct class *class,
-				   struct class_attribute *attr,
+static ssize_t vfm_debug_flag_show(const struct class *class,
+				   const struct class_attribute *attr,
 				   char *buf)
 {
 	ssize_t size = 0;
@@ -758,8 +758,8 @@ static ssize_t vfm_debug_flag_show(struct class *class,
 	return size;
 }
 
-static ssize_t vfm_debug_flag_store(struct class *class,
-				    struct class_attribute *attr,
+static ssize_t vfm_debug_flag_store(const struct class *class,
+				    const struct class_attribute *attr,
 				    const char *buf, size_t size)
 {
 	unsigned int val;
@@ -775,8 +775,8 @@ static ssize_t vfm_debug_flag_store(struct class *class,
 	return size;
 }
 
-static ssize_t vfm_map_num_show(struct class *class,
-				struct class_attribute *attr,
+static ssize_t vfm_map_num_show(const struct class *class,
+				const struct class_attribute *attr,
 				char *buf)
 {
 	ssize_t size = 0;
@@ -786,8 +786,8 @@ static ssize_t vfm_map_num_show(struct class *class,
 	return size;
 }
 
-static ssize_t vfm_map_num_store(struct class *class,
-				 struct class_attribute *attr,
+static ssize_t vfm_map_num_store(const struct class *class,
+				 const struct class_attribute *attr,
 				 const char *buf, size_t size)
 {
 	unsigned int val;
@@ -803,8 +803,8 @@ static ssize_t vfm_map_num_store(struct class *class,
 	return size;
 }
 
-static ssize_t vfm_trace_enable_show(struct class *class,
-				     struct class_attribute *attr, char *buf)
+static ssize_t vfm_trace_enable_show(const struct class *class,
+				     const struct class_attribute *attr, char *buf)
 {
 	ssize_t size = 0;
 
@@ -813,8 +813,8 @@ static ssize_t vfm_trace_enable_show(struct class *class,
 	return size;
 }
 
-static ssize_t vfm_trace_enable_store(struct class *class,
-				      struct class_attribute *attr,
+static ssize_t vfm_trace_enable_store(const struct class *class,
+				      const struct class_attribute *attr,
 				      const char *buf, size_t size)
 {
 	unsigned int val;
@@ -830,8 +830,8 @@ static ssize_t vfm_trace_enable_store(struct class *class,
 	return size;
 }
 
-static ssize_t vfm_trace_num_show(struct class *class,
-				  struct class_attribute *attr,
+static ssize_t vfm_trace_num_show(const struct class *class,
+				  const struct class_attribute *attr,
 				  char *buf)
 {
 	ssize_t size = 0;
@@ -841,8 +841,8 @@ static ssize_t vfm_trace_num_show(struct class *class,
 	return size;
 }
 
-static ssize_t vfm_trace_num_store(struct class *class,
-				   struct class_attribute *attr,
+static ssize_t vfm_trace_num_store(const struct class *class,
+				   const struct class_attribute *attr,
 				   const char *buf, size_t size)
 {
 	unsigned int val;
@@ -880,7 +880,8 @@ static struct class vfm_class = {
 	.class_groups = vfm_class_groups,
 };
 
-int vfm_map_store_fun(const char *trigger, int id, const char *buf, int size)
+#ifdef CONFIG_AMLOGIC_MEDIA_CODEC_MM
+static int vfm_map_store_fun(const char *trigger, int id, const char *buf, int size)
 {
 	int ret = size;
 
@@ -891,8 +892,10 @@ int vfm_map_store_fun(const char *trigger, int id, const char *buf, int size)
 	}
 	return size;
 }
+#endif
 
-int vfm_map_show_fun(const char *trigger, int id, char *sbuf, int size)
+#ifdef CONFIG_AMLOGIC_MEDIA_CODEC_MM
+static int vfm_map_show_fun(const char *trigger, int id, char *sbuf, int size)
 {
 	int ret = -1;
 
@@ -922,6 +925,7 @@ int vfm_map_show_fun(const char *trigger, int id, char *sbuf, int size)
 		free_page((unsigned long)getbuf);
 	return ret;
 }
+#endif
 
 #ifdef CONFIG_AMLOGIC_MEDIA_CODEC_MM
 static struct mconfig vfm_configs[] = {

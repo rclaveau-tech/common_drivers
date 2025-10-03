@@ -287,7 +287,7 @@ void vclk_hiu_reg_setb(unsigned int _reg, unsigned int _value,
 	spin_unlock_irqrestore(&vclk_ana_lock, flags);
 }
 
-unsigned int vclk_hiu_reg_getb(unsigned int _reg,
+/*unsigned int vclk_hiu_reg_getb(unsigned int _reg,
 			       unsigned int _start, unsigned int _len)
 {
 	void __iomem *p;
@@ -309,7 +309,7 @@ unsigned int vclk_hiu_reg_getb(unsigned int _reg,
 
 	spin_unlock_irqrestore(&vclk_ana_lock, flags);
 	return val;
-}
+}*/
 
 unsigned int vclk_ana_reg_read(unsigned int _reg)
 {
@@ -533,10 +533,9 @@ static int aml_vclk_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int aml_vclk_remove(struct platform_device *pdev)
+static void aml_vclk_remove(struct platform_device *pdev)
 {
 	vclk_iounmap(pdev);
-	return 0;
 }
 
 static struct platform_driver aml_vclk_driver = {
@@ -548,6 +547,7 @@ static struct platform_driver aml_vclk_driver = {
 	},
 };
 
+int __init aml_vclk_init_module(void);
 int __init aml_vclk_init_module(void)
 {
 	int ret = 0;
@@ -563,6 +563,7 @@ int __init aml_vclk_init_module(void)
 	return ret;
 }
 
+__exit void aml_vclk_exit_module(void);
 __exit void aml_vclk_exit_module(void)
 {
 	platform_driver_unregister(&aml_vclk_driver);

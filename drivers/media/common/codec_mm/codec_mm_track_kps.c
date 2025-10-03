@@ -21,6 +21,7 @@
 #include <linux/kallsyms.h>
 #include <linux/dma-buf.h>
 #include <linux/ptrace.h>
+#include <linux/vmalloc.h>
 
 #include "codec_mm_track_kps.h"
 #include "codec_mm_track_priv.h"
@@ -80,7 +81,7 @@ static int kp_do_dup2_pre(struct kprobe *p, struct pt_regs *regs)
 
 	fdt = files_fdtable(files);
 	tofree = fdt->fd[fd];
-	if (!tofree && fd_is_open(fd, fdt))
+	if (!tofree && test_bit(fd, fdt->open_fds))
 		goto out;
 
 	kctx->func(kctx->priv, p->symbol_name, 0, DBUF_TRACE_FUNC_1, file, &fd, NULL);
@@ -141,7 +142,7 @@ static struct kprobe g_kps[] = {
 #include "codec_mm_kps_config.h"
 };
 
-void codec_mm_unregister_kprobes(struct kprobe **kps, int num)
+static void codec_mm_unregister_kprobes(struct kprobe **kps, int num)
 {
 	int i;
 
@@ -152,7 +153,7 @@ void codec_mm_unregister_kprobes(struct kprobe **kps, int num)
 		unregister_kprobe(kps[i]);
 }
 
-int codec_mm_register_kprobes(struct kprobe **kps, int num)
+static int codec_mm_register_kprobes(struct kprobe **kps, int num)
 {
 	int i, ret = 0;
 

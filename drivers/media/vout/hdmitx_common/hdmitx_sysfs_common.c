@@ -850,7 +850,7 @@ static ssize_t disp_cap_show(struct device *dev,
 	const char *mode_name;
 	int i, pos = 0;
 	int vic_len = prxcap->VIC_count + VESA_MAX_TIMING;
-	int *edid_vics = vmalloc(vic_len * sizeof(int));
+	int *edid_vics = kvmalloc(vic_len * sizeof(int), GFP_KERNEL);
 	enum hdmi_vic prefer_vic = HDMI_0_UNKNOWN;
 
 	memset(edid_vics, 0, vic_len * sizeof(int));
@@ -915,7 +915,7 @@ static ssize_t disp_cap_show(struct device *dev,
 			pos += snprintf(buf + pos, PAGE_SIZE, "%s\n", timing->name);
 	}
 
-	vfree(edid_vics);
+	kvfree(edid_vics);
 	return pos;
 }
 

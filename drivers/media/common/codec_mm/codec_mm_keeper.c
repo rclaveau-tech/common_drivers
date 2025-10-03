@@ -16,6 +16,7 @@
 #include <linux/workqueue.h>
 #include "codec_mm_priv.h"
 #include "codec_mm_scatter_priv.h"
+#include "codec_mm_keeper_priv.h"
 
 #define KEEP_NAME "keeper"
 #define MAX_KEEP_FRAME 64

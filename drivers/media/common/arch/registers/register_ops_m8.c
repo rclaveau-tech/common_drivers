@@ -35,6 +35,7 @@ static struct chip_register_ops ex_gx_ops[] __initdata = {
 	{IO_DMC_BUS, 0, codecio_read_dmcbus, codecio_write_dmcbus},
 };
 
+int __init vdec_reg_ops_init(void);
 int __init vdec_reg_ops_init(void)
 {
 	int  i = 0;
