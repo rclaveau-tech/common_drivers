@@ -7,8 +7,8 @@
 #include <drm/drm_plane.h>
 #include <drm/drm_atomic.h>
 #include <drm/drm_atomic_helper.h>
-#include <drm/drm_fb_cma_helper.h>
-#include <drm/drm_gem_cma_helper.h>
+#include <drm/drm_fb_dma_helper.h>
+#include <drm/drm_gem_dma_helper.h>
 
 #include <linux/platform_device.h>
 #include <linux/of_device.h>
@@ -25,6 +25,7 @@
 #ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT
 #include <linux/amlogic/media/amvecm/amvecm.h>
 #endif
+#include <linux/amlogic/media/registers/cpu_version.h>
 #include <drm/amlogic/meson_drm_bind.h>
 #include <vout/vout_serve/vout_func.h>
 #ifdef CONFIG_AMLOGIC_DRM_USE_ION
@@ -134,7 +135,7 @@ static void meson_drm_signal_present_fence(struct am_meson_crtc *amcrtc)
 	}
 }
 
-void am_meson_crtc_handle_vsync(struct am_meson_crtc *amcrtc)
+static void am_meson_crtc_handle_vsync(struct am_meson_crtc *amcrtc)
 {
 	unsigned long flags;
 	struct drm_crtc *crtc;
@@ -624,11 +625,9 @@ static int am_meson_vpu_probe(struct platform_device *pdev)
 	return component_add(dev, &am_meson_vpu_component_ops);
 }
 
-static int am_meson_vpu_remove(struct platform_device *pdev)
+static void am_meson_vpu_remove(struct platform_device *pdev)
 {
 	component_del(&pdev->dev, &am_meson_vpu_component_ops);
-
-	return 0;
 }
 
 static struct platform_driver am_meson_vpu_platform_driver = {

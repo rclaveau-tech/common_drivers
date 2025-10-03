@@ -10,7 +10,7 @@
 #include <drm/drm_probe_helper.h>
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_connector.h>
-#include <drm/drm_hdcp.h>
+#include <drm/display/drm_hdcp_helper.h>
 #include <drm/drm_modeset_lock.h>
 
 #include <linux/component.h>
@@ -329,7 +329,7 @@ static int meson_hdmitx_decide_color_attr
 	return 0;
 }
 
-int meson_hdmitx_get_modes(struct drm_connector *connector)
+static int meson_hdmitx_get_modes(struct drm_connector *connector)
 {
 	bool vrr_cap;
 	struct edid *edid;
@@ -491,8 +491,8 @@ int meson_hdmitx_get_modes(struct drm_connector *connector)
  *		hsync_end(hse) : h_active + h_front + h_sync
  *		htotal : h_total
  */
-enum drm_mode_status meson_hdmitx_check_mode(struct drm_connector *connector,
-					   struct drm_display_mode *mode)
+static enum drm_mode_status meson_hdmitx_check_mode(struct drm_connector *connector,
+					   const struct drm_display_mode *mode)
 {
 	return MODE_OK;
 }
@@ -846,7 +846,7 @@ static void am_hdmitx_connector_destroy(struct drm_connector *connector)
 	drm_connector_cleanup(connector);
 }
 
-int meson_hdmitx_atomic_check(struct drm_connector *connector,
+static int meson_hdmitx_atomic_check(struct drm_connector *connector,
 	struct drm_atomic_state *state)
 {
 	struct am_hdmitx_connector_state *new_hdmitx_state, *old_hdmitx_state;
@@ -910,7 +910,7 @@ int meson_hdmitx_atomic_check(struct drm_connector *connector,
 	return 0;
 }
 
-struct drm_connector_state *meson_hdmitx_atomic_duplicate_state
+static struct drm_connector_state *meson_hdmitx_atomic_duplicate_state
 	(struct drm_connector *connector)
 {
 	struct am_hdmitx_connector_state *new_state;
@@ -937,7 +937,7 @@ struct drm_connector_state *meson_hdmitx_atomic_duplicate_state
 	return &new_state->base;
 }
 
-void meson_hdmitx_atomic_destroy_state(struct drm_connector *connector,
+static void meson_hdmitx_atomic_destroy_state(struct drm_connector *connector,
 	 struct drm_connector_state *state)
 {
 	struct am_hdmitx_connector_state *hdmitx_state;
@@ -948,7 +948,7 @@ void meson_hdmitx_atomic_destroy_state(struct drm_connector *connector,
 }
 
 /*similar to drm_atomic_helper_connector_reset*/
-void meson_hdmitx_reset(struct drm_connector *connector)
+static void meson_hdmitx_reset(struct drm_connector *connector)
 {
 	struct am_hdmitx_connector_state *hdmitx_state;
 
@@ -975,7 +975,7 @@ void meson_hdmitx_reset(struct drm_connector *connector)
 				(connector, 8, HDMITX_MAX_BPC);
 }
 
-void meson_hdmitx_atomic_print_state(struct drm_printer *p,
+static void meson_hdmitx_atomic_print_state(struct drm_printer *p,
 	const struct drm_connector_state *state)
 {
 	struct am_hdmitx_connector_state *hdmitx_state =
@@ -1134,7 +1134,7 @@ static int meson_hdmitx_get_hdcp_request(struct am_hdmi_tx *tx,
 	return type;
 }
 
-void meson_hdmitx_update_hdcp(void)
+static void meson_hdmitx_update_hdcp(void)
 {
 	int hdcp_request_mode = HDCP_NULL;
 	int hdcp_request_mask = HDCP_NULL;
@@ -1178,7 +1178,7 @@ void meson_hdmitx_update_hdcp(void)
 		DRM_ERROR("No valid hdcp mode exit, maybe hdcp havenot init.\n");
 }
 
-void meson_hdmitx_update(struct drm_connector_state *new_state,
+static void meson_hdmitx_update(struct drm_connector_state *new_state,
 	struct drm_connector_state *old_state)
 {
 	int mute_op = OFF_AVMUTE;
@@ -1536,7 +1536,7 @@ static int meson_hdmitx_choose_preset_mode(struct am_hdmi_tx *hdmitx,
 }
 
 /*Calculate parameters before enable crtc&encoder.*/
-void meson_hdmitx_encoder_atomic_mode_set(struct drm_encoder *encoder,
+static void meson_hdmitx_encoder_atomic_mode_set(struct drm_encoder *encoder,
 	struct drm_crtc_state *crtc_state,
 	struct drm_connector_state *conn_state)
 {
@@ -1674,7 +1674,7 @@ int meson_encoder_vrr_change(struct drm_encoder *encoder,
 	return 0;
 }
 
-void meson_hdmitx_encoder_atomic_enable(struct drm_encoder *encoder,
+static void meson_hdmitx_encoder_atomic_enable(struct drm_encoder *encoder,
 	struct drm_atomic_state *state)
 {
 	struct am_meson_crtc_state *meson_crtc_state =
@@ -1739,7 +1739,7 @@ void meson_hdmitx_encoder_atomic_enable(struct drm_encoder *encoder,
 	}
 }
 
-void meson_hdmitx_encoder_atomic_disable(struct drm_encoder *encoder,
+static void meson_hdmitx_encoder_atomic_disable(struct drm_encoder *encoder,
 	struct drm_atomic_state *state)
 {
 	struct hdmitx_common *tx_comm = am_hdmi_info.hdmitx_dev->hdmitx_common;

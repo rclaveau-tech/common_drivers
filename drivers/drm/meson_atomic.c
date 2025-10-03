@@ -20,8 +20,8 @@
 #include <drm/drm_self_refresh_helper.h>
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_plane_helper.h>
-#include <drm/drm_gem_cma_helper.h>
-#include <drm/drm_fb_cma_helper.h>
+#include <drm/drm_gem_dma_helper.h>
+#include <drm/drm_fb_dma_helper.h>
 #include <drm/drm_gem_framebuffer_helper.h>
 #include <drm/drm_rect.h>
 #include <drm/drm_fb_helper.h>
@@ -432,7 +432,7 @@ static int meson_drm_atomic_helper_setup_commit(struct drm_atomic_state *state,
 	return 0;
 }
 
-void meson_atomic_helper_async_commit(struct drm_device *dev,
+static void meson_atomic_helper_async_commit(struct drm_device *dev,
 				    struct drm_atomic_state *state)
 {
 	struct drm_plane *plane;
@@ -649,7 +649,7 @@ meson_drm_atomic_helper_wait_for_vblanks(struct drm_device *dev,
 	}
 }
 
-void meson_atomic_helper_commit_tail_rpm(struct drm_atomic_state *old_state)
+static void meson_atomic_helper_commit_tail_rpm(struct drm_atomic_state *old_state)
 {
 	struct drm_device *dev = old_state->dev;
 	struct meson_drm *priv = dev->dev_private;

@@ -13,6 +13,7 @@
 #include <linux/init.h>
 #include <linux/amlogic/gki_module.h>
 
+#include <linux/sched.h>
 #include <uapi/linux/sched/types.h>
 
 #include <drm/drmP.h>
@@ -23,8 +24,8 @@
 #include <drm/drm_flip_work.h>
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_plane_helper.h>
-#include <drm/drm_gem_cma_helper.h>
-#include <drm/drm_fb_cma_helper.h>
+#include <drm/drm_gem_dma_helper.h>
+#include <drm/drm_fb_dma_helper.h>
 #include <drm/drm_gem_framebuffer_helper.h>
 #include <drm/drm_rect.h>
 #include <drm/drm_fb_helper.h>
@@ -77,31 +78,15 @@ static int check_reboot_mode(char *str)
 
 __setup("reboot_mode=", check_reboot_mode);
 
-static void am_meson_fb_output_poll_changed(struct drm_device *dev)
-{
-#ifdef CONFIG_AMLOGIC_DRM_EMULATE_FBDEV
-	int i;
-	struct meson_drm_fbdev *fbdev;
-	struct meson_drm *priv = dev->dev_private;
-
-	for (i = 0; i < MESON_MAX_OSD; i++) {
-		fbdev = priv->osd_fbdevs[i];
-		if (fbdev)
-			drm_fb_helper_hotplug_event(&fbdev->base);
-	}
-#endif
-}
-
 static const struct drm_mode_config_funcs meson_mode_config_funcs = {
-	.output_poll_changed = am_meson_fb_output_poll_changed,
 	.atomic_check        = drm_atomic_helper_check,
 	.atomic_commit       = meson_atomic_commit,
 #ifdef CONFIG_AMLOGIC_DRM_USE_ION
 	.fb_create           = am_meson_fb_create,
+	.get_format_info     = am_meson_get_format_info,
 #else
 	.fb_create           = drm_gem_fb_create,
 #endif
-	.get_format_info     = am_meson_get_format_info,
 
 };
 
@@ -160,7 +145,7 @@ int am_meson_get_vrr_range_ioctl(struct drm_device *dev,
 static const struct drm_ioctl_desc meson_ioctls[] = {
 	#ifdef CONFIG_AMLOGIC_DRM_USE_ION
 	DRM_IOCTL_DEF_DRV(MESON_GEM_CREATE, am_meson_gem_create_ioctl,
-			  DRM_UNLOCKED | DRM_AUTH | DRM_RENDER_ALLOW),
+			  DRM_AUTH | DRM_RENDER_ALLOW),
 	#endif
 	DRM_IOCTL_DEF_DRV(MESON_ASYNC_ATOMIC, meson_async_atomic_ioctl,
 			  0),
@@ -198,11 +183,9 @@ static struct drm_driver meson_driver = {
 	 * by meson driver can be imported ok.
 	 */
 	.gem_prime_import_sg_table = am_meson_gem_prime_import_sg_table,
-	.gem_prime_mmap = drm_gem_prime_mmap,
 
 	/* GEM Ops */
 	.dumb_create			= am_meson_gem_dumb_create,
-	.dumb_destroy		= am_meson_gem_dumb_destroy,
 	.dumb_map_offset		= am_meson_gem_dumb_map_offset,
 	.ioctls			= meson_ioctls,
 	.num_ioctls		= ARRAY_SIZE(meson_ioctls),
@@ -211,31 +194,34 @@ static struct drm_driver meson_driver = {
 	.prime_handle_to_fd	= drm_gem_prime_handle_to_fd,
 	.prime_fd_to_handle	= drm_gem_prime_fd_to_handle,
 	.gem_prime_import	= drm_gem_prime_import,
-	.gem_prime_import_sg_table = drm_gem_cma_prime_import_sg_table,
-	.gem_prime_mmap = drm_gem_prime_mmap,
+	.gem_prime_import_sg_table = drm_gem_dma_prime_import_sg_table,
+	//.gem_prime_mmap = drm_gem_prime_mmap,
 
 	/* GEM Ops */
-	.dumb_create		= drm_gem_cma_dumb_create,
-	.dumb_destroy		= drm_gem_dumb_destroy,
+	.dumb_create		= drm_gem_dma_dumb_create,
+	//.dumb_destroy		= drm_gem_dumb_destroy,
 	.dumb_map_offset	= drm_gem_dumb_map_offset,
-	.gem_free_object_unlocked = drm_gem_cma_free_object,
-	.gem_vm_ops		= &drm_gem_cma_vm_ops,
+	//.gem_free_object_unlocked = drm_gem_cma_free_object,
+	//.gem_vm_ops		= &drm_gem_cma_vm_ops,
 #endif
 
 	/* Misc */
 	.fops			= &meson_drm_fops,
 	.name			= DRIVER_NAME,
 	.desc			= DRIVER_DESC,
-	.date			= "20220603",
 	.major			= MESON_VERSION_MAJOR,
 	.minor			= MESON_VERSION_MINOR,
-	.minor			= 0,
+	.patchlevel		= 0,
+
+#ifdef CONFIG_AMLOGIC_DRM_USE_ION
+	.fbdev_probe = am_meson_drm_fbdev_probe,
+#endif
 };
 
 static int meson_worker_thread_init(struct meson_drm *priv,
 				    unsigned int num_crtcs)
 {
-	int i, ret;
+	int i;
 	struct sched_param param;
 	struct kthread_worker *worker;
 	char thread_name[16];
@@ -258,9 +244,7 @@ static int meson_worker_thread_init(struct meson_drm *priv,
 			return -1;
 		}
 
-		ret = sched_setscheduler(drm_thread->thread, SCHED_FIFO, &param);
-		if (ret)
-			DRM_ERROR("failed to set priority\n");
+		sched_set_fifo(drm_thread->thread);
 	}
 
 	return 0;
@@ -333,7 +317,6 @@ static int am_meson_drm_bind(struct device *dev)
 	drm->mode_config.max_height = max_height;
 	drm->mode_config.funcs = &meson_mode_config_funcs;
 	drm->mode_config.helper_private	= &meson_mode_config_helpers;
-	drm->mode_config.allow_fb_modifiers = true;
 
 	if (recovery_mode)
 		priv->recovery_mode = true;
@@ -543,7 +526,7 @@ err_free1:
 	return ret;
 }
 
-static int am_meson_drv_remove_prune(struct platform_device *pdev)
+static void am_meson_drv_remove_prune(struct platform_device *pdev)
 {
 	struct drm_device *drm = platform_get_drvdata(pdev);
 
@@ -555,7 +538,7 @@ static int am_meson_drv_remove_prune(struct platform_device *pdev)
 	platform_set_drvdata(pdev, NULL);
 	drm_dev_put(drm);
 
-	return 0;
+	return;
 }
 
 static int am_meson_drv_probe(struct platform_device *pdev)
@@ -624,13 +607,13 @@ static int am_meson_drv_probe(struct platform_device *pdev)
 	return component_master_add_with_match(dev, &am_meson_drm_ops, match);
 }
 
-static int am_meson_drv_remove(struct platform_device *pdev)
+static void am_meson_drv_remove(struct platform_device *pdev)
 {
 	if (am_meson_drv_use_osd())
 		return am_meson_drv_remove_prune(pdev);
 
 	component_master_del(&pdev->dev, &am_meson_drm_ops);
-	return 0;
+	return;
 }
 
 static const struct of_device_id am_meson_drm_dt_match[] = {

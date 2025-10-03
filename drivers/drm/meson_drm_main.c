@@ -18,7 +18,6 @@
 #include <linux/ctype.h>
 #include <drm/drmP.h>
 #include "meson_drm_main.h"
-#include <linux/amlogic/gki_module.h>
 
 static int __init meson_drm_main_init(void)
 {
@@ -51,4 +50,5 @@ module_init(meson_drm_main_init);
 module_exit(meson_drm_main_exit);
 
 MODULE_LICENSE("GPL v2");
+MODULE_IMPORT_NS("DMA_BUF");
 #endif

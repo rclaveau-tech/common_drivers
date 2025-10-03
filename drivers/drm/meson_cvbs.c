@@ -118,7 +118,7 @@ static inline struct am_drm_cvbs_s *encoder_to_cvbs(struct drm_encoder *encoder)
 	return container_of(encoder, struct am_drm_cvbs_s, encoder);
 }
 
-int am_cvbs_tx_get_modes(struct drm_connector *connector)
+static int am_cvbs_tx_get_modes(struct drm_connector *connector)
 {
 	int i, count;
 	struct drm_display_mode *mode;
@@ -139,8 +139,8 @@ int am_cvbs_tx_get_modes(struct drm_connector *connector)
 	return count;
 }
 
-enum drm_mode_status am_cvbs_tx_check_mode(struct drm_connector *connector,
-					   struct drm_display_mode *mode)
+static enum drm_mode_status am_cvbs_tx_check_mode(struct drm_connector *connector,
+					   const struct drm_display_mode *mode)
 {
 	int i;
 	int checked_vrefresh = drm_mode_vrefresh(mode);
@@ -163,7 +163,7 @@ static struct drm_encoder *am_cvbs_connector_best_encoder
 	return &am_drm_cvbs->encoder;
 }
 
-int am_cvbs_tx_atomic_check(struct drm_connector *connector,
+static int am_cvbs_tx_atomic_check(struct drm_connector *connector,
 	struct drm_atomic_state *state)
 {
 	struct drm_crtc_state *new_crtc_state = NULL;
@@ -234,7 +234,7 @@ static int am_cvbs_connector_atomic_get_property
 	return -EINVAL;
 }
 
-struct drm_connector_state *am_cvbs_atomic_duplicate_state
+static struct drm_connector_state *am_cvbs_atomic_duplicate_state
 	(struct drm_connector *connector)
 {
 	struct am_cvbs_connector_state *new_state;
@@ -250,7 +250,7 @@ struct drm_connector_state *am_cvbs_atomic_duplicate_state
 	return &new_state->base;
 }
 
-void am_cvbs_atomic_destroy_state(struct drm_connector *connector,
+static void am_cvbs_atomic_destroy_state(struct drm_connector *connector,
 	 struct drm_connector_state *state)
 {
 	struct am_cvbs_connector_state *cvbs_state;
@@ -271,13 +271,13 @@ static const struct drm_connector_funcs am_cvbs_connector_funcs = {
 	.atomic_get_property	= am_cvbs_connector_atomic_get_property,
 };
 
-void am_cvbs_encoder_mode_set(struct drm_encoder *encoder,
+static void am_cvbs_encoder_mode_set(struct drm_encoder *encoder,
 	struct drm_crtc_state *crtc_state,
 	struct drm_connector_state *conn_state)
 {
 }
 
-void am_cvbs_encoder_enable(struct drm_encoder *encoder,
+static void am_cvbs_encoder_enable(struct drm_encoder *encoder,
 	struct drm_atomic_state *state)
 {
 	struct am_meson_crtc_state *meson_crtc_state = to_am_meson_crtc_state(encoder->crtc->state);
@@ -293,13 +293,15 @@ void am_cvbs_encoder_enable(struct drm_encoder *encoder,
 
 	meson_vout_notify_mode_change(amcrtc->vout_index,
 		vmode, EVENT_MODE_SET_START);
+#ifdef CONFIG_AMLOGIC_CVBS_OUTPUT
 	cvbs_set_current_vmode(vmode, NULL);
+#endif
 	meson_vout_notify_mode_change(amcrtc->vout_index,
 		vmode, EVENT_MODE_SET_FINISH);
 	meson_vout_update_mode_name(amcrtc->vout_index, mode->name, "cvbs");
 }
 
-void am_cvbs_encoder_disable(struct drm_encoder *encoder,
+static void am_cvbs_encoder_disable(struct drm_encoder *encoder,
 	struct drm_atomic_state *state)
 {
 }

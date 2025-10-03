@@ -232,7 +232,7 @@ static const struct attribute_group vpu_attr_group = {
 };
 
 static ssize_t osd_pixel_blend_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -260,7 +260,7 @@ static ssize_t osd_pixel_blend_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_pixel_blend_store(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -283,7 +283,7 @@ static ssize_t osd_pixel_blend_store(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_reverse_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -311,7 +311,7 @@ static ssize_t osd_reverse_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_reverse_store(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -345,7 +345,7 @@ static ssize_t osd_reverse_store(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_blend_bypass_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -371,7 +371,7 @@ static ssize_t osd_blend_bypass_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_blend_bypass_store(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -397,7 +397,7 @@ static ssize_t osd_blend_bypass_store(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_read_port_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -425,7 +425,7 @@ static ssize_t osd_read_port_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_read_port_store(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -450,7 +450,7 @@ static ssize_t osd_read_port_store(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_fbdump_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -510,14 +510,14 @@ static ssize_t osd_fbdump_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_fbdump_store(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	return count;
 }
 
 static ssize_t osd_blank_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -545,7 +545,7 @@ static ssize_t osd_blank_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t osd_blank_store(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -589,7 +589,7 @@ static ssize_t osd_blank_store(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t state_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -609,7 +609,7 @@ static ssize_t state_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t reg_dump_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -651,7 +651,7 @@ static ssize_t reg_dump_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t crtc_blank_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -685,7 +685,7 @@ static ssize_t crtc_blank_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t crtc_blank_store(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	struct device *dev = kobj_to_dev(kobj);
@@ -733,7 +733,7 @@ static ssize_t crtc_blank_store(struct file *filp, struct kobject *kobj,
 	return count;
 }
 
-struct drm_atomic_state *
+static struct drm_atomic_state *
 meson_drm_duplicate_state(struct drm_device *dev, struct drm_modeset_acquire_ctx *ctx,
 			  struct drm_crtc *dst_crtc, struct drm_connector *dst_conn,
 			  const struct drm_display_mode *mode)
@@ -823,7 +823,7 @@ free:
 }
 
 static ssize_t crtc_mode_store(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	int found, num_modes, ret = 0;
@@ -895,7 +895,7 @@ static ssize_t crtc_mode_store(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t crtc_mode_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	int pos = 0;
@@ -920,7 +920,7 @@ static ssize_t crtc_mode_show(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t hdmitx_attr_store(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	char attr_str[16];
@@ -990,7 +990,7 @@ static ssize_t hdmitx_attr_store(struct file *filp, struct kobject *kobj,
 }
 
 static ssize_t hdmitx_attr_show(struct file *filp, struct kobject *kobj,
-			 struct bin_attribute *attr, char *buf, loff_t off,
+			 const struct bin_attribute *attr, char *buf, loff_t off,
 			 size_t count)
 {
 	int pos = 0;
@@ -1051,7 +1051,7 @@ static ssize_t hdmitx_attr_show(struct file *filp, struct kobject *kobj,
 	return pos;
 }
 
-static struct bin_attribute osd0_attr[] = {
+static const struct bin_attribute osd0_attr[] = {
 	{
 		.attr.name = "osd_reverse",
 		.attr.mode = 0664,
@@ -1097,7 +1097,7 @@ static struct bin_attribute osd0_attr[] = {
 	},
 };
 
-static struct bin_attribute *osd0_bin_attrs[] = {
+static const struct bin_attribute *osd0_bin_attrs[] = {
 	&osd0_attr[0],
 	&osd0_attr[1],
 	&osd0_attr[2],
@@ -1107,7 +1107,7 @@ static struct bin_attribute *osd0_bin_attrs[] = {
 	NULL,
 };
 
-static struct bin_attribute osd1_attr[] = {
+static const struct bin_attribute osd1_attr[] = {
 	{
 		.attr.name = "osd_reverse",
 		.attr.mode = 0664,
@@ -1153,7 +1153,7 @@ static struct bin_attribute osd1_attr[] = {
 	},
 };
 
-static struct bin_attribute *osd1_bin_attrs[] = {
+static const struct bin_attribute *osd1_bin_attrs[] = {
 	&osd1_attr[0],
 	&osd1_attr[1],
 	&osd1_attr[2],
@@ -1163,7 +1163,7 @@ static struct bin_attribute *osd1_bin_attrs[] = {
 	NULL,
 };
 
-static struct bin_attribute osd2_attr[] = {
+static const struct bin_attribute osd2_attr[] = {
 	{
 		.attr.name = "osd_reverse",
 		.attr.mode = 0664,
@@ -1210,7 +1210,7 @@ static struct bin_attribute osd2_attr[] = {
 
 };
 
-static struct bin_attribute *osd2_bin_attrs[] = {
+static const struct bin_attribute *osd2_bin_attrs[] = {
 	&osd2_attr[0],
 	&osd2_attr[1],
 	&osd2_attr[2],
@@ -1220,7 +1220,7 @@ static struct bin_attribute *osd2_bin_attrs[] = {
 	NULL,
 };
 
-static struct bin_attribute osd3_attr[] = {
+static const struct bin_attribute osd3_attr[] = {
 	{
 		.attr.name = "osd_reverse",
 		.attr.mode = 0664,
@@ -1267,7 +1267,7 @@ static struct bin_attribute osd3_attr[] = {
 
 };
 
-static struct bin_attribute *osd3_bin_attrs[] = {
+static const struct bin_attribute *osd3_bin_attrs[] = {
 	&osd3_attr[0],
 	&osd3_attr[1],
 	&osd3_attr[2],
@@ -1296,7 +1296,7 @@ static const struct attribute_group osd_attr_group[MESON_MAX_OSDS] = {
 	},
 };
 
-static struct bin_attribute crtc0_attr[] = {
+static const struct bin_attribute crtc0_attr[] = {
 	{
 		.attr.name = "blank",
 		.attr.mode = 0664,
@@ -1321,14 +1321,14 @@ static struct bin_attribute crtc0_attr[] = {
 
 };
 
-static struct bin_attribute *crtc0_bin_attrs[] = {
+static const struct bin_attribute *crtc0_bin_attrs[] = {
 	&crtc0_attr[0],
 	&crtc0_attr[1],
 	&crtc0_attr[2],
 	NULL,
 };
 
-static struct bin_attribute crtc1_attr[] = {
+static const struct bin_attribute crtc1_attr[] = {
 	{
 		.attr.name = "blank",
 		.attr.mode = 0664,
@@ -1353,14 +1353,14 @@ static struct bin_attribute crtc1_attr[] = {
 
 };
 
-static struct bin_attribute *crtc1_bin_attrs[] = {
+static const struct bin_attribute *crtc1_bin_attrs[] = {
 	&crtc1_attr[0],
 	&crtc1_attr[1],
 	&crtc1_attr[2],
 	NULL,
 };
 
-static struct bin_attribute crtc2_attr[] = {
+static const struct bin_attribute crtc2_attr[] = {
 	{
 		.attr.name = "blank",
 		.attr.mode = 0664,
@@ -1384,7 +1384,7 @@ static struct bin_attribute crtc2_attr[] = {
 	},
 };
 
-static struct bin_attribute *crtc2_bin_attrs[] = {
+static const struct bin_attribute *crtc2_bin_attrs[] = {
 	&crtc2_attr[0],
 	&crtc2_attr[1],
 	&crtc2_attr[2],
@@ -1406,13 +1406,13 @@ static const struct attribute_group crtc_attr_group[MESON_MAX_POSTBLEND] = {
 	},
 };
 
-static struct bin_attribute state_attr = {
+static const struct bin_attribute state_attr = {
 	.attr.name = "state",
 	.attr.mode = 0664,
 	.read = state_show,
 };
 
-static struct bin_attribute reg_dump_attr = {
+static const struct bin_attribute reg_dump_attr = {
 	.attr.name = "reg_dump",
 	.attr.mode = 0664,
 	.read = reg_dump_show,

@@ -418,4 +418,6 @@ enum osd_color_matrix_e {
 
 const struct meson_drm_format_info *meson_drm_format_info(u32 format,
 							  bool afbc_en);
+
+const struct meson_drm_format_info *__meson_drm_gfcd_format_info(u32 format);
 #endif

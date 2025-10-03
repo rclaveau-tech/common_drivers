@@ -6,6 +6,8 @@
 /* Amlogic Headers */
 #include <linux/amlogic/media/vout/vout_notify.h>
 
+#include <linux/amlogic/media/registers/cpu_version.h>
+
 #ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT
 #include <linux/amlogic/media/amvecm/amvecm.h>
 #endif
@@ -272,12 +274,16 @@ static int postblend_check_state(struct meson_vpu_block *vblk,
 			MESON_DRM_BLOCK("unsupported zorder\n");
 			return -1;
 		} else if (top_flag) {
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 			set_video_zorder(video_zorder +
 					 VPP_POST_BLEND_REF_ZORDER, i);
 			MESON_DRM_BLOCK("video on the top\n");
+#endif
 		} else if (bottom_flag) {
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 			set_video_zorder(video_zorder, i);
 			MESON_DRM_BLOCK("video on the bottom\n");
+#endif
 		}
 	}
 

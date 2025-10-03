@@ -50,4 +50,7 @@ struct meson_drm_fbdev {
 };
 
 extern struct am_meson_logo logo;
+
+int am_meson_drm_fbdev_probe(struct drm_fb_helper *helper,
+					 struct drm_fb_helper_surface_size *sizesxx);
 #endif /* __AM_MESON_FBDEV_H */

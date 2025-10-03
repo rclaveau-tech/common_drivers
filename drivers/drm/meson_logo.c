@@ -30,11 +30,12 @@
 #include <drm/drm_flip_work.h>
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_plane_helper.h>
-#include <drm/drm_gem_cma_helper.h>
-#include <drm/drm_fb_cma_helper.h>
+#include <drm/drm_gem_dma_helper.h>
+#include <drm/drm_fb_dma_helper.h>
 #include <drm/drm_gem_framebuffer_helper.h>
 #include <drm/drm_rect.h>
 #include <drm/drm_fb_helper.h>
+#include <drm/drm_blend.h>
 
 #ifdef CONFIG_AMLOGIC_DRM_USE_ION
 #include "meson_gem.h"
@@ -322,14 +323,14 @@ static void free_reserved_mem(unsigned long start, unsigned long size)
 void am_meson_free_logo_memory(void)
 {
 	if (is_cma) {
-		phys_addr_t logo_addr = page_to_phys(logo.logo_page);
+		dma_addr_t *logo_addr = logo.logo_page;
 
 		if (logo.size > 0 && logo.alloc_flag) {
 #ifdef CONFIG_CMA
-			DRM_INFO("%s, free cma memory: addr:0x%pa,size:0x%x\n",
-				 __func__, &logo_addr, logo.size);
+			DRM_INFO("%s, free dma memory: addr:0x%pa,size:0x%x\n",
+				 __func__, logo_addr, logo.size);
 
-			cma_release(cma_logo, logo.logo_page, logo.size >> PAGE_SHIFT);
+			dmam_pool_destroy(logo.dma_pool);
 #endif
 		}
 	} else {
@@ -346,7 +347,7 @@ void am_meson_free_logo_memory(void)
 static int am_meson_logo_info_update(struct meson_drm *priv)
 {
 	if (is_cma)
-		logo.start = page_to_phys(logo.logo_page);
+		logo.start = (phys_addr_t)logo.logo_page;
 
 	logo.alloc_flag = 1;
 	/*config 1080p logo as default*/
@@ -534,7 +535,7 @@ static int _am_meson_occupy_plane_config(struct drm_atomic_state *state,
 /*similar with __drm_atomic_helper_set_config,
  *TODO:sync with __drm_atomic_helper_set_config
  */
-int __am_meson_drm_set_config(struct drm_mode_set *set,
+static int __am_meson_drm_set_config(struct drm_mode_set *set,
 			      struct drm_atomic_state *state, int idx)
 {
 	struct drm_crtc_state *crtc_state;
@@ -839,30 +840,20 @@ void am_meson_logo_init(struct drm_device *dev)
 				DRM_ERROR("no memory-region\n");
 			}
 
-			cma_logo = dev_get_cma_area(&gp_dev->dev);
+			if (logo.size > 0) {
+				logo.dma_pool = dmam_pool_create(dev_name(&gp_dev->dev),
+										&gp_dev->dev, ALIGN(logo.size, PAGE_SIZE) >> PAGE_SHIFT,
+										ALIGN(logo.size, PAGE_SIZE) >> PAGE_SHIFT, 0);
+				struct dma_block *block = dma_pool_alloc(logo.dma_pool, GFP_KERNEL, logo.logo_page);
+				if (!block)
+					DRM_ERROR("allocate buffer failed\n");
+				else
+					am_meson_logo_info_update(private);
 
-			if (cma_logo) {
-				if (logo.size > 0) {
-#if CONFIG_AMLOGIC_KERNEL_VERSION >= 14515
-					logo.logo_page = cma_alloc(cma_logo,
-							ALIGN(logo.size, PAGE_SIZE) >> PAGE_SHIFT,
-							0, GFP_KERNEL);
-#else
-					logo.logo_page = cma_alloc(cma_logo,
-							ALIGN(logo.size, PAGE_SIZE) >> PAGE_SHIFT,
-							0, false);
-#endif
-					if (!logo.logo_page)
-						DRM_ERROR("allocate buffer failed\n");
-					else
-						am_meson_logo_info_update(private);
-
-					DRM_INFO(" cma_alloc from %s start page %px-%px size %x\n",
-						cma_get_name(cma_logo),
-						logo.logo_page,
-						(void *)logo.start,
-						logo.size);
-				}
+				DRM_INFO(" dma_pool_alloc start page %px-%px size %x\n",
+					logo.logo_page,
+					(void *)logo.start,
+					logo.size);
 			}
 #endif
 			if (gem_mem_start) {
@@ -932,12 +923,14 @@ void am_meson_logo_init(struct drm_device *dev)
 	mode_cmd.modifier[0] = DRM_FORMAT_MOD_LINEAR;
 	/*ToDo*/
 	mode_cmd.pitches[0] = ALIGN(mode_cmd.width * logo.bpp, 32) / 8;
+#ifdef CONFIG_AMLOGIC_DRM_USE_ION
 	fb = am_meson_fb_alloc(dev, &mode_cmd, NULL);
 	if (IS_ERR_OR_NULL(fb)) {
 		DRM_ERROR("drm fb allocate failed\n");
 		private->logo_show_done = true;
 		return;
 	}
+#endif
 
 	/*Todo: the condition may need change according to the boot args*/
 	if (strmode && !strcmp("4", strmode))
@@ -948,10 +941,14 @@ void am_meson_logo_init(struct drm_device *dev)
 #endif
 			am_meson_load_logo(dev, fb, i);
 
+#ifdef CONFIG_AMLOGIC_DRM_USE_ION
 	if (drm_framebuffer_read_refcount(fb) > 1)
 		drm_framebuffer_put(fb);
+#endif
 
+#ifdef CONFIG_AMLOGIC_DRM_USE_ION
 	DRM_DEBUG("drm_fb[id:%d,ref:%d]\n", fb->base.id, kref_read(&fb->base.refcount));
+#endif
 
 	private->logo_show_done = true;
 

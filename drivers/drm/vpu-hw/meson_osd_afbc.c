@@ -598,8 +598,10 @@ static void g12a_osd_afbc_set_state(struct meson_vpu_block *vblk,
 	reverse_x = (plane_info->rotation & DRM_MODE_REFLECT_X) ? 1 : 0;
 	reverse_y = (plane_info->rotation & DRM_MODE_REFLECT_Y) ? 1 : 0;
 
+#ifdef CONFIG_AMLOGIC_MEDIA_SECURITY
 	if (pipeline_state->sec_src)
 		pipeline_state->sec_src |= MALI_AFBCD_SECURE;
+#endif
 
 	/* set osd path misc ctrl */
 	reg_ops->rdma_write_reg_bits(OSD_PATH_MISC_CTRL, 0x1,
@@ -771,8 +773,10 @@ static void t7_osd_afbc_set_state(struct meson_vpu_block *vblk,
 			afbc_reg = &afbc->afbc_regs[osd_index];
 			plane_info = &mvps->plane_info[osd_index];
 
+#ifdef CONFIG_AMLOGIC_MEDIA_SECURITY
 			if (mvps->sec_src)
 				mvps->sec_src |= MALI_AFBCD_SECURE;
+#endif
 
 			t7_osd_afbc_enable(vblk, reg_ops, afbc_stat_reg, osd_index, 1);
 
@@ -965,8 +969,10 @@ static void t3_osd_afbc_set_state(struct meson_vpu_block *vblk,
 			afbc_reg = &afbc->afbc_regs[osd_index];
 			plane_info = &mvps->plane_info[osd_index];
 
+#ifdef CONFIG_AMLOGIC_MEDIA_SECURITY
 			if (mvps->sec_src)
 				mvps->sec_src |= MALI_AFBCD_SECURE;
+#endif
 
 			t7_osd_afbc_enable(vblk, reg_ops, afbc_stat_reg, osd_index, 1);
 
@@ -1141,8 +1147,10 @@ static void s5_osd_afbc_set_state(struct meson_vpu_block *vblk,
 			afbc_reg = &afbc->afbc_regs[osd_index];
 			plane_info = &mvps->plane_info[osd_index];
 
+#ifdef CONFIG_AMLOGIC_MEDIA_SECURITY
 			if (mvps->sec_src)
 				mvps->sec_src |= MALI_AFBCD_SECURE;
+#endif
 
 			t7_osd_afbc_enable(vblk, reg_ops, afbc_stat_reg, osd_index, 1);
 
@@ -1315,8 +1323,10 @@ static void t3x_osd_afbc_set_state(struct meson_vpu_block *vblk,
 			afbc_reg = &afbc->afbc_regs[osd_index];
 			plane_info = &mvps->plane_info[osd_index];
 
+#ifdef CONFIG_AMLOGIC_MEDIA_SECURITY
 			if (mvps->sec_src)
 				mvps->sec_src |= MALI_AFBCD_SECURE;
+#endif
 
 			t7_osd_afbc_enable(vblk, reg_ops, afbc_stat_reg, osd_index, 1);
 

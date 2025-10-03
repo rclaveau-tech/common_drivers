@@ -22,7 +22,7 @@
 #include "meson_async_atomic.h"
 #include "meson_plane.h"
 
-struct drm_property *meson_mode_obj_find_prop_id(struct drm_mode_object *obj,
+static struct drm_property *meson_mode_obj_find_prop_id(struct drm_mode_object *obj,
 					       uint32_t prop_id)
 {
 	int i;

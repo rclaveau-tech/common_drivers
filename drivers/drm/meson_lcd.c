@@ -54,7 +54,7 @@ static int find_frac_hint_by_fps(int fps)
 	return 6000;
 }
 
-int meson_panel_get_modes(struct drm_connector *connector)
+static int meson_panel_get_modes(struct drm_connector *connector)
 {
 	struct meson_panel *am_lcd = connector_to_meson_panel(connector);
 	struct meson_panel_dev *panel_dev = am_lcd->panel_dev;
@@ -101,8 +101,8 @@ int meson_panel_get_modes(struct drm_connector *connector)
 	return modes_cnt;
 }
 
-enum drm_mode_status meson_panel_check_mode(struct drm_connector *connector,
-	struct drm_display_mode *mode)
+static enum drm_mode_status meson_panel_check_mode(struct drm_connector *connector,
+	const struct drm_display_mode *mode)
 {
 	return MODE_OK;
 }
@@ -161,7 +161,7 @@ static void am_lcd_connector_destroy_state(struct drm_connector *connector,
 	drm_atomic_helper_connector_destroy_state(connector, state);
 }
 
-int meson_panel_atomic_set_property(struct drm_connector *connector,
+static int meson_panel_atomic_set_property(struct drm_connector *connector,
 			   struct drm_connector_state *state,
 			   struct drm_property *property,
 			   uint64_t val)
@@ -169,7 +169,7 @@ int meson_panel_atomic_set_property(struct drm_connector *connector,
 	return -EINVAL;
 }
 
-int meson_panel_atomic_get_property(struct drm_connector *connector,
+static int meson_panel_atomic_get_property(struct drm_connector *connector,
 			   const struct drm_connector_state *state,
 			   struct drm_property *property,
 			   uint64_t *val)
@@ -184,7 +184,7 @@ int meson_panel_atomic_get_property(struct drm_connector *connector,
 	return -EINVAL;
 }
 
-void meson_panel_atomic_print_state(struct drm_printer *p,
+static void meson_panel_atomic_print_state(struct drm_printer *p,
 				    const struct drm_connector_state *state)
 {
 	int i;

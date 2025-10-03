@@ -376,13 +376,13 @@ static int populate_vpu_pipeline(struct device_node *vpu_block_node,
 	return 0;
 }
 
-void VPU_PIPELINE_HW_INIT(struct meson_vpu_block *mvb)
+static void VPU_PIPELINE_HW_INIT(struct meson_vpu_block *mvb)
 {
 	if (mvb->ops->init)
 		mvb->ops->init(mvb);
 }
 
-void VPU_PIPELINE_HW_FINI(struct meson_vpu_block *mvb)
+static void VPU_PIPELINE_HW_FINI(struct meson_vpu_block *mvb)
 {
 	if (mvb->ops->fini)
 		mvb->ops->fini(mvb);
@@ -492,7 +492,7 @@ int vpu_pipeline_video_check(struct meson_vpu_pipeline *pipeline,
 }
 
 /*for VIU_OSD2_TCOLOR_AGx, alpha channel [7:0] need keep 0xff in case color key is enabled*/
-void vpu_pipeline_append_finish_reg(int crtc_index, struct rdma_reg_ops *reg_ops)
+static void vpu_pipeline_append_finish_reg(int crtc_index, struct rdma_reg_ops *reg_ops)
 {
 	drm_rdma_cnt[crtc_index].val += 0xff;
 	reg_ops->rdma_write_reg(drm_rdma_cnt[crtc_index].reg, drm_rdma_cnt[crtc_index].val);
@@ -961,6 +961,7 @@ int vpu_pipeline_read_scanout_pos(struct meson_vpu_pipeline *pipeline,
 }
 EXPORT_SYMBOL(vpu_pipeline_read_scanout_pos);
 
+#ifdef CONFIG_AMLOGIC_MEDIA_RDMA
 static int vpu_pipeline_get_active_begin_line(struct meson_vpu_pipeline *pipeline, u32 viu_type)
 {
 	int active_line_begin = 0;
@@ -1018,6 +1019,7 @@ static int vpu_pipeline_get_active_begin_line(struct meson_vpu_pipeline *pipelin
 
 	return active_line_begin;
 }
+#endif
 
 void vpu_pipeline_prepare_update(struct meson_vpu_pipeline *pipeline,
 	int vdisplay, int vrefresh, int crtc_index)

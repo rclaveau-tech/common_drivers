@@ -29,6 +29,7 @@ int gamma_ctl = 1;
 int meson_gamma_ctl = -1;
 
 #ifndef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION
+bool get_amdv_mode(void);
 bool get_amdv_mode(void)
 {
 	return false;
@@ -39,18 +40,22 @@ bool is_amdv_enable(void)
 	return false;
 }
 
+void set_amdv_ll_policy(int policy);
 void set_amdv_ll_policy(int policy)
 {
 }
 
+void set_amdv_policy(int policy);
 void set_amdv_policy(int policy)
 {
 }
 
+void set_amdv_enable(bool enable);
 void set_amdv_enable(bool enable)
 {
 }
 
+void set_amdv_mode(int mode);
 void set_amdv_mode(int mode)
 {
 }
@@ -114,15 +119,19 @@ static void set_eotf_by_property(struct am_meson_crtc_state *state)
 				set_amdv_policy(2);
 				set_amdv_mode(0);
 				set_amdv_enable(0);
+#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
 				set_hdr_policy(2);
 				set_force_output(1);
+#endif
 			}
 			if (state->eotf_type_by_property == 2) {
 				set_amdv_policy(2);
 				set_amdv_mode(0);
 				set_amdv_enable(0);
+#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
 				set_hdr_policy(2);
 				set_force_output(3);
+#endif
 			}
 		}
 	}
@@ -183,7 +192,9 @@ static struct drm_crtc_state *meson_crtc_duplicate_state(struct drm_crtc *crtc)
 static void meson_crtc_init_hdr_preference
 	(struct am_meson_crtc_state *crtc_state)
 {
+#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
 	crtc_state->crtc_hdr_process_policy = get_hdr_policy();
+#endif
 #ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION
 	crtc_state->crtc_dv_enable = is_amdv_enable();
 #else
@@ -247,7 +258,7 @@ static const struct dma_fence_ops meson_crtc_fence_ops = {
 	.get_timeline_name = meson_crtc_fence_get_timeline_name,
 };
 
-struct dma_fence *meson_crtc_create_fence(spinlock_t *lock)
+static struct dma_fence *meson_crtc_create_fence(spinlock_t *lock)
 {
 	struct dma_fence *fence;
 
@@ -331,7 +342,9 @@ static int meson_crtc_atomic_get_property(struct drm_crtc *crtc,
 	struct am_meson_crtc *meson_crtc = to_am_meson_crtc(crtc);
 	int ret = 0;
 
+#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
 	crtc_state->hdr_conversion_ctrl = get_hdr_cur_output();
+#endif
 
 	if (!crtc_state->crtc_eotf_by_property_flag)
 		crtc_state->eotf_type_by_property = EOTF_RESERVED;
@@ -360,10 +373,14 @@ static int meson_crtc_atomic_get_property(struct drm_crtc *crtc,
 	} else if (property == meson_crtc->hdr_conversion_ctrl_property) {
 		*val = crtc_state->hdr_conversion_ctrl;
 		return 0;
-	} else if (property == meson_crtc->hdr_conversion_cap_property) {
+	}
+#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
+	else if (property == meson_crtc->hdr_conversion_cap_property) {
 		*val = get_hdr_conversion_cap();
 		return 0;
-	} else if (property == meson_crtc->brr_update_property) {
+	}
+#endif
+	else if (property == meson_crtc->brr_update_property) {
 		*val = crtc_state->brr_update;
 		return 0;
 	} else if (property == meson_crtc->drm_policy_property) {
@@ -944,7 +961,7 @@ static void am_meson_crtc_atomic_flush(struct drm_crtc *crtc,
 	}
 }
 
-bool am_meson_crtc_get_scanout_position(struct drm_crtc *crtc,
+static bool am_meson_crtc_get_scanout_position(struct drm_crtc *crtc,
 				 bool in_vblank_irq, int *vpos, int *hpos,
 				 ktime_t *stime, ktime_t *etime,
 				 const struct drm_display_mode *mode)

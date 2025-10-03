@@ -158,4 +158,7 @@ void meson_of_init(struct device *vpu_dev, struct drm_device *dev,
 void meson_debugfs_init(struct drm_minor *minor);
 #endif
 
+int __init am_meson_drm_init(void);
+void __exit am_meson_drm_exit(void);
+
 #endif /* __AM_MESON_DRV_H */
