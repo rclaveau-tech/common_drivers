@@ -150,13 +150,13 @@ int meson_vpu_write_reg_bits(u32 addr, u32 val, u32 start, u32 len)
 #endif
 }
 
-int meson_vpu_dummy_write_reg(u32 addr, u32 val)
+static int meson_vpu_dummy_write_reg(u32 addr, u32 val)
 {
 	MESON_DRM_REG("%s, 0x%x, 0x%x dummy_write\n", __func__, addr, val);
 	return 0;
 }
 
-int meson_vpu_dummy_write_reg_bits(u32 addr, u32 val, u32 start, u32 len)
+static int meson_vpu_dummy_write_reg_bits(u32 addr, u32 val, u32 start, u32 len)
 {
 	MESON_DRM_REG("%s, 0x%x, 0x%x, %d, %d dummy_write\n", __func__, addr, val, start, len);
 	return 0;
@@ -205,7 +205,7 @@ static int meson_vpu1_write_reg_non_rdma(u32 addr, u32 val)
 	return 0;
 }
 
-int meson_vpu1_write_reg_bits_non_rdma(u32 addr, u32 val, u32 start, u32 len)
+static int meson_vpu1_write_reg_bits_non_rdma(u32 addr, u32 val, u32 start, u32 len)
 {
 	aml_vcbus_update_bits(addr, ((1 << len) - 1) << start, val << start);
 	return 0;

@@ -109,12 +109,12 @@ int am_meson_plane_create(struct meson_drm *priv);
 
 /*For async commit on kernel 4.9, and can be reused on kernel 5.4.*/
 int meson_video_plane_async_check(struct drm_plane *plane,
-	struct drm_atomic_state *state);
+	struct drm_atomic_state *state, bool flip);
 void meson_video_plane_async_update(struct drm_plane *plane,
 	struct drm_atomic_state *state);
 
 int meson_osd_plane_async_check(struct drm_plane *plane,
-	struct drm_atomic_state *state);
+	struct drm_atomic_state *state, bool flip);
 void meson_osd_plane_async_update(struct drm_plane *plane,
 	struct drm_atomic_state *state);
 

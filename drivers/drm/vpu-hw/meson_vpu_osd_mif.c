@@ -7,6 +7,9 @@
 #include <linux/init.h>
 #include <linux/fs.h>
 #include <linux/uaccess.h>
+#include <drm/drm_blend.h>
+
+#include <linux/amlogic/media/registers/cpu_version.h>
 
 #ifdef CONFIG_AMLOGIC_MEDIA_CANVAS
 #include <linux/amlogic/media/canvas/canvas.h>
@@ -317,15 +320,17 @@ static struct osd_mif_reg_s s5_osd_mif_reg[HW_OSD_MIF_NUM] = {
 
 static unsigned int osd_canvas[4][2];
 static u32 osd_canvas_index[4] = {0, 0, 0, 0};
+#ifdef CONFIG_AMLOGIC_MEDIA_SECURITY
 static u32 osd_secure_input_index[] = {OSD1_INPUT_SECURE,
 	OSD2_INPUT_SECURE, OSD3_INPUT_SECURE, OSD4_INPUT_SECURE};
+#endif
 
 /*
  * Internal function to query information for a given format. See
  * meson_drm_format_info() for the public API.
  */
 #ifndef CONFIG_AMLOGIC_ZAPPER_CUT_C1A
-const struct meson_drm_format_info *__meson_drm_format_info(u32 format)
+static const struct meson_drm_format_info *__meson_drm_format_info(u32 format)
 {
 	static const struct meson_drm_format_info formats[] = {
 		{ .format = DRM_FORMAT_XRGB8888,
@@ -402,7 +407,7 @@ const struct meson_drm_format_info *__meson_drm_format_info(u32 format)
 #endif
 
 #ifndef CONFIG_AMLOGIC_ZAPPER_CUT
-const struct meson_drm_format_info *__meson_drm_format_info_t3x(u32 format)
+static const struct meson_drm_format_info *__meson_drm_format_info_t3x(u32 format)
 {
 	static const struct meson_drm_format_info formats[] = {
 		{ .format = DRM_FORMAT_XRGB8888,
@@ -490,7 +495,7 @@ const struct meson_drm_format_info *__meson_drm_format_info_t3x(u32 format)
 }
 #endif
 
-const struct meson_drm_format_info *__meson_drm_format_info_s1a(u32 format)
+static const struct meson_drm_format_info *__meson_drm_format_info_s1a(u32 format)
 {
 	static const struct meson_drm_format_info formats[] = {
 		{ .format = DRM_FORMAT_XRGB8888,
@@ -586,7 +591,7 @@ const struct meson_drm_format_info *__meson_drm_format_info_s1a(u32 format)
 }
 
 #ifndef CONFIG_AMLOGIC_ZAPPER_CUT_C1A
-const struct meson_drm_format_info *__meson_drm_afbc_format_info(u32 format)
+static const struct meson_drm_format_info *__meson_drm_afbc_format_info(u32 format)
 {
 	static const struct meson_drm_format_info formats[] = {
 		{ .format = DRM_FORMAT_XRGB8888,
@@ -693,7 +698,7 @@ const struct meson_drm_format_info *meson_drm_format_info(u32 format,
 #endif
 
 #ifndef CONFIG_AMLOGIC_ZAPPER_CUT
-const struct meson_drm_format_info *meson_drm_format_info_t3x(u32 format,
+static const struct meson_drm_format_info *meson_drm_format_info_t3x(u32 format,
 							  bool afbc_en)
 {
 	const struct meson_drm_format_info *info;
@@ -706,7 +711,7 @@ const struct meson_drm_format_info *meson_drm_format_info_t3x(u32 format,
 	return info;
 }
 
-const struct meson_drm_format_info *meson_drm_format_info_s7(u32 format,
+static const struct meson_drm_format_info *meson_drm_format_info_s7(u32 format,
 							  bool afbc_en)
 {
 	const struct meson_drm_format_info *info;
@@ -720,7 +725,7 @@ const struct meson_drm_format_info *meson_drm_format_info_s7(u32 format,
 }
 #endif
 
-const struct meson_drm_format_info *meson_drm_format_info_s1a(u32 format,
+static const struct meson_drm_format_info *meson_drm_format_info_s1a(u32 format,
 							  bool afbc_en)
 {
 	const struct meson_drm_format_info *info = NULL;
@@ -863,7 +868,7 @@ static u8 meson_drm_format_alpha_replace_s1a(u32 format, bool afbc_en)
 }
 
 /*osd hold line config*/
-void ods_hold_line_config(struct meson_vpu_block *vblk,
+static void ods_hold_line_config(struct meson_vpu_block *vblk,
 			  struct rdma_reg_ops *reg_ops,
 			  struct osd_mif_reg_s *reg, int hold_line)
 {
@@ -877,7 +882,7 @@ void ods_hold_line_config(struct meson_vpu_block *vblk,
 }
 
 /*osd input size config*/
-void osd_input_size_config(struct meson_vpu_block *vblk,
+static void osd_input_size_config(struct meson_vpu_block *vblk,
 			   struct rdma_reg_ops *reg_ops,
 			   struct osd_mif_reg_s *reg, struct osd_scope_s scope)
 {
@@ -890,7 +895,7 @@ void osd_input_size_config(struct meson_vpu_block *vblk,
 }
 
 /*osd canvas config*/
-void osd_canvas_config(struct meson_vpu_block *vblk,
+static void osd_canvas_config(struct meson_vpu_block *vblk,
 		       struct rdma_reg_ops *reg_ops,
 		       struct osd_mif_reg_s *reg, u32 canvas_index)
 {
@@ -909,7 +914,7 @@ static void osd_rpt_y_config(struct meson_vpu_block *vblk,
 /*osd mali afbc src en
  * 1: read data from mali afbcd;0: read data from DDR directly
  */
-void osd_mali_src_en(struct meson_vpu_block *vblk,
+static void osd_mali_src_en(struct meson_vpu_block *vblk,
 		     struct rdma_reg_ops *reg_ops,
 		     struct osd_mif_reg_s *reg, u8 osd_index, bool flag)
 {
@@ -918,7 +923,7 @@ void osd_mali_src_en(struct meson_vpu_block *vblk,
 				     flag, (osd_index + 4), 1);
 }
 
-void osd_mali_src_en_linear(struct meson_vpu_block *vblk,
+static void osd_mali_src_en_linear(struct meson_vpu_block *vblk,
 			struct rdma_reg_ops *reg_ops,
 			struct osd_mif_reg_s *reg, u8 osd_index, bool flag)
 {
@@ -931,7 +936,7 @@ void osd_mali_src_en_linear(struct meson_vpu_block *vblk,
 /*osd axi mux
  *1:axi input data to gfcd;0:axi input data to osd mali
  */
-void osd_gfcd_axi_input_en(struct meson_vpu_block *vblk,
+static void osd_gfcd_axi_input_en(struct meson_vpu_block *vblk,
 		     struct rdma_reg_ops *reg_ops,
 		     struct osd_mif_reg_s *reg, u8 osd_index, bool flag)
 {
@@ -942,7 +947,7 @@ void osd_gfcd_axi_input_en(struct meson_vpu_block *vblk,
 /*osd dout mux
  *1:osd dout from gfcd; 0:osd dout from osd
  */
-void osd_gfcd_dout_en(struct meson_vpu_block *vblk,
+static void osd_gfcd_dout_en(struct meson_vpu_block *vblk,
 		     struct rdma_reg_ops *reg_ops,
 		     struct osd_mif_reg_s *reg, u8 osd_index, bool flag)
 {
@@ -953,14 +958,14 @@ void osd_gfcd_dout_en(struct meson_vpu_block *vblk,
 /*osd endian mode
  * 1: little endian;0: big endian[for mali afbc input]
  */
-void osd_endian_mode(struct meson_vpu_block *vblk, struct rdma_reg_ops *reg_ops,
+static void osd_endian_mode(struct meson_vpu_block *vblk, struct rdma_reg_ops *reg_ops,
 		     struct osd_mif_reg_s *reg, bool flag)
 {
 	reg_ops->rdma_write_reg_bits(reg->viu_osd_blk0_cfg_w0, flag, 15, 1);
 }
 
 /*osd mif enable*/
-void osd_block_enable(struct meson_vpu_block *vblk,
+static void osd_block_enable(struct meson_vpu_block *vblk,
 		      struct rdma_reg_ops *reg_ops,
 		      struct osd_mif_reg_s *reg, bool flag)
 {
@@ -970,7 +975,7 @@ void osd_block_enable(struct meson_vpu_block *vblk,
 /*osd mem mode
  * 0: canvas_addr;1:linear_addr[for mali-afbc-mode]
  */
-void osd_mem_mode(struct meson_vpu_block *vblk, struct rdma_reg_ops *reg_ops,
+static void osd_mem_mode(struct meson_vpu_block *vblk, struct rdma_reg_ops *reg_ops,
 		  struct osd_mif_reg_s *reg, bool mode)
 {
 	reg_ops->rdma_write_reg_bits(reg->viu_osd_ctrl_stat, mode, 2, 1);
@@ -979,7 +984,7 @@ void osd_mem_mode(struct meson_vpu_block *vblk, struct rdma_reg_ops *reg_ops,
 /*osd alpha_div en
  *if input is premult,alpha_div=1,else alpha_div=0
  */
-void osd_global_alpha_set(struct meson_vpu_block *vblk,
+static void osd_global_alpha_set(struct meson_vpu_block *vblk,
 			  struct rdma_reg_ops *reg_ops,
 			  struct osd_mif_reg_s *reg, u16 val)
 {
@@ -989,7 +994,7 @@ void osd_global_alpha_set(struct meson_vpu_block *vblk,
 /*osd alpha_div en
  *if input is premult,alpha_div=1,else alpha_div=0
  */
-void osd_premult_enable(struct meson_vpu_block *vblk,
+static void osd_premult_enable(struct meson_vpu_block *vblk,
 			struct rdma_reg_ops *reg_ops,
 			struct osd_mif_reg_s *reg, int flag)
 {
@@ -1003,7 +1008,7 @@ void osd_premult_enable(struct meson_vpu_block *vblk,
 /*osd x reverse en
  *reverse read in X direction
  */
-void osd_reverse_x_enable(struct meson_vpu_block *vblk,
+static void osd_reverse_x_enable(struct meson_vpu_block *vblk,
 			  struct rdma_reg_ops *reg_ops,
 			  struct osd_mif_reg_s *reg, bool flag)
 {
@@ -1013,7 +1018,7 @@ void osd_reverse_x_enable(struct meson_vpu_block *vblk,
 /*osd y reverse en
  *reverse read in Y direction
  */
-void osd_reverse_y_enable(struct meson_vpu_block *vblk,
+static void osd_reverse_y_enable(struct meson_vpu_block *vblk,
 			  struct rdma_reg_ops *reg_ops,
 			  struct osd_mif_reg_s *reg, bool flag)
 {
@@ -1023,14 +1028,14 @@ void osd_reverse_y_enable(struct meson_vpu_block *vblk,
 /*osd mali unpack en
  * 1: osd will unpack mali_afbc_src;0:osd will unpack normal src
  */
-void osd_mali_unpack_enable(struct meson_vpu_block *vblk,
+static void osd_mali_unpack_enable(struct meson_vpu_block *vblk,
 			    struct rdma_reg_ops *reg_ops,
 			    struct osd_mif_reg_s *reg, bool flag)
 {
 	reg_ops->rdma_write_reg_bits(reg->viu_osd_mali_unpack_ctrl, flag, 31, 1);
 }
 
-void osd_ctrl_init(struct meson_vpu_block *vblk, struct rdma_reg_ops *reg_ops,
+static void osd_ctrl_init(struct meson_vpu_block *vblk, struct rdma_reg_ops *reg_ops,
 		   struct osd_mif_reg_s *reg)
 {
 	/*Need config follow crtc index.*/
@@ -1187,7 +1192,7 @@ static void osd_set_dimm_ctrl(struct meson_vpu_block *vblk,
 }
 
 /* set osd, video two port */
-void osd_set_two_ports(u32 set, struct rdma_reg_ops *reg_ops)
+static void osd_set_two_ports(u32 set, struct rdma_reg_ops *reg_ops)
 {
 	static u32 data32[2];
 
@@ -1577,8 +1582,10 @@ static void osd_set_state(struct meson_vpu_block *vblk,
 		osd_afbc_config(vblk, reg_ops, reg, vblk->index, afbc_en);
 	}
 
+#ifdef CONFIG_AMLOGIC_MEDIA_SECURITY
 	if (mvos->sec_en)
 		mvps->sec_src |= osd_secure_input_index[vblk->index];
+#endif
 
 	osd_premult_enable(vblk, reg_ops, reg, alpha_div_en);
 	osd_global_alpha_set(vblk, reg_ops, reg, global_alpha);

@@ -170,7 +170,7 @@ static u8 find_in_port(struct meson_vpu_block *in, struct meson_vpu_block *out)
 	return 0;
 }
 
-void vpu_pipeline_scaler_scope_size_calc(u8 index, u8 osd_index,
+static void vpu_pipeline_scaler_scope_size_calc(u8 index, u8 osd_index,
 					 struct meson_vpu_pipeline_state *mvps)
 {
 	u8 m, i;
@@ -467,7 +467,7 @@ static void vpu_osd_shift_recalc(struct meson_vpu_pipeline_state *state)
 	state->scaler_param[0].input_height += 1;
 }
 
-int vpu_pipeline_scaler_check(int *combination, int num_planes,
+static int vpu_pipeline_scaler_check(int *combination, int num_planes,
 			      struct meson_vpu_pipeline_state *mvps)
 {
 	int i, j, osd_index, ret, m, osdblend_crtc_idx = 0;
@@ -563,7 +563,7 @@ int vpu_pipeline_scaler_check(int *combination, int num_planes,
  * RETURNS:
  * 0 for the valid path or -1 for the invalid path
  */
-int vpu_pipeline_check_block(int *combination, int num_planes,
+static int vpu_pipeline_check_block(int *combination, int num_planes,
 			     struct meson_vpu_pipeline_state *mvps,
 					struct drm_atomic_state *state)
 {
@@ -653,7 +653,7 @@ int vpu_pipeline_check_block(int *combination, int num_planes,
 }
 
 #ifndef CONFIG_AMLOGIC_ZAPPER_CUT
-int s5_check_pipeline_path(int *combination, int num_planes,
+static int s5_check_pipeline_path(int *combination, int num_planes,
 			   struct meson_vpu_pipeline_state *mvps,
 			   struct drm_atomic_state *state)
 {
@@ -711,7 +711,7 @@ int s5_check_pipeline_path(int *combination, int num_planes,
 	return 0;
 }
 
-int t7_check_pipeline_path(int *combination, int num_planes,
+static int t7_check_pipeline_path(int *combination, int num_planes,
 			     struct meson_vpu_pipeline_state *mvps,
 					struct drm_atomic_state *state)
 {
@@ -719,7 +719,7 @@ int t7_check_pipeline_path(int *combination, int num_planes,
 }
 #endif
 
-int g12a_check_pipeline_path(int *combination, int num_planes,
+static int g12a_check_pipeline_path(int *combination, int num_planes,
 			     struct meson_vpu_pipeline_state *mvps,
 					struct drm_atomic_state *state)
 {
@@ -754,7 +754,7 @@ int vpu_video_pipeline_check_block(struct meson_vpu_pipeline_state *mvps,
 	return ret;
 }
 
-void vpu_pipeline_enable_block(int *combination, int num_planes,
+static void vpu_pipeline_enable_block(int *combination, int num_planes,
 			       struct meson_vpu_pipeline_state *mvps)
 {
 	int i, j, osd_index, crtc_index;
@@ -795,7 +795,7 @@ void vpu_pipeline_enable_block(int *combination, int num_planes,
 }
 
 #ifndef CONFIG_AMLOGIC_ZAPPER_CUT
-int s5_set_pipeline_para(int *combination, int num_planes,
+static int s5_set_pipeline_para(int *combination, int num_planes,
 			 struct meson_vpu_pipeline_state *mvps,
 			 struct drm_atomic_state *state)
 {
@@ -993,7 +993,7 @@ int s5_set_pipeline_para(int *combination, int num_planes,
 	return 0;
 }
 
-int t7_set_pipeline_para(int *combination, int num_planes,
+static int t7_set_pipeline_para(int *combination, int num_planes,
 			     struct meson_vpu_pipeline_state *mvps,
 					struct drm_atomic_state *state)
 {
@@ -1002,7 +1002,7 @@ int t7_set_pipeline_para(int *combination, int num_planes,
 }
 #endif
 
-int g12a_set_pipeline_para(int *combination, int num_planes,
+static int g12a_set_pipeline_para(int *combination, int num_planes,
 			     struct meson_vpu_pipeline_state *mvps,
 					struct drm_atomic_state *state)
 {
@@ -1010,7 +1010,7 @@ int g12a_set_pipeline_para(int *combination, int num_planes,
 	return 0;
 }
 
-void vpu_pipeline_clean_block(int *combination, int num_planes,
+static void vpu_pipeline_clean_block(int *combination, int num_planes,
 			      struct meson_vpu_pipeline_state *mvps,
 			      struct drm_atomic_state *state)
 {
@@ -1059,7 +1059,7 @@ void vpu_pipeline_clean_block(int *combination, int num_planes,
  * RETURNS:
  * 0 for the valid path or -1 for the invalid path
  */
-int combine_layer_path(int *path_num_array, int num_planes,
+static int combine_layer_path(int *path_num_array, int num_planes,
 			 struct meson_vpu_pipeline_state *mvps,
 					struct drm_atomic_state *state)
 {

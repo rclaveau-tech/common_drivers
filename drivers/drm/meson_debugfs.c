@@ -529,7 +529,7 @@ static const struct file_operations meson_reg_debug_fops = {
 	.write = meson_reg_debug_write,
 };
 
-int meson_crtc_debugfs_init(struct drm_crtc *crtc, struct dentry *root)
+static int meson_crtc_debugfs_init(struct drm_crtc *crtc, struct dentry *root)
 {
 	struct dentry *meson_vpu_root;
 	struct dentry *entry;
@@ -560,7 +560,7 @@ int meson_crtc_debugfs_init(struct drm_crtc *crtc, struct dentry *root)
 	return 0;
 }
 
-int meson_plane_debugfs_init(struct drm_plane *plane, struct dentry *root)
+static int meson_plane_debugfs_init(struct drm_plane *plane, struct dentry *root)
 {
 	struct dentry *meson_vpu_root;
 	struct dentry *entry;

@@ -169,6 +169,7 @@ static void video_disable_fence(struct meson_vpu_video *video)
  */
 void video_dummy_data_set(u64 crtc_bgcolor, bool crtc_bgcolor_flag)
 {
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 	int r, g, b, alpha, y, u, v;
 	u32 vpp_index = 0;
 
@@ -185,6 +186,7 @@ void video_dummy_data_set(u64 crtc_bgcolor, bool crtc_bgcolor_flag)
 	v = ((112 * r - 102 * g - 10 * b + 128) >> 8) + 128;
 
 	set_post_blend_dummy_data(vpp_index, 1 << 24 | y << 16 | u << 8 | v, alpha);
+#endif
 }
 
 /* -----------------------------------------------------------------
@@ -230,12 +232,9 @@ static void vp_vf_put(struct vframe_s *vf, void *op_arg)
 
 static int vp_event_cb(int type, void *data, void *private_data)
 {
-	if (type & VFRAME_EVENT_RECEIVER_PUT)
-		;
-	else if (type & VFRAME_EVENT_RECEIVER_GET)
-		;
-	else if (type & VFRAME_EVENT_RECEIVER_FRAME_WAIT)
-		;
+	if (type & VFRAME_EVENT_RECEIVER_PUT) {}
+	else if (type & VFRAME_EVENT_RECEIVER_GET) {}
+	else if (type & VFRAME_EVENT_RECEIVER_FRAME_WAIT) {}
 	return 0;
 }
 
@@ -428,8 +427,11 @@ static void video_set_state(struct meson_vpu_block *vblk,
 			vf_info.reserved[0] = 0;
 			vf_info.phy_addr[0] = mvvs->phy_addr[0];
 			vf_info.phy_addr[1] = mvvs->phy_addr[1];
-			if (vf_info.dmabuf && vf_info.dmabuf->resv)
-				old_fence = dma_resv_get_excl_unlocked(vf_info.dmabuf->resv);
+			if (vf_info.dmabuf && vf_info.dmabuf->resv) {
+				struct dma_resv_iter *cursor = NULL;
+				dma_resv_iter_begin(cursor, vf_info.dmabuf->resv, DMA_RESV_USAGE_READ);
+				old_fence = dma_resv_iter_first_unlocked(cursor);
+			}
 			MESON_DRM_FENCE("dmabuf(%px), release_fence(%px-%d), old_fence=%px-%d\n",
 				vf_info.dmabuf, vf_info.release_fence,
 				vf_info.release_fence ?
@@ -441,8 +443,7 @@ static void video_set_state(struct meson_vpu_block *vblk,
 			} else {
 				MESON_DRM_FENCE("no re-frame\n");
 				if (vf_info.dmabuf && vf_info.dmabuf->resv)
-					dma_resv_add_excl_fence(vf_info.dmabuf->resv,
-						vf_info.release_fence);
+					dma_resv_add_fence(vf_info.dmabuf->resv, vf_info.release_fence, DMA_RESV_USAGE_WRITE);
 			}
 			MESON_DRM_BLOCK("vf-info crop:%u, %u, %u, %u, pic:%u, %u\n",
 				vf_info.crop_x, vf_info.crop_y, vf_info.crop_w, vf_info.crop_h,
@@ -482,8 +483,11 @@ static void video_set_state(struct meson_vpu_block *vblk,
 			else
 				vf_info.phy_addr[1] = mvvs->phy_addr[1];
 			vf_info.reserved[0] = video_type_get(pixel_format);
-			if (vf_info.dmabuf && vf_info.dmabuf->resv)
-				old_fence = dma_resv_get_excl_unlocked(vf_info.dmabuf->resv);
+			if (vf_info.dmabuf && vf_info.dmabuf->resv) {
+				struct dma_resv_iter *cursor = NULL;
+				dma_resv_iter_begin(cursor, vf_info.dmabuf->resv, DMA_RESV_USAGE_READ);
+				old_fence = dma_resv_iter_first_unlocked(cursor);
+			}
 			MESON_DRM_FENCE("dmabuf(%px), release_fence(%px-%d), old_fence=%px-%d\n",
 				vf_info.dmabuf, vf_info.release_fence,
 				vf_info.release_fence ?
@@ -495,8 +499,7 @@ static void video_set_state(struct meson_vpu_block *vblk,
 			} else {
 				MESON_DRM_FENCE("no re-frame\n");
 				if (vf_info.dmabuf && vf_info.dmabuf->resv)
-					dma_resv_add_excl_fence(vf_info.dmabuf->resv,
-						vf_info.release_fence);
+					dma_resv_add_fence(vf_info.dmabuf->resv, vf_info.release_fence, DMA_RESV_USAGE_WRITE);
 			}
 #ifdef CONFIG_AMLOGIC_VIDEO_COMPOSER
 			video_display_setframe(vblk->index, &vf_info, 0);
@@ -591,7 +594,9 @@ static void video_hw_enable(struct meson_vpu_block *vblk,
 	}
 
 	if (!video->video_enabled) {
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 		set_video_enabled(1, vblk->index);
+#endif
 		video->video_enabled = 1;
 	}
 	MESON_DRM_BLOCK("%s enable done.\n", video->base.name);
@@ -625,7 +630,9 @@ static void video_hw_disable(struct meson_vpu_block *vblk,
 		video->fence = NULL;
 		video->dmabuf = NULL;
 		if (video->video_enabled) {
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 			set_video_enabled(0, vblk->index);
+#endif
 			video->video_enabled = 0;
 		}
 

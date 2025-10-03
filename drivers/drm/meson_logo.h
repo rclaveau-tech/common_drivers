@@ -10,7 +10,8 @@
 #define VMODE_NAME_LEN_MAX    64
 
 struct am_meson_logo {
-	struct page *logo_page;
+	struct dma_pool *dma_pool;
+	dma_addr_t *logo_page;
 	void *vaddr;
 	phys_addr_t start;
 	int panel_index;

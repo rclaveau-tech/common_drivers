@@ -13,7 +13,7 @@ static const struct drm_format_info meson_formats[] = {
 		.cpp = { 5, 0, 0 }, .hsub = 1, .vsub = 1, .has_alpha = true },
 };
 
-void am_meson_fb_destroy(struct drm_framebuffer *fb)
+static void am_meson_fb_destroy(struct drm_framebuffer *fb)
 {
 	struct am_meson_fb *meson_fb = to_am_meson_fb(fb);
 	int i;
@@ -27,7 +27,7 @@ void am_meson_fb_destroy(struct drm_framebuffer *fb)
 	kfree(meson_fb);
 }
 
-int am_meson_fb_create_handle(struct drm_framebuffer *fb,
+static int am_meson_fb_create_handle(struct drm_framebuffer *fb,
 			      struct drm_file *file_priv,
 	     unsigned int *handle)
 {
@@ -143,7 +143,7 @@ am_meson_drm_framebuffer_init(struct drm_device *dev,
 	return fb;
 }
 
-int am_meson_mode_rmfb(struct drm_device *dev, u32 fb_id,
+static int am_meson_mode_rmfb(struct drm_device *dev, u32 fb_id,
 		  struct drm_file *file_priv)
 {
 	struct drm_framebuffer *fb = NULL;
@@ -380,7 +380,7 @@ meson_internal_framebuffer_create(struct drm_device *dev,
 	}
 
 	if (r->flags & DRM_MODE_FB_MODIFIERS &&
-	    !dev->mode_config.allow_fb_modifiers) {
+	    dev->mode_config.fb_modifiers_not_supported) {
 		DRM_DEBUG_KMS("driver does not support fb modifiers\n");
 		return ERR_PTR(-EINVAL);
 	}

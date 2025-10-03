@@ -9,6 +9,9 @@
 #include <linux/dma-buf.h>
 #include <uapi/linux/dma-buf.h>
 #include <uapi/linux/magic.h>
+#include <drm/drm_blend.h>
+#include <drm/drm_fb_dma_helper.h>
+#include <drm/drm_gem_dma_helper.h>
 #ifdef CONFIG_AMLOGIC_MEDIA_FB
 #include <linux/amlogic/media/osd/osd_logo.h>
 #endif
@@ -200,7 +203,9 @@ static void osd_plane_mute(bool mute)
 static void video_plane_mute(bool mute)
 {
 	DRM_DEBUG("mute video plane.\n");
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 	set_video_mute(DRM_MUTE_SET, mute);
+#endif
 }
 
 int meson_plane_mute_ioctl(struct drm_device *dev,
@@ -269,7 +274,9 @@ int am_meson_dmabuf_export_sync_file_ioctl(struct drm_device *dev,
 		//	goto err_put_fd;
 		//}
 	} else if (arg->flags & DMA_BUF_SYNC_READ) {
-		fence = dma_resv_get_excl_unlocked(dmabuf->resv);
+		struct dma_resv_iter *cursor = NULL;
+		dma_resv_iter_begin(cursor, dmabuf->resv, DMA_RESV_USAGE_READ);
+		fence = dma_resv_iter_first_unlocked(cursor);
 	}
 	if (!fence)
 		fence = dma_fence_get_stub();
@@ -568,7 +575,7 @@ static int meson_plane_fb_check(struct drm_plane *plane,
 	struct meson_drm *drv = osd_plane->drv;
 	struct am_meson_fb *meson_fb;
 	#else
-	struct drm_gem_cma_object *gem;
+	struct drm_gem_dma_object *gem;
 	#endif
 	size_t fb_size = 0;
 	phys_addr_t phyaddr;
@@ -600,12 +607,12 @@ static int meson_plane_fb_check(struct drm_plane *plane,
 		return -EINVAL;
 
 	/* Update Canvas with buffer address */
-	gem = drm_fb_cma_get_gem_obj(fb, 0);
+	gem = drm_fb_dma_get_gem_obj(fb, 0);
 	if (!gem) {
 		DRM_INFO("gem is NULL!\n");
 		return -EINVAL;
 	}
-	phyaddr = gem->paddr;
+	phyaddr = gem->dma_addr;
 	#endif
 	plane_info->phy_addr = phyaddr;
 	plane_info->fb_size = (u32)fb_size;
@@ -623,7 +630,7 @@ static int meson_video_plane_fb_check(struct drm_plane *plane,
 	struct am_meson_fb *meson_fb;
 	struct uvm_buf_obj *ubo;
 	#else
-	struct drm_gem_cma_object *gem;
+	struct drm_gem_dma_object *gem;
 	#endif
 	size_t fb_size[2] = {0};
 	phys_addr_t phyaddr, phyaddr1 = 0;
@@ -673,12 +680,12 @@ static int meson_video_plane_fb_check(struct drm_plane *plane,
 		return -EINVAL;
 
 	/* Update Canvas with buffer address */
-	gem = drm_fb_cma_get_gem_obj(fb, 0);
+	gem = drm_fb_dma_get_gem_obj(fb, 0);
 	if (!gem) {
 		DRM_INFO("gem is NULL!\n");
 		return -EINVAL;
 	}
-	phyaddr = gem->paddr;
+	phyaddr = gem->dma_addr;
 	#endif
 	plane_info->phy_addr[0] = phyaddr;
 	plane_info->fb_size[0] = (u32)fb_size[0];
@@ -1007,7 +1014,7 @@ static void meson_plane_reset(struct drm_plane *plane)
 		meson_plane_state->base.zpos = zpos;
 }
 
-bool am_meson_vpu_check_format_mod(struct drm_plane *plane,
+static bool am_meson_vpu_check_format_mod(struct drm_plane *plane,
 				   u32 format, u64 modifier)
 {
 	DRM_DEBUG("modifier %llu", modifier);
@@ -1047,7 +1054,7 @@ bool am_meson_vpu_check_format_mod(struct drm_plane *plane,
 	}
 }
 
-bool am_meson_vpu_check_video_format_mod(struct drm_plane *plane,
+static bool am_meson_vpu_check_video_format_mod(struct drm_plane *plane,
 		u32 format, u64 modifier)
 {
 	if (modifier == DRM_FORMAT_MOD_LINEAR &&
@@ -1540,7 +1547,7 @@ static void meson_video_plane_atomic_disable(struct drm_plane *plane,
 
 /*add async check & atomic funs*/
 int meson_osd_plane_async_check(struct drm_plane *plane,
-	struct drm_atomic_state *atomic_state)
+	struct drm_atomic_state *atomic_state, bool flip)
 {
 	int ret = 0;
 	struct meson_vpu_pipeline_state *mvps;
@@ -1578,7 +1585,7 @@ int meson_osd_plane_async_check(struct drm_plane *plane,
 }
 
 int meson_video_plane_async_check(struct drm_plane *plane,
-	struct drm_atomic_state *atomic_state)
+	struct drm_atomic_state *atomic_state, bool flip)
 {
 
 	struct meson_vpu_video_layer_info *plane_info;
@@ -1792,7 +1799,7 @@ meson_create_scaling_filter_prop(struct drm_device *dev,
 	return prop;
 }
 
-int meson_plane_create_scaling_filter_property(struct drm_plane *plane,
+static int meson_plane_create_scaling_filter_property(struct drm_plane *plane,
 					     unsigned int supported_filters)
 {
 	struct drm_property *prop =
@@ -1998,14 +2005,14 @@ static struct am_osd_plane *am_osd_plane_create(struct meson_drm *priv,
 					 afbc_modifier,
 					 type, const_plane_name);
 	} else {
-		priv->drm->mode_config.allow_fb_modifiers = false;
+		priv->drm->mode_config.fb_modifiers_not_supported = true;
 		drm_universal_plane_init(priv->drm, plane, 1 << crtc_mask,
 					 &am_osd_plane_funs,
 					 formats_group,
 					 num_formats,
 					 NULL,
 					 type, const_plane_name);
-		priv->drm->mode_config.allow_fb_modifiers = true;
+		priv->drm->mode_config.fb_modifiers_not_supported = false;
 	}
 	drm_plane_create_blend_mode_property(plane,
 				BIT(DRM_MODE_BLEND_PIXEL_NONE) |

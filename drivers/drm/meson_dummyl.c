@@ -32,7 +32,7 @@ static struct drm_display_mode dummy_mode = {
 	.flags =  DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC,
 };
 
-int meson_dummyl_get_modes(struct drm_connector *connector)
+static int meson_dummyl_get_modes(struct drm_connector *connector)
 {
 	struct drm_display_mode *mode = NULL;
 	int count = 0;
@@ -49,8 +49,8 @@ int meson_dummyl_get_modes(struct drm_connector *connector)
 	return count;
 }
 
-enum drm_mode_status meson_dummyl_check_mode(struct drm_connector *connector,
-	struct drm_display_mode *mode)
+static enum drm_mode_status meson_dummyl_check_mode(struct drm_connector *connector,
+	const struct drm_display_mode *mode)
 {
 	return MODE_OK;
 }
@@ -109,7 +109,7 @@ static void am_dummyl_connector_destroy_state(struct drm_connector *connector,
 	drm_atomic_helper_connector_destroy_state(connector, state);
 }
 
-int meson_dummyl_atomic_set_property(struct drm_connector *connector,
+static int meson_dummyl_atomic_set_property(struct drm_connector *connector,
 			   struct drm_connector_state *state,
 			   struct drm_property *property,
 			   uint64_t val)
@@ -117,7 +117,7 @@ int meson_dummyl_atomic_set_property(struct drm_connector *connector,
 	return -EINVAL;
 }
 
-int meson_dummyl_atomic_get_property(struct drm_connector *connector,
+static int meson_dummyl_atomic_get_property(struct drm_connector *connector,
 			   const struct drm_connector_state *state,
 			   struct drm_property *property,
 			   uint64_t *val)

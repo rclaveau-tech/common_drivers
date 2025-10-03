@@ -61,4 +61,7 @@ int set_vout_mode_name(char *name);
 int set_vout2_mode_name(char *name);
 int set_vout3_mode_name(char *name);
 
+int __init am_meson_vpu_init(void);
+void __exit am_meson_vpu_exit(void);
+
 #endif /* __AM_MESON_VPU_H */

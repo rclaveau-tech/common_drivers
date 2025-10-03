@@ -9,6 +9,7 @@
 #include <drm/drm_connector.h>
 #include <drm/drm_modeset_lock.h>
 #include <drm/drm_probe_helper.h>
+#include <drm/drm_edid.h>
 
 #include <linux/component.h>
 #include <linux/irq.h>
@@ -30,9 +31,9 @@ static int meson_writeback_connector_get_modes(struct drm_connector *connector)
 				    dev->mode_config.max_height);
 }
 
-enum drm_mode_status
+static enum drm_mode_status
 meson_writeback_connector_check_mode(struct drm_connector *connector,
-					   struct drm_display_mode *mode)
+					   const struct drm_display_mode *mode)
 {
 	struct drm_device *dev = connector->dev;
 	struct drm_mode_config *mode_config = &dev->mode_config;
@@ -85,7 +86,7 @@ static int meson_writeback_connector_atomic_check(struct drm_connector *conn,
 	return 0;
 }
 
-u32 meson_writeback_format_covert2drm(enum tvin_pixel_format_e pixel_value)
+static u32 meson_writeback_format_covert2drm(enum tvin_pixel_format_e pixel_value)
 {
 	u32 writeback_fmt = DRM_FORMAT_RGB888;
 
@@ -111,7 +112,7 @@ u32 meson_writeback_format_covert2drm(enum tvin_pixel_format_e pixel_value)
 	return writeback_fmt;
 }
 
-enum tvin_pixel_format_e meson_writeback_format_covert2vdin(u32 writeback_fmt)
+static enum tvin_pixel_format_e meson_writeback_format_covert2vdin(u32 writeback_fmt)
 {
 	enum tvin_pixel_format_e pixel_value = TVIN_PIXEL_RGB444;
 
@@ -138,7 +139,7 @@ enum tvin_pixel_format_e meson_writeback_format_covert2vdin(u32 writeback_fmt)
 	return pixel_value;
 }
 
-int meson_writeback_capture_picture(struct drm_framebuffer *fb, u32 port)
+static int meson_writeback_capture_picture(struct drm_framebuffer *fb, u32 port)
 {
 	struct am_meson_fb *meson_fb;
 	struct dma_buf *dmabuf;
@@ -323,20 +324,20 @@ static const struct drm_connector_funcs am_writeback_connector_funcs = {
 	.atomic_get_property	= am_writeback_connector_atomic_get_property,
 };
 
-void meson_writeback_encoder_atomic_mode_set(struct drm_encoder *encoder,
+static void meson_writeback_encoder_atomic_mode_set(struct drm_encoder *encoder,
 	struct drm_crtc_state *crtc_state,
 	struct drm_connector_state *conn_state)
 {
 	/*TODO*/
 }
 
-void meson_writeback_encoder_atomic_enable(struct drm_encoder *encoder,
+static void meson_writeback_encoder_atomic_enable(struct drm_encoder *encoder,
 	struct drm_atomic_state *state)
 {
 	/*TODO*/
 }
 
-void meson_writeback_encoder_atomic_disable(struct drm_encoder *encoder,
+static void meson_writeback_encoder_atomic_disable(struct drm_encoder *encoder,
 	struct drm_atomic_state *state)
 {
 	/*TODO*/
@@ -379,7 +380,7 @@ static int meson_writeback_port_property(struct drm_device *drm_dev,
 	return 0;
 }
 
-int meson_writeback_get_format(u32 *writeback_fmts)
+static int meson_writeback_get_format(u32 *writeback_fmts)
 {
 	struct support_pixel_format pixel_format;
 	int i;
@@ -436,7 +437,7 @@ int am_meson_writeback_create(struct drm_device *drm)
 	ret = drm_writeback_connector_init(drm, wb_connector,
 			&am_writeback_connector_funcs,
 			&am_writeback_encoder_helper_funcs,
-			writeback_fmts, ARRAY_SIZE(writeback_fmts));
+			writeback_fmts, ARRAY_SIZE(writeback_fmts), wb_connector->encoder.possible_crtcs);
 	if (ret) {
 		DRM_ERROR("Failed to init writeback connector\n");
 		return ret;

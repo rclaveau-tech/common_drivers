@@ -288,7 +288,7 @@ static void osd_dv_core_size_set_s5(u32 h_size, u32 v_size,
  *  0: osd is disabled
  *  1: osd is enabled
  */
-int osd_dv_get_osd_status(enum OSD_INDEX index)
+static int osd_dv_get_osd_status(enum OSD_INDEX index)
 {
 	if (index < MESON_MAX_OSDS)
 		return osd_enable[index];
@@ -298,7 +298,7 @@ int osd_dv_get_osd_status(enum OSD_INDEX index)
 #endif
 
 /*osd blend0 & blend1 4 din inputs premult flag config as 0 default*/
-void osd_blend01_premult_config(struct meson_vpu_block *vblk,
+static void osd_blend01_premult_config(struct meson_vpu_block *vblk,
 				struct rdma_reg_ops *reg_ops,
 				struct osdblend_reg_s *reg)
 {
@@ -306,7 +306,7 @@ void osd_blend01_premult_config(struct meson_vpu_block *vblk,
 }
 
 /*osd blend2 2 inputs premult flag config as 1 default*/
-void osd_blend2_premult_config(struct meson_vpu_block *vblk,
+static void osd_blend2_premult_config(struct meson_vpu_block *vblk,
 			       struct rdma_reg_ops *reg_ops,
 			       struct osdblend_reg_s *reg)
 {
@@ -314,7 +314,7 @@ void osd_blend2_premult_config(struct meson_vpu_block *vblk,
 }
 
 /*osd blend dout0 output div en config as 1,alpha 9bit default*/
-void osd_blend_dout0_div_config(struct meson_vpu_block *vblk,
+static void osd_blend_dout0_div_config(struct meson_vpu_block *vblk,
 				struct rdma_reg_ops *reg_ops,
 				struct osdblend_reg_s *reg)
 {
@@ -323,7 +323,7 @@ void osd_blend_dout0_div_config(struct meson_vpu_block *vblk,
 }
 
 /*osd blend dout1 output div en config as 1,alpha 9bit default*/
-void osd_blend_dout1_div_config(struct meson_vpu_block *vblk,
+static void osd_blend_dout1_div_config(struct meson_vpu_block *vblk,
 				struct rdma_reg_ops *reg_ops,
 				struct osdblend_reg_s *reg)
 {
@@ -332,7 +332,7 @@ void osd_blend_dout1_div_config(struct meson_vpu_block *vblk,
 }
 
 /*osd blend premult config*/
-void osdblend_premult_config(struct meson_vpu_block *vblk,
+static void osdblend_premult_config(struct meson_vpu_block *vblk,
 			     struct rdma_reg_ops *reg_ops,
 			     struct osdblend_reg_s *reg)
 {
@@ -342,7 +342,7 @@ void osdblend_premult_config(struct meson_vpu_block *vblk,
 	osd_blend_dout1_div_config(vblk, reg_ops, reg);
 }
 
-enum osd_channel_e osd2channel(u8 osd_index)
+static enum osd_channel_e osd2channel(u8 osd_index)
 {
 	u8 din_channel_seq[MAX_DIN_NUM] = {OSD_CHANNEL1, OSD_CHANNEL2,
 		OSD_CHANNEL3, OSD_CHANNEL4};
