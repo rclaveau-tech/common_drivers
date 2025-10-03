@@ -1229,7 +1229,10 @@ enum frl_rate_enum hdmitx_select_frl_rate(u8 *dsc_en, u8 dsc_policy, enum hdmi_v
 unsigned int hdmitx_get_frame_duration(void)
 {
 	unsigned int frame_duration;
-	struct vinfo_s *vinfo = hdmitx_get_current_vinfo(NULL);
+	struct vinfo_s *vinfo = NULL;
+#ifdef CONFIG_AMLOGIC_VOUT_SERVE
+	vinfo = hdmitx_get_current_vinfo(NULL);
+#endif
 
 	if (!vinfo || !vinfo->sync_duration_num)
 		return 0;

@@ -347,7 +347,7 @@ static void config_video_mapping(enum hdmi_colorspace cs,
 }
 
 /* reset HDMITX APB & TX */
-void hdmitx21_sys_reset(void)
+/*void hdmitx21_sys_reset(void)
 {
 	switch (global_tx_hw->chip_data->chip_type) {
 	case MESON_CPU_ID_T7:
@@ -366,7 +366,7 @@ void hdmitx21_sys_reset(void)
 	default:
 		break;
 	}
-}
+}*/
 
 /* use PLL/phy state
  * note that PHY_CTRL0 may be enabled for bandgap in plugin top half,
@@ -929,7 +929,7 @@ static void _hdmitx21_set_clk(void)
 	set_hdmitx_fe_clk();
 }
 
-void enable_crt_video_encl2(u32 enable, u32 in_sel)
+static void enable_crt_video_encl2(u32 enable, u32 in_sel)
 {
 	//encl_clk_sel:hi_viid_clk_div[15:12]
 	hd21_set_reg_bits(CLKCTRL_VIID_CLK2_DIV, in_sel, 12, 4);
@@ -946,7 +946,7 @@ void enable_crt_video_encl2(u32 enable, u32 in_sel)
 }
 
 //Enable CLK_ENCL
-void enable_crt_video_encl(u32 enable, u32 in_sel)
+static void enable_crt_video_encl(u32 enable, u32 in_sel)
 {
 	/* RE bit[15:12] encl_clk_sel, 0: vid_pll0_clk */
 	//encl_clk_sel:hi_viid_clk_div[15:12]
@@ -966,7 +966,7 @@ void enable_crt_video_encl(u32 enable, u32 in_sel)
 }
 
 //Enable CLK_ENCP, no use for S5, already configure previously
-void enable_crt_video_encp(u32 enable, u32 in_sel)
+static void enable_crt_video_encp(u32 enable, u32 in_sel)
 {
 	enable_crt_video_encl(enable, in_sel);
 }
@@ -1060,7 +1060,7 @@ static bool is_deep_phase_unstable(enum hdmi_colorspace cs, enum hdmi_color_dept
 
 //Enable HDMI_TX_PIXEL_CLK
 //Note: when in_sel == 15, select tcon_clko
-void enable_crt_video_hdmi(u32 enable, u32 in_sel, u8 enc_sel)
+static void enable_crt_video_hdmi(u32 enable, u32 in_sel, u8 enc_sel)
 {
 	u32 data32;
 	u32 addr_vid_clk02;
@@ -1128,7 +1128,7 @@ void enable_crt_video_hdmi(u32 enable, u32 in_sel, u8 enc_sel)
 }   // enable_crt_video_hdmi
 
 //Enable CLK_ENCP
-void enable_crt_video_encp2(u32 enable, u32 in_sel)
+static void enable_crt_video_encp2(u32 enable, u32 in_sel)
 {
 	enable_crt_video_encl2(enable, in_sel);
 }
@@ -2011,7 +2011,7 @@ static void set_aud_info_pkt(struct aud_para *audio_param)
 	hdmi_audio_infoframe_set(info);
 }
 
-u32 hdmi21_get_frl_aud_n_paras(enum hdmi_audio_fs fs,
+static u32 hdmi21_get_frl_aud_n_paras(enum hdmi_audio_fs fs,
 			       u32 frl_rate)
 {
 	u32 base32k_n = 6048;
@@ -2742,10 +2742,14 @@ static void hdmitx_debug(struct hdmitx_hw_common *tx_hw, const char *buf)
 		vid_mute_ms = value;
 		HDMITX_INFO("set vid_mute_ms :%lu\n", vid_mute_ms);
 	} else if (strncmp(tmpbuf, "get_output_mute", 15) == 0) {
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 		HDMITX_INFO("VPP output mute :%d\n", get_output_mute());
+#endif
 	} else if (strncmp(tmpbuf, "set_output_mute", 15) == 0) {
 		ret = kstrtoul(tmpbuf + 15, 10, &value);
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 		set_output_mute(!!value);
+#endif
 		HDMITX_INFO("set VPP output mute :%d\n", !!value);
 	} else if (strncmp(tmpbuf, "vinfo", 5) == 0) {
 		ret = kstrtoul(tmpbuf + 5, 10, &value);
@@ -3174,7 +3178,9 @@ static int hdmitx_cntl_config(struct hdmitx_hw_common *tx_hw, u32 cmd,
 		if (argv == VIDEO_MUTE) {
 			if (hdev->tx_hw.chip_data->chip_type == MESON_CPU_ID_T7) {
 				/* T7 use vpp mute pattern */
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 				set_output_mute(true);
+#endif
 			} else {
 				hd21_set_reg_bits(ENCP_VIDEO_MODE_ADV, 0, 3, 1);
 				hd21_write_reg(VENC_VIDEO_TST_EN, 1);
@@ -3187,7 +3193,9 @@ static int hdmitx_cntl_config(struct hdmitx_hw_common *tx_hw, u32 cmd,
 		if (argv == VIDEO_UNMUTE) {
 			if (hdev->tx_hw.chip_data->chip_type == MESON_CPU_ID_T7) {
 				/* T7 use vpp mute pattern */
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 				set_output_mute(false);
+#endif
 			} else {
 				hd21_set_reg_bits(ENCP_VIDEO_MODE_ADV, 1, 3, 1);
 				hd21_write_reg(VENC_VIDEO_TST_EN, 0);
@@ -4003,14 +4011,14 @@ u32 hdmitx_vrr_get_maxlncnt(void)
 	return hd21_read_reg(ENCP_VIDEO_MAX_LNCNT) + 1;
 }
 
-int hdmitx21_read_phy_status(void)
+/*int hdmitx21_read_phy_status(void)
 {
 	int phy_value = 0;
 
 	phy_value = !!(hd21_read_reg(ANACTRL_HDMIPHY_CTRL0) & 0xffff);
 
 	return phy_value;
-}
+}*/
 
 void hdmitx21_dither_config(struct hdmitx_dev *hdev)
 {

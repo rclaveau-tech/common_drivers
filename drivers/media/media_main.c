@@ -17,7 +17,7 @@
 #include <linux/cma.h>
 #include <linux/extcon-provider.h>
 #include <linux/mm.h>
-#include <linux/amlogic/gki_module.h>
+//#include <linux/amlogic/gki_module.h>
 #include "media_main.h"
 
 //#define DEBUG
@@ -165,3 +165,4 @@ static void __exit media_main_exit(void)
 module_init(media_main_init);
 module_exit(media_main_exit);
 MODULE_LICENSE("GPL v2");
+MODULE_IMPORT_NS("DMA_BUF");

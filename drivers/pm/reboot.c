@@ -33,6 +33,8 @@
 #include <linux/gpio.h>
 #include <linux/of_gpio.h>
 
+#include "main.h"
+
 static void __iomem *reboot_reason_vaddr;
 static u32 psci_function_id_restart;
 static u32 psci_function_id_poweroff;
@@ -196,13 +198,13 @@ static noinline int __invoke_psci_fn_smc(u64 function_id, u64 arg0, u64 arg1,
 	return res.a0;
 }
 
-void meson_smc_restart(u64 function_id, u64 reboot_reason)
+static void meson_smc_restart(u64 function_id, u64 reboot_reason)
 {
 	__invoke_psci_fn_smc(function_id,
 			     reboot_reason, 0, 0);
 }
 
-void meson_common_restart(char mode, const char *cmd)
+static void meson_common_restart(char mode, const char *cmd)
 {
 	u32 reboot_reason = parse_reason(cmd);
 
@@ -216,15 +218,15 @@ void meson_common_restart(char mode, const char *cmd)
 				  (u64)reboot_reason);
 }
 
-void sd_card_power_reset(void)
+static void sd_card_power_reset(void)
 {
 	int ret = 0, sd_power_en_gpio = 0, vccio_en_gpio = 0;
 
-	sd_power_en_gpio = of_get_named_gpio_flags(g_pdev->dev.of_node,
-			"sd_power_en_gpio", 0, NULL);
+	sd_power_en_gpio = of_get_named_gpio(g_pdev->dev.of_node,
+			"sd_power_en_gpio", 0);
 
-	vccio_en_gpio = of_get_named_gpio_flags(g_pdev->dev.of_node,
-			"vccio_en_gpio", 0, NULL);
+	vccio_en_gpio = of_get_named_gpio(g_pdev->dev.of_node,
+			"vccio_en_gpio", 0);
 
 	if (sd_power_en_gpio < 1 || vccio_en_gpio < 1)
 		return;
@@ -311,7 +313,7 @@ static struct notifier_block panic_notifier = {
 };
 
 #ifndef CONFIG_AMLOGIC_ZAPPER_CUT
-ssize_t reboot_reason_show(struct device *dev,
+static ssize_t reboot_reason_show(struct device *dev,
 			   struct device_attribute *attr, char *buf)
 {
 	unsigned int len;

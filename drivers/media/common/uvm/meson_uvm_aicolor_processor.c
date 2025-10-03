@@ -51,7 +51,7 @@ struct ge2d_output_t {
 	phys_addr_t addr;
 };
 
-int aicolor_print(int debug_flag, const char *fmt, ...)
+static int aicolor_print(int debug_flag, const char *fmt, ...)
 {
 	if ((uvm_aicolor_debug & debug_flag) ||
 	    debug_flag == PRINT_ERROR) {
@@ -68,7 +68,7 @@ int aicolor_print(int debug_flag, const char *fmt, ...)
 	return 0;
 }
 
-struct vframe_s *aicolor_get_dw_vf(struct uvm_aicolor_info *aicolor_info)
+static struct vframe_s *aicolor_get_dw_vf(struct uvm_aicolor_info *aicolor_info)
 {
 	struct uvm_hook_mod *uhmod = NULL;
 	struct dma_buf *dmabuf = NULL;
@@ -154,10 +154,10 @@ struct vframe_s *aicolor_get_dw_vf(struct uvm_aicolor_info *aicolor_info)
 	return vf;
 }
 
-static int aiface_canvas[4] = {-1, -1, -1, -1};
-static struct ge2d_context_s *context;
+//static int aiface_canvas[4] = {-1, -1, -1, -1};
+//static struct ge2d_context_s *context;
 
-static int get_canvas(u32 index)
+/*static int get_canvas(u32 index)
 {
 	const char *owner = "aiface";
 
@@ -167,9 +167,9 @@ static int get_canvas(u32 index)
 	if (aiface_canvas[index] < 0)
 		aicolor_print(PRINT_ERROR, "no canvas\n");
 	return aiface_canvas[index];
-}
+}*/
 
-static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
+/*static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 {
 	struct config_para_ex_s ge2d_config_s;
 	struct config_para_ex_s *ge2d_config = &ge2d_config_s;
@@ -253,7 +253,7 @@ static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 	    interlace_mode == VIDTYPE_INTERLACE_TOP) {
 		input_height >>= 1;
 	} else if (vf->height > uvm_aicolor_skip_height) {
-		/*used to reduce bandwidth by change format to interlace*/
+		*//*used to reduce bandwidth by change format to interlace*//*
 		aicolor_print(PRINT_OTHER, "use interlace format.\n");
 		input_height >>= 1;
 		src_format |= (GE2D_FMT_M24_YUV420T & (3 << 3));
@@ -297,7 +297,7 @@ static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 	ge2d_config->src_para.height = input_height;
 	ge2d_config->alu_const_color = 0;
 	ge2d_config->bitmask_en = 0;
-	ge2d_config->src1_gb_alpha = 0;/* 0xff; */
+	ge2d_config->src1_gb_alpha = 0;*//* 0xff; *//*
 	ge2d_config->src2_para.mem_type = CANVAS_TYPE_INVALID;
 	ge2d_config->dst_para.canvas_index = output_canvas;
 
@@ -324,12 +324,12 @@ static int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 			   0, 0, output->width, output->height);
 
 	return 0;
-}
+}*/
 
-void free_aicolor_data(void *arg)
+static void free_aicolor_data(void *arg)
 {
 	if (arg)
-		vfree(arg);
+		kvfree(arg);
 	else
 		aicolor_print(PRINT_ERROR, "%s NULL\n", __func__);
 }
@@ -371,7 +371,9 @@ int attach_aicolor_hook_mod_info(int shared_fd,
 			aicolor_info->need_do_aicolor = 0;
 		}
 
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 		get_output_pcrscr_info(&output_pts_inc_scale, &output_pts_inc_scale_base);
+#endif
 		if (!output_pts_inc_scale_base) {
 			aicolor_print(PRINT_OTHER, "get output pcrscr info failed.\n");
 			output_fps = 0;
@@ -406,7 +408,7 @@ int attach_aicolor_hook_mod_info(int shared_fd,
 	handle = dmabuf->priv;
 	uhmod = uvm_get_hook_mod(dmabuf, PROCESS_AICOLOR);
 	if (IS_ERR_OR_NULL(uhmod)) {
-		nn_aicolor = vmalloc(sizeof(*nn_aicolor));
+		nn_aicolor = kvmalloc(sizeof(*nn_aicolor), GFP_KERNEL);
 		memset(nn_aicolor, 0, sizeof(struct vf_aicolor_t));
 		aicolor_print(PRINT_OTHER, "attach:first attach, need alloc\n");
 		if (!nn_aicolor) {
@@ -450,7 +452,7 @@ int attach_aicolor_hook_mod_info(int shared_fd,
 	info->arg = nn_aicolor;
 	info->free = free_aicolor_data;
 	info->acquire_fence = NULL;
-	info->getinfo = aicolor_getinfo;
+	//info->getinfo = aicolor_getinfo;
 	info->setinfo = aicolor_setinfo;
 
 	return 0;
@@ -486,7 +488,7 @@ int aicolor_setinfo(void *arg, char *buf)
 	return 0;
 }
 
-static void dump_vf(struct vframe_s *vf, phys_addr_t addr, struct uvm_aicolor_info *info, int num)
+/*static void dump_vf(struct vframe_s *vf, phys_addr_t addr, struct uvm_aicolor_info *info, int num)
 {
 #ifdef CONFIG_AMLOGIC_ENABLE_VIDEO_PIPELINE_DUMP_DATA
 	struct file *fp;
@@ -549,9 +551,9 @@ static void dump_vf(struct vframe_s *vf, phys_addr_t addr, struct uvm_aicolor_in
 	codec_mm_unmap_phyaddr(data_uv);
 	filp_close(fp, NULL);
 #endif
-}
+}*/
 
-int aicolor_getinfo(void *arg, char *buf)
+/*int aicolor_getinfo(void *arg, char *buf)
 {
 	struct uvm_aicolor_info *aicolor_info = NULL;
 	int ret = -1;
@@ -645,5 +647,5 @@ int aicolor_getinfo(void *arg, char *buf)
 		}
 	}
 	return 0;
-}
+}*/
 

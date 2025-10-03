@@ -20,6 +20,7 @@
 #include <linux/dma-map-ops.h>
 #include <linux/cma.h>
 #include <linux/kasan.h>
+#include <linux/vmalloc.h>
 
 #include "ge2d_log.h"
 #include "ge2d_dmabuf.h"
@@ -104,11 +105,7 @@ static void aml_dma_put(void *buf_priv)
 	/* change in kernel5.15 */
 	if (buf->dev && buf->dev->cma_area)
 		cma_area = buf->dev->cma_area;
-	else
-		cma_area = dma_contiguous_default_area;
-	if (!cma_release(cma_area, cma_pages, buf->size >> PAGE_SHIFT)) {
-		pr_err("failed to release cma buffer\n");
-	}
+	dma_free_pages(buf->dev, buf->size, cma_pages, buf->dma_addr, DMA_BIDIRECTIONAL);
 	buf->vaddr = NULL;
 	if (buf->index < AML_MAX_DMABUF && buf->priv)
 		clear_dma_buffer((struct aml_dma_buffer *)buf->priv,
@@ -140,13 +137,7 @@ static void *aml_dma_alloc(struct device *dev, unsigned long attrs,
 	/* change in kernel5.15 */
 	if (dev && dev->cma_area)
 		cma_area = dev->cma_area;
-	else
-		cma_area = dma_contiguous_default_area;
-#if CONFIG_AMLOGIC_KERNEL_VERSION >= 14515
-	cma_pages = cma_alloc(cma_area, size >> PAGE_SHIFT, 0, GFP_KERNEL);
-#else
-	cma_pages = cma_alloc(cma_area, size >> PAGE_SHIFT, 0, 0);
-#endif
+	cma_pages = dma_alloc_pages(dev, size, &paddr, DMA_BIDIRECTIONAL, GFP_KERNEL);
 	if (cma_pages) {
 		paddr = page_to_phys(cma_pages);
 	} else {
@@ -187,7 +178,7 @@ static int aml_dma_mmap(void *buf_priv, struct vm_area_struct *vma)
 		pr_err("Remapping memory, error: %d\n", ret);
 		return ret;
 	}
-	vma->vm_flags |= VM_DONTEXPAND;
+	vm_flags_set(vma, VM_DONTEXPAND);
 	ge2d_log_dbg("mapped dma addr 0x%08lx at 0x%08lx, size %d\n",
 		     (unsigned long)buf->dma_addr, vma->vm_start,
 		     buf->size);
@@ -266,15 +257,11 @@ static struct sg_table *aml_dmabuf_ops_map(struct dma_buf_attachment *db_attach,
 {
 	struct aml_attachment *attach = db_attach->priv;
 	/* stealing dmabuf mutex to serialize map/unmap operations */
-	struct mutex *lock = &db_attach->dmabuf->lock;
 	struct sg_table *sgt;
-
-	mutex_lock(lock);
 
 	sgt = &attach->sgt;
 	/* return previously mapped sg table */
 	if (attach->dma_dir == dma_dir) {
-		mutex_unlock(lock);
 		return sgt;
 	}
 
@@ -289,13 +276,10 @@ static struct sg_table *aml_dmabuf_ops_map(struct dma_buf_attachment *db_attach,
 				dma_dir);
 	if (!sgt->nents) {
 		pr_err("failed to map scatterlist\n");
-		mutex_unlock(lock);
 		return (void *)(-EIO);
 	}
 
 	attach->dma_dir = dma_dir;
-
-	mutex_unlock(lock);
 	return sgt;
 }
 
@@ -315,12 +299,12 @@ static void aml_dmabuf_ops_release(struct dma_buf *dbuf)
 		aml_dma_put(buf);
 }
 
-static int aml_dmabuf_ops_vmap(struct dma_buf *dbuf, struct dma_buf_map *map)
+static int aml_dmabuf_ops_vmap(struct dma_buf *dbuf, struct iosys_map *map)
 {
 	struct aml_dma_buf_priv *buf_priv = dbuf->priv;
 	struct aml_dma_buf *buf = buf_priv->aml_buf;
 
-	dma_buf_map_set_vaddr(map, buf->vaddr);  //change in kernel5.15
+	iosys_map_set_vaddr(map, buf->vaddr);  //change in kernel5.15
 	return 0;
 }
 

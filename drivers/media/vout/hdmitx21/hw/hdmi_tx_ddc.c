@@ -338,7 +338,7 @@ bool hdmitx_ddcm_write(u8 seg_index, u8 slave_addr, u8 reg_addr, u8 data)
 	return (ddc_err == DDC_ERR_NONE) ? false : true;
 }
 
-enum ddc_err_t hdmitx_ddc_read_1byte(u8 slave_addr, u8 reg_addr, u8 *p_buf)
+/*enum ddc_err_t hdmitx_ddc_read_1byte(u8 slave_addr, u8 reg_addr, u8 *p_buf)
 {
 	hdmitx21_wr_reg(LM_DDC_IVCTX, 0x80);
 	hdmitx21_wr_reg(DDC_CMD_IVCTX, 0x09);
@@ -354,7 +354,7 @@ enum ddc_err_t hdmitx_ddc_read_1byte(u8 slave_addr, u8 reg_addr, u8 *p_buf)
 	p_buf[0]  = hdmitx21_rd_reg(DDC_DATA_AON_IVCTX);
 
 	return DDC_ERR_NONE;
-} /* hdmi20_tx_read_edid */
+}*/ /* hdmi20_tx_read_edid */
 
 bool is_rx_hdcp2ver(void)
 {

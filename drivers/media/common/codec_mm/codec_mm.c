@@ -317,33 +317,17 @@ static inline u64 codec_mm_get_current_ms(void)
 struct page *dma_alloc_from_contiguous(struct device *dev, size_t count,
 				       unsigned int align, bool no_warn)
 {
-	if (align > CONFIG_CMA_ALIGNMENT)
-		align = CONFIG_CMA_ALIGNMENT;
+	struct page *pages;
+	dma_addr_t dma_addr;
 
-#if CONFIG_AMLOGIC_KERNEL_VERSION >= 14515
-	if (no_warn)
-		return cma_alloc(dev_get_cma_area(dev), count, align, GFP_KERNEL | __GFP_NOWARN);
-	else
-		return cma_alloc(dev_get_cma_area(dev), count, align, GFP_KERNEL);
-#else
-	return cma_alloc(dev_get_cma_area(dev), count, align, no_warn);
-#endif
-}
+	if (align > CONFIG_CMA_ALIGNMENT && !no_warn)
+		pr_warn("Requested alignment %u > CONFIG_CMA_ALIGNMENT %u\n",
+				align, CONFIG_CMA_ALIGNMENT);
 
-/**
- * dma_release_from_contiguous() - release allocated pages
- * @dev:   Pointer to device for which the pages were allocated.
- * @pages: Allocated pages.
- * @count: Number of allocated pages.
- *
- * This function releases memory allocated by dma_alloc_from_contiguous().
- * It returns false when provided pages do not belong to contiguous area and
- * true otherwise.
- */
-bool dma_release_from_contiguous(struct device *dev, struct page *pages,
-				 int count)
-{
-	return cma_release(dev_get_cma_area(dev), pages, count);
+	pages = dma_alloc_pages(dev, count, &dma_addr, DMA_BIDIRECTIONAL, GFP_KERNEL);
+	if (!pages)
+		return NULL;
+	return pages;
 }
 
 int is_vmalloc_or_module_addr(const void *x)
@@ -1142,8 +1126,7 @@ static void codec_mm_free_in(struct codec_mm_mgt_s *mgt,
 		if (mem->flags & CODEC_MM_FLAGS_FOR_PHYS_VMAPED)
 			codec_mm_unmap_phyaddr(mem->vbuffer);
 
-		dma_release_from_contiguous(mgt->dev, mem->mem_handle,
-					    mem->page_count);
+		dma_free_pages(mgt->dev, mem->page_count, mem->mem_handle, (dma_addr_t)mem->phy_addr, DMA_BIDIRECTIONAL);
 	} else if (mem->from_flags ==
 		AMPORTS_MEM_FLAGS_FROM_GET_FROM_REVERSED) {
 		gen_pool_free(mgt->res_pool,
@@ -2067,6 +2050,8 @@ void codec_mm_prealloc_tvp_pool(void)
 EXPORT_SYMBOL(codec_mm_prealloc_tvp_pool);
 
 int codec_mm_extpool_pool_alloc(struct extpool_mgt_s *tvp_pool,
+	int size, int memflags, int for_tvp);
+int codec_mm_extpool_pool_alloc(struct extpool_mgt_s *tvp_pool,
 	int size, int memflags, int for_tvp)
 {
 	struct codec_mm_mgt_s *mgt = get_mem_mgt();
@@ -2425,47 +2410,39 @@ EXPORT_SYMBOL(codec_mm_virt_to_phys);
 
 unsigned long dma_get_cma_size_int_byte(struct device *dev)
 {
-	unsigned long size = 0;
-	struct cma *cma = NULL;
+	struct reserved_mem *rmem;
 
 	if (!dev) {
 		pr_err("CMA: NULL DEV\n");
 		return 0;
 	}
 
-	cma = dev_get_cma_area(dev);
-	if (!cma) {
+	rmem = of_reserved_mem_lookup(dev->of_node);
+	if (!rmem) {
 		pr_err("CMA:  NO CMA region\n");
 		return 0;
 	}
-	size = cma_get_size(cma);
-	return size;
+
+	return rmem->size;
 }
 EXPORT_SYMBOL(dma_get_cma_size_int_byte);
 
 static int codec_mm_get_cma_size_int_byte(struct device *dev)
 {
-	static int static_size = -1;
-	struct cma *cma = NULL;
+	struct reserved_mem *rmem;
 
-	if (static_size >= 0)
-		return static_size;
 	if (!dev) {
 		pr_err("CMA: NULL DEV\n");
 		return 0;
 	}
 
-	cma = dev_get_cma_area(dev);
-	if (!cma) {
+	rmem = of_reserved_mem_lookup(dev->of_node);
+	if (!rmem) {
 		pr_err("CMA:  NO CMA region\n");
 		return 0;
 	}
-	if (cma == dev_get_cma_area(NULL))
-		static_size = 0;/*ignore default cma pool*/
-	else
-		static_size = cma_get_size(cma);
 
-	return static_size;
+	return rmem->size;
 }
 
 static int codec_mm_cal_dump_buf_size(void)
@@ -2486,7 +2463,7 @@ static int codec_mm_cal_dump_buf_size(void)
 	return codec_mm_align_up2n(size, PAGE_SHIFT);
 }
 
-int get_string_offset(int *buf_len, int *pos, int len)
+static int get_string_offset(int *buf_len, int *pos, int len)
 {
 	int log_line_step = len + PREFIX_MAX;
 	int remain = LOG_LINE_MAX -
@@ -2502,7 +2479,7 @@ int get_string_offset(int *buf_len, int *pos, int len)
 	return len;
 }
 
-int get_string_segment(int size)
+static int get_string_segment(int size)
 {
 	return (size % LOG_LINE_MAX == 0) ?
 		(size / LOG_LINE_MAX) :
@@ -2672,7 +2649,7 @@ static int dump_free_mem_infos(void *buf, int size)
 			break;
 		}
 	};
-	cma_base_phy = cma_get_base(dev_get_cma_area(mgt->dev));
+	cma_base_phy = of_reserved_mem_lookup(mgt->dev->of_node)->base;
 	cma_end_phy = cma_base_phy + dma_get_cma_size_int_byte(mgt->dev);
 	spin_unlock_irqrestore(&mgt->lock, flags);
 	pr_info("free cma idea[%x-%x] from codec_mm items %d\n", cma_base_phy,
@@ -3128,6 +3105,7 @@ int codec_mm_enough_for_size(int size, int with_wait, int mem_flags)
 }
 EXPORT_SYMBOL(codec_mm_enough_for_size);
 
+int codec_mm_mgt_init(struct device *dev);
 int codec_mm_mgt_init(struct device *dev)
 {
 	struct codec_mm_mgt_s *mgt = get_mem_mgt();
@@ -3208,8 +3186,8 @@ static int __init amstream_test_init(void)
 	return 0;
 }
 
-static ssize_t codec_mm_dump_show(struct class *class,
-				  struct class_attribute *attr, char *buf)
+static ssize_t codec_mm_dump_show(const struct class *cla,
+				  const struct class_attribute *attr, char *buf)
 {
 	size_t ret = 0;
 
@@ -3217,8 +3195,8 @@ static ssize_t codec_mm_dump_show(struct class *class,
 	return ret;
 }
 
-static ssize_t codec_mm_scatter_dump_show(struct class *class,
-					  struct class_attribute *attr,
+static ssize_t codec_mm_scatter_dump_show(const struct class *cla,
+					  const struct class_attribute *attr,
 					  char *buf)
 {
 	size_t ret;
@@ -3227,8 +3205,8 @@ static ssize_t codec_mm_scatter_dump_show(struct class *class,
 	return ret;
 }
 
-static ssize_t codec_mm_keeper_dump_show(struct class *class,
-					 struct class_attribute *attr,
+static ssize_t codec_mm_keeper_dump_show(const struct class *cla,
+					 const struct class_attribute *attr,
 					 char *buf)
 {
 	size_t ret;
@@ -3237,8 +3215,8 @@ static ssize_t codec_mm_keeper_dump_show(struct class *class,
 	return ret;
 }
 
-static ssize_t tvp_enable_show(struct class *class,
-		struct class_attribute *attr,
+static ssize_t tvp_enable_show(const struct class *cla,
+		const struct class_attribute *attr,
 		char *buf)
 {
 	ssize_t size = 0;
@@ -3260,8 +3238,8 @@ static ssize_t tvp_enable_show(struct class *class,
 	return size;
 }
 
-static ssize_t tvp_enable_store(struct class *class,
-		struct class_attribute *attr,
+static ssize_t tvp_enable_store(const struct class *cla,
+		const struct class_attribute *attr,
 		const char *buf, size_t size)
 {
 	struct codec_mm_mgt_s *mgt = get_mem_mgt();
@@ -3310,8 +3288,8 @@ static ssize_t tvp_enable_store(struct class *class,
 	return size;
 }
 
-static ssize_t fastplay_enable_show(struct class *class,
-		struct class_attribute *attr,
+static ssize_t fastplay_enable_show(const struct class *cla,
+		const struct class_attribute *attr,
 		char *buf)
 {
 	ssize_t size = 0;
@@ -3324,8 +3302,8 @@ static ssize_t fastplay_enable_show(struct class *class,
 	return size;
 }
 
-static ssize_t fastplay_enable_store(struct class *class,
-					 struct class_attribute *attr,
+static ssize_t fastplay_enable_store(const struct class *cla,
+					 const struct class_attribute *attr,
 					 const char *buf, size_t size)
 {
 	struct codec_mm_mgt_s *mgt = get_mem_mgt();
@@ -3355,8 +3333,8 @@ static ssize_t fastplay_enable_store(struct class *class,
 	return size;
 }
 
-static ssize_t config_show(struct class *class,
-	struct class_attribute *attr, char *buf)
+static ssize_t config_show(const struct class *cla,
+	const struct class_attribute *attr, char *buf)
 {
 	ssize_t ret;
 
@@ -3365,8 +3343,8 @@ static ssize_t config_show(struct class *class,
 	return ret;
 }
 
-static ssize_t config_store(struct class *class,
-			struct class_attribute *attr,
+static ssize_t config_store(const struct class *cla,
+			const struct class_attribute *attr,
 			const char *buf, size_t size)
 {
 	int ret;
@@ -3377,8 +3355,8 @@ static ssize_t config_store(struct class *class,
 	return size;
 }
 
-static ssize_t tvp_region_show(struct class *class,
-				   struct class_attribute *attr, char *buf)
+static ssize_t tvp_region_show(const struct class *cla,
+				   const struct class_attribute *attr, char *buf)
 {
 	size_t ret;
 	ulong res_victor[16];
@@ -3397,8 +3375,8 @@ static ssize_t tvp_region_show(struct class *class,
 	return off;
 }
 
-static ssize_t debug_show(struct class *class,
-		struct class_attribute *attr,
+static ssize_t debug_show(const struct class *cla,
+		const struct class_attribute *attr,
 		char *buf)
 {
 	ssize_t size = 0;
@@ -3476,8 +3454,8 @@ static int codec_mm_mem_dump(unsigned long addr, int isphy, int len)
 	return 0;
 }
 
-static ssize_t debug_store(struct class *class,
-		struct class_attribute *attr,
+static ssize_t debug_store(const struct class *cla,
+		const struct class_attribute *attr,
 		const char *buf, size_t size)
 {
 	unsigned int val;
@@ -3537,7 +3515,7 @@ static ssize_t debug_store(struct class *class,
 		}
 		break;
 	case 200:
-		codec_mm_dbuf_walk(NULL);
+		//codec_mm_dbuf_walk(NULL);
 		break;
 	default:
 		pr_err("unknown cmd! %d\n", val);
@@ -3546,8 +3524,8 @@ static ssize_t debug_store(struct class *class,
 
 }
 
-static ssize_t debug_sc_mode_show(struct class *class,
-				  struct class_attribute *attr, char *buf)
+static ssize_t debug_sc_mode_show(const struct class *cla,
+				  const struct class_attribute *attr, char *buf)
 {
 	ssize_t size = 0;
 
@@ -3556,8 +3534,8 @@ static ssize_t debug_sc_mode_show(struct class *class,
 	return size;
 }
 
-static ssize_t debug_sc_mode_store(struct class *class,
-				   struct class_attribute *attr,
+static ssize_t debug_sc_mode_store(const struct class *cla,
+				   const struct class_attribute *attr,
 				   const char *buf, size_t size)
 {
 	unsigned int val;
@@ -3573,8 +3551,8 @@ static ssize_t debug_sc_mode_store(struct class *class,
 	return size;
 }
 
-static ssize_t debug_keep_mode_show(struct class *class,
-					struct class_attribute *attr, char *buf)
+static ssize_t debug_keep_mode_show(const struct class *cla,
+					const struct class_attribute *attr, char *buf)
 {
 	ssize_t size = 0;
 
@@ -3583,8 +3561,8 @@ static ssize_t debug_keep_mode_show(struct class *class,
 	return size;
 }
 
-static ssize_t debug_keep_mode_store(struct class *class,
-					 struct class_attribute *attr,
+static ssize_t debug_keep_mode_store(const struct class *cla,
+					 const struct class_attribute *attr,
 					 const char *buf, size_t size)
 {
 	unsigned int val;
@@ -3701,8 +3679,8 @@ int codec_mm_get_scatter_watermark(void)
 	return mgt->codec_mm_scatter_watermark;
 }
 
-static ssize_t dbuf_trace_show(struct class *class,
-			       struct class_attribute *attr, char *buf)
+static ssize_t dbuf_trace_show(const struct class *cla,
+			       const struct class_attribute *attr, char *buf)
 {
 	struct codec_mm_mgt_s *mgt = get_mem_mgt();
 	char *pbuf = buf;
@@ -3713,8 +3691,8 @@ static ssize_t dbuf_trace_show(struct class *class,
 	return pbuf - buf;
 }
 
-static ssize_t dbuf_trace_store(struct class *class,
-			       struct class_attribute *attr,
+static ssize_t dbuf_trace_store(const struct class *cla,
+			       const struct class_attribute *attr,
 			       const char *buf, size_t size)
 {
 	struct codec_mm_mgt_s *mgt = get_mem_mgt();
@@ -3735,16 +3713,16 @@ static ssize_t dbuf_trace_store(struct class *class,
 	return size;
 }
 
-static ssize_t dbuf_dump_show(struct class *class,
-			     struct class_attribute *attr, char *buf)
+static ssize_t dbuf_dump_show(const struct class *cla,
+			     const struct class_attribute *attr, char *buf)
 {
-	codec_mm_dbuf_walk(NULL);
+	//codec_mm_dbuf_walk(NULL);
 
 	return 0;
 }
 
-static ssize_t dbuf_dump_store(struct class *class,
-			     struct class_attribute *attr,
+static ssize_t dbuf_dump_store(const struct class *cla,
+			     const struct class_attribute *attr,
 			     const char *buf, size_t size)
 {
 	u32 val = UINT_MAX;
@@ -3832,7 +3810,7 @@ static struct mconfig codec_mm_configs[] = {
 
 static struct mconfig_node codec_mm_trigger_node;
 
-int codec_mm_trigger_fun(const char *trigger, int id, const char *buf, int size)
+static int codec_mm_trigger_fun(const char *trigger, int id, const char *buf, int size)
 {
 	int ret = size;
 
@@ -3852,7 +3830,7 @@ int codec_mm_trigger_fun(const char *trigger, int id, const char *buf, int size)
 	return size;
 }
 
-int codec_mm_trigger_help_fun(const char *trigger, int id, char *sbuf, int size)
+static int codec_mm_trigger_help_fun(const char *trigger, int id, char *sbuf, int size)
 {
 	int ret = -1;
 	void *buf, *getbuf = NULL;
@@ -3896,7 +3874,7 @@ static struct mconfig codec_mm_trigger[] = {
 	MC_FUN("debug", codec_mm_trigger_help_fun, codec_mm_trigger_fun),
 };
 
-int codec_mm_cs_show(struct seq_file *m, struct codec_state_node *cs)
+static int codec_mm_cs_show(struct seq_file *m, struct codec_state_node *cs)
 {
 	char *buf = (void *)__get_free_page(GFP_KERNEL);
 	int r = 0;
@@ -4017,6 +3995,7 @@ int __nocfi get_mte_sync_tags_hook_kprobe(void *data)
 	static DEFINE_MUTEX(lock);
 	struct cma *cma = NULL;
 	struct page *page = NULL;
+	dma_addr_t dma_addr;
 #if defined(CONFIG_ARM64)
 	int ret;
 
@@ -4034,14 +4013,9 @@ int __nocfi get_mte_sync_tags_hook_kprobe(void *data)
 	pr_debug("aml_init_mm: %px, aml_mte_sync_tags: %px\n", aml_init_mm, aml_mte_sync_tags);
 #endif
 
-	cma = dev_get_cma_area(codec_dev);
-	if (!cma) {
-		pr_err("CMA:  NO CMA region\n");
-		return -1;
-	}
 	pr_debug("%s, %s, %lx, %lx\n", __func__, cma_get_name(cma), cma->base_pfn, cma->count);
 	/* spin_lock_irqsave(&cma->lock, flags); */
-	page = cma_alloc(cma, cma->count, 0, 0);
+	page = dma_alloc_pages(codec_dev, cma->count, &dma_addr, DMA_BIDIRECTIONAL, GFP_KERNEL);
 	if (!page) {
 		pr_err("cma alloc failed.\n");
 		return -1;
@@ -4051,7 +4025,7 @@ int __nocfi get_mte_sync_tags_hook_kprobe(void *data)
 		tvp_setup_cma_full_pagemap(cma->base_pfn, cma->count);
 	/* spin_unlock_irqrestore(&cma->lock, flags); */
 	mutex_unlock(&lock);
-	cma_release(cma, page, cma->count);
+	dma_free_pages(codec_dev, cma->count, page, &dma_addr, DMA_BIDIRECTIONAL);
 	return 0;
 }
 #endif
@@ -4159,6 +4133,7 @@ static struct platform_driver codec_mm_driver = {
 		}
 };
 
+int __init codec_mm_module_init(void);
 int __init codec_mm_module_init(void)
 {
 	pr_err("now in %s\n", __func__);
@@ -4184,6 +4159,7 @@ int __init codec_mm_module_init(void)
 	return 0;
 }
 
+void __exit codec_mm_module_exit(void);
 void __exit codec_mm_module_exit(void)
 {
 	codec_state_debugfs_release();

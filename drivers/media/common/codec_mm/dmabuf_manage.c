@@ -280,20 +280,11 @@ static struct sg_table *dmabuf_manage_map_dma_buf(struct dma_buf_attachment *att
 {
 	struct kdmabuf_attachment *attach = attachment->priv;
 	struct dmabuf_manage_block *block = attachment->dmabuf->priv;
-#if CONFIG_AMLOGIC_KERNEL_VERSION <= 14515
-	struct mutex *lock = &attachment->dmabuf->lock;
-#endif
 	struct sg_table *sgt;
 
 	pr_enter();
-#if CONFIG_AMLOGIC_KERNEL_VERSION <= 14515
-	mutex_lock(lock);
-#endif
 	sgt = &attach->sgt;
 	if (attach->dma_dir == dma_dir) {
-#if CONFIG_AMLOGIC_KERNEL_VERSION <= 14515
-		mutex_unlock(lock);
-#endif
 		return sgt;
 	}
 	sgt->sgl->dma_address = block->paddr;
@@ -305,9 +296,6 @@ static struct sg_table *dmabuf_manage_map_dma_buf(struct dma_buf_attachment *att
 	pr_dbg("nents %d, %x, %d, %d\n", sgt->nents, block->paddr,
 			sg_dma_len(sgt->sgl), block->size);
 	attach->dma_dir = dma_dir;
-#if CONFIG_AMLOGIC_KERNEL_VERSION <= 14515
-	mutex_unlock(lock);
-#endif
 	return sgt;
 }
 
@@ -1884,8 +1872,8 @@ const struct file_operations fops = {
 #endif
 };
 
-static ssize_t dmabuf_manage_dump_show(struct class *class,
-				  struct class_attribute *attr, char *buf)
+static ssize_t dmabuf_manage_dump_show(const struct class *class,
+				  const struct class_attribute *attr, char *buf)
 {
 	struct list_head *pos = NULL;
 	struct list_head *tmp = NULL;
@@ -1904,8 +1892,8 @@ static ssize_t dmabuf_manage_dump_show(struct class *class,
 	return 0;
 }
 
-static ssize_t dmabuf_manage_config_show(struct class *class,
-	struct class_attribute *attr, char *buf)
+static ssize_t dmabuf_manage_config_show(const struct class *class,
+	const struct class_attribute *attr, char *buf)
 {
 	ssize_t ret;
 
@@ -1914,8 +1902,8 @@ static ssize_t dmabuf_manage_config_show(struct class *class,
 	return ret;
 }
 
-static ssize_t dmabuf_manage_config_store(struct class *class,
-			struct class_attribute *attr,
+static ssize_t dmabuf_manage_config_store(const struct class *class,
+			const struct class_attribute *attr,
 			const char *buf, size_t size)
 {
 	int ret;
@@ -1953,6 +1941,7 @@ static struct class dmabuf_manage_class = {
 	.class_groups = dmabuf_manage_class_groups,
 };
 
+int __init dmabuf_manage_init(void);
 int __init dmabuf_manage_init(void)
 {
 	int ret;
@@ -1989,6 +1978,7 @@ error_register:
 	return ret;
 }
 
+void __exit dmabuf_manage_exit(void);
 void __exit dmabuf_manage_exit(void)
 {
 	device_destroy(&dmabuf_manage_class, MKDEV(dev_no, 0));

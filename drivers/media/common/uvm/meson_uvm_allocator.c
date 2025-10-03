@@ -33,7 +33,7 @@
 #include "meson_uvm_aicolor_processor.h"
 #include "meson_uvm_buffer_info.h"
 
-static struct mua_device *mdev;
+struct mua_device *mdev;
 
 static int enable_screencap;
 module_param_named(enable_screencap, enable_screencap, int, 0664);
@@ -151,23 +151,18 @@ size_t mua_calc_real_dmabuf_size(struct mua_buffer *buffer)
 static int mua_process_gpu_realloc(struct dma_buf *dmabuf,
 				   struct uvm_buf_obj *obj, int scalar)
 {
-	int i, j, num_pages;
-	struct dma_buf *idmabuf = NULL;
-	struct ion_buffer *ibuffer;
+	int i, num_pages;
 	struct uvm_alloc_info info;
 	struct mua_buffer *buffer;
-	struct page *page;
 	struct page **tmp;
 	struct page **page_array;
 	pgprot_t pgprot;
 	void *vaddr;
 	bool skip_fill_buf = false;
-	struct sg_table *src_sgt = NULL;
-	struct scatterlist *sg = NULL;
 	size_t pre_size = 0;
 	size_t new_size = 0;
-	struct dma_heap *heap;
-	struct dma_buf_attachment *attachment = NULL;
+	void *cpu_addr = NULL;
+	dma_addr_t dma_handle = 0;
 
 	buffer = container_of(obj, struct mua_buffer, base);
 	MUA_PRINTK(MUA_INFO, "%s.dmabuf(%px) buf_scalar=%d WxH: %dx%d\n",
@@ -201,115 +196,65 @@ static int mua_process_gpu_realloc(struct dma_buf *dmabuf,
 			buffer, buffer->size, new_size, pre_size);
 	if (new_size < pre_size)
 		new_size = pre_size;
-	heap = dma_heap_find(CODECMM_HEAP_NAME);
-	if (!heap) {
-		MUA_PRINTK(MUA_ERROR, "%s: dma_heap_find fail. heap name is %s\n",
-			__func__, CODECMM_HEAP_NAME);
-		return -ENOMEM;
+
+	struct device *dev = mdev ? mdev->dev.this_device : NULL;
+	if (!dev) {
+		MUA_PRINTK(MUA_ERROR, "%s: device not initialized\n", __func__);
+		return -ENODEV;
 	}
 
-	if (pre_size != new_size && buffer->idmabuf[1]) {
-		dma_buf_put(buffer->idmabuf[1]);
-		buffer->idmabuf[1] = NULL;
+	/* if we already have an allocated coherent buffer and sizes differ, free it */
+	if (buffer->cpu_addr && pre_size != new_size) {
+		dma_free_coherent(dev, pre_size, buffer->cpu_addr, buffer->paddr);
+		buffer->cpu_addr = NULL;
+		buffer->paddr = 0;
 	}
 
-	if (!buffer->idmabuf[1]) {
-		idmabuf = dma_heap_buffer_alloc(heap, new_size,
-			O_RDWR, DMA_HEAP_VALID_HEAP_FLAGS);
-		if (IS_ERR(idmabuf)) {
-			MUA_PRINTK(MUA_ERROR, "%s: dma_heap_buffer_alloc fail.\n", __func__);
+	if (!buffer->cpu_addr) {
+		cpu_addr = dma_alloc_coherent(dev, new_size, &dma_handle, GFP_KERNEL);
+		if (!cpu_addr) {
+			MUA_PRINTK(MUA_ERROR, "%s: dma_alloc_coherent fail.\n", __func__);
 			return -ENOMEM;
 		}
-		MUA_PRINTK(MUA_INFO, "%s: idmabuf(%px) alloc success.\n", __func__, idmabuf);
+		MUA_PRINTK(MUA_INFO, "%s: coherent alloc success cpu=%p dma=0x%lx\n",
+				   __func__, cpu_addr, (unsigned long)dma_handle);
 
-		ibuffer = idmabuf->priv;
-		if (ibuffer) {
-			attachment = dma_buf_attach(idmabuf, dma_heap_get_dev(heap));
-			if (!attachment) {
-				MUA_PRINTK(MUA_ERROR, "%s: Failed to set dma attach", __func__);
-				return -ENOMEM;
-			}
+		buffer->cpu_addr = cpu_addr; /* ensure mua_buffer has this field */
+		buffer->paddr = dma_handle;  /* DMA address for hw */
 
-			src_sgt = dma_buf_map_attachment(attachment, DMA_BIDIRECTIONAL);
-			if (!src_sgt) {
-				MUA_PRINTK(MUA_ERROR, "%s: Failed to get dma sg", __func__);
-				dma_buf_detach(idmabuf, attachment);
-				return -ENOMEM;
-			}
-
-			MUA_PRINTK(MUA_INFO, "%s: src_sgt(%p). nents = %u, length=%u\n",
-				__func__, src_sgt, src_sgt->nents, src_sgt->sgl->length);
-			page = sg_page(src_sgt->sgl);
-			buffer->paddr = PFN_PHYS(page_to_pfn(page));
-			buffer->ibuffer[1] = ibuffer;
-			buffer->idmabuf[1] = idmabuf;
-			buffer->sg_table = src_sgt;
-
-			info.sgt = src_sgt;
-			dmabuf_bind_uvm_delay_alloc(dmabuf, &info);
-		}
+		info.sgt = NULL;
+		/* dmabuf_bind_uvm_delay_alloc(dmabuf, &info); -- skipped (no sgt) */
 	} else {
-		idmabuf = buffer->idmabuf[1];
-		MUA_PRINTK(MUA_INFO, "%s: idmabuf(%px) don't do realloc.\n",
-			__func__, idmabuf);
-		attachment = dma_buf_attach(idmabuf, dma_heap_get_dev(heap));
-		if (!attachment) {
-			MUA_PRINTK(MUA_ERROR, "%s(%d): Failed to set dma attach",
-				__func__, __LINE__);
-			return -ENOMEM;
-		}
-
-		src_sgt = dma_buf_map_attachment(attachment, DMA_BIDIRECTIONAL);
-		if (!src_sgt) {
-			MUA_PRINTK(MUA_ERROR, "%s(%d): Failed to get dma sg", __func__, __LINE__);
-			dma_buf_detach(idmabuf, attachment);
-			return -ENOMEM;
-		}
-
-		MUA_PRINTK(MUA_INFO, "%s(%d): src_sgt(%p). nents = %u, length=%u\n",
-			__func__, __LINE__, src_sgt, src_sgt->nents, src_sgt->sgl->length);
-		page = sg_page(src_sgt->sgl);
-		buffer->paddr = PFN_PHYS(page_to_pfn(page));
-		buffer->sg_table = src_sgt;
-
-		info.sgt = src_sgt;
-		dmabuf_bind_uvm_delay_alloc(dmabuf, &info);
+		/* already allocated and fits new_size */
+		cpu_addr = buffer->cpu_addr;
+		dma_handle = buffer->paddr;
+		info.sgt = NULL;
 	}
 
-	//start to do vmap
-	if (!buffer->sg_table) {
+	if (!buffer->cpu_addr) {
 		MUA_PRINTK(MUA_ERROR, "none uvm buffer allocated.\n");
 		return -ENODEV;
 	}
-	src_sgt = buffer->sg_table;
 	num_pages = PAGE_ALIGN(new_size) / PAGE_SIZE;
-	tmp = vmalloc(sizeof(struct page *) * num_pages);
+	tmp = kvmalloc(sizeof(struct page *) * num_pages, GFP_KERNEL);
+	if (!tmp)
+		return -ENOMEM;
 	page_array = tmp;
 
 	pgprot = pgprot_writecombine(PAGE_KERNEL);
 
-	for_each_sg(src_sgt->sgl, sg, src_sgt->nents, i) {
-		int npages_this_entry =
-			PAGE_ALIGN(sg->length) / PAGE_SIZE;
-		struct page *page = sg_page(sg);
-
-		for (j = 0; j < npages_this_entry; j++)
-			*(tmp++) = page++;
-	}
+	for (i = 0; i < num_pages; i++)
+		page_array[i] = virt_to_page(buffer->cpu_addr + i * PAGE_SIZE);
 
 	vaddr = vmap(page_array, num_pages, VM_MAP, pgprot);
 	if (!vaddr) {
 		MUA_PRINTK(MUA_ERROR, "vmap fail, size: %d\n",
 			   num_pages << PAGE_SHIFT);
-		vfree(page_array);
-		if (src_sgt && attachment) {
-			dma_buf_unmap_attachment(attachment, src_sgt, DMA_BIDIRECTIONAL);
-			dma_buf_detach(idmabuf, attachment);
-		}
+		kvfree(page_array);
 
 		return -ENOMEM;
 	}
-	vfree(page_array);
+	kvfree(page_array);
 	MUA_PRINTK(MUA_INFO, "buffer vaddr: %p.\n", vaddr);
 
 	//start to filldata
@@ -323,10 +268,6 @@ static int mua_process_gpu_realloc(struct dma_buf *dmabuf,
 		meson_uvm_fill_pattern(buffer, dmabuf, vaddr);
 	}
 	vunmap(vaddr);
-	if (src_sgt && attachment) {
-		dma_buf_unmap_attachment(attachment, src_sgt, DMA_BIDIRECTIONAL);
-		dma_buf_detach(idmabuf, attachment);
-	}
 
 	return 0;
 }
@@ -334,21 +275,15 @@ static int mua_process_gpu_realloc(struct dma_buf *dmabuf,
 static int mua_process_delay_alloc(struct dma_buf *dmabuf,
 				   struct uvm_buf_obj *obj)
 {
-	int i, j, num_pages;
-	struct dma_buf *idmabuf;
-	struct ion_buffer *ibuffer;
+	int i, num_pages;
 	struct uvm_alloc_info info;
 	struct mua_buffer *buffer;
-	struct page *page;
 	struct page **tmp;
 	struct page **page_array;
 	pgprot_t pgprot;
 	void *vaddr;
-	struct sg_table *src_sgt = NULL;
-	struct scatterlist *sg = NULL;
-	char *name = CODECMM_HEAP_NAME;
-	struct dma_heap *heap;
-	struct dma_buf_attachment *attachment = NULL;
+	void *cpu_addr = NULL;
+	dma_addr_t dma_handle = 0;
 
 	buffer = container_of(obj, struct mua_buffer, base);
 	memset(&info, 0, sizeof(info));
@@ -361,96 +296,59 @@ static int mua_process_delay_alloc(struct dma_buf *dmabuf,
 		return -ENODEV;
 	}
 
-	if (!buffer->ibuffer[0]) {
-		if (buffer->ion_flags & MUA_USAGE_PROTECTED)
-			name = CODECMM_SECURE_HEAP_NAME;
-		else if (buffer->ion_flags & ION_FLAG_CACHED)
-			name = CODECMM_CACHED_HEAP_NAME;
+	if (!buffer->cpu_addr) {
+		struct device *dev = mdev ? mdev->dev.this_device : NULL;
+		if (!dev) {
+			MUA_PRINTK(MUA_ERROR, "%s: device not initialized\n", __func__);
+			return -ENODEV;
+		}
 
-		heap = dma_heap_find(name);
-		if (!heap) {
-			MUA_PRINTK(MUA_ERROR, "%s: dma_heap_find fail. heap name is %s\n",
-				   __func__, name);
+		cpu_addr = dma_alloc_coherent(dev, dmabuf->size, &dma_handle, GFP_KERNEL);
+		if (!cpu_addr) {
+			MUA_PRINTK(MUA_ERROR, "%s: dma_alloc_coherent fail. size=%zu\n",
+					   __func__, dmabuf->size);
 			return -ENOMEM;
 		}
 
-		idmabuf = dma_heap_buffer_alloc(heap, dmabuf->size, O_RDWR,
-			DMA_HEAP_VALID_HEAP_FLAGS);
-		if (IS_ERR(idmabuf)) {
-			MUA_PRINTK(MUA_ERROR, "%s: dma_heap_buffer_alloc fail. name is %s\n",
-				__func__, name);
-			return -ENOMEM;
-		}
+		MUA_PRINTK(MUA_INFO, "%s: coherent alloc cpu=%p dma=0x%lx\n",
+				   __func__, cpu_addr, (unsigned long)dma_handle);
 
-		ibuffer = idmabuf->priv;
-		if (ibuffer) {
-			attachment = dma_buf_attach(idmabuf, dma_heap_get_dev(heap));
-			if (!attachment) {
-				MUA_PRINTK(MUA_ERROR, "%s: Failed to set dma attach", __func__);
-				return -ENOMEM;
-			}
+		buffer->cpu_addr = cpu_addr;
+		buffer->paddr = dma_handle;
 
-			src_sgt = dma_buf_map_attachment(attachment, DMA_BIDIRECTIONAL);
-			if (!src_sgt) {
-				MUA_PRINTK(MUA_ERROR, "%s: Failed to get dma sg", __func__);
-				dma_buf_detach(idmabuf, attachment);
-				return -ENOMEM;
-			}
-
-			page = sg_page(src_sgt->sgl);
-			buffer->paddr = PFN_PHYS(page_to_pfn(page));
-			buffer->ibuffer[0] = ibuffer;
-			buffer->sg_table = src_sgt;
-			buffer->idmabuf[0] = idmabuf;
-			info.sgt = src_sgt;
-			dmabuf_bind_uvm_delay_alloc(dmabuf, &info);
-		}
+		info.sgt = NULL;
 	}
 
 	//start to do vmap
-	if (!buffer->sg_table) {
+	if (!buffer->cpu_addr) {
 		MUA_PRINTK(MUA_ERROR, "none uvm buffer allocated.\n");
 		return -ENODEV;
 	}
 
-	src_sgt = buffer->sg_table;
 	num_pages = PAGE_ALIGN(buffer->size) / PAGE_SIZE;
-	tmp = vmalloc(sizeof(struct page *) * num_pages);
+	tmp = kvmalloc(sizeof(struct page *) * num_pages, GFP_KERNEL);
+	if (!tmp)
+		return -ENOMEM;
 	page_array = tmp;
 
 	pgprot = pgprot_writecombine(PAGE_KERNEL);
 
-	for_each_sg(src_sgt->sgl, sg, src_sgt->nents, i) {
-		int npages_this_entry =
-			PAGE_ALIGN(sg->length) / PAGE_SIZE;
-		struct page *page = sg_page(sg);
-
-		for (j = 0; j < npages_this_entry; j++)
-			*(tmp++) = page++;
-	}
+	for (i = 0; i < num_pages; i++)
+		page_array[i] = virt_to_page(buffer->cpu_addr + i * PAGE_SIZE);
 
 	vaddr = vmap(page_array, num_pages, VM_MAP, pgprot);
 	if (!vaddr) {
 		MUA_PRINTK(MUA_ERROR, "vmap fail, size: %d\n",
 			   num_pages << PAGE_SHIFT);
-		vfree(page_array);
-		if (src_sgt && attachment) {
-			dma_buf_unmap_attachment(attachment, src_sgt, DMA_BIDIRECTIONAL);
-			dma_buf_detach(idmabuf, attachment);
-		}
+		kvfree(page_array);
 
 		return -ENOMEM;
 	}
-	vfree(page_array);
+	kvfree(page_array);
 	MUA_PRINTK(MUA_INFO, "buffer vaddr: %p.\n", vaddr);
 
 	//start to filldata
 	meson_uvm_fill_pattern(buffer, dmabuf, vaddr);
-
-	if (src_sgt && attachment) {
-		dma_buf_unmap_attachment(attachment, src_sgt, DMA_BIDIRECTIONAL);
-		dma_buf_detach(idmabuf, attachment);
-	}
 
 	return 0;
 }
@@ -459,15 +357,15 @@ static int mua_handle_alloc(struct dma_buf *dmabuf, struct uvm_alloc_data *data,
 {
 	struct mua_buffer *buffer;
 	struct uvm_alloc_info info;
-	struct dma_buf *idmabuf;
-	struct ion_buffer *ibuffer;
-	char *name = CODECMM_HEAP_NAME;
-	struct dma_heap *heap;
-	struct dma_buf_attachment *attachment = NULL;
-	struct sg_table *sg = NULL;
+	struct device *dev;
+	void *cpu_addr;
+	dma_addr_t dma_handle;
 
 	memset(&info, 0, sizeof(info));
 	buffer = kzalloc(sizeof(*buffer), GFP_KERNEL);
+	if (!buffer)
+		return -ENOMEM;
+
 	buffer->size = alloc_buf_size;
 	buffer->dev = mdev;
 	buffer->byte_stride = data->byte_stride;
@@ -479,82 +377,58 @@ static int mua_handle_alloc(struct dma_buf *dmabuf, struct uvm_alloc_data *data,
 	if (data->flags & MUA_SIZE_SKIP)
 		buffer->origin_size = data->size;
 
+	dev = mdev ? mdev->dev.this_device : NULL;
+	if (!dev) {
+		MUA_PRINTK(MUA_ERROR, "%s: device not initialized\n", __func__);
+		kfree(buffer);
+		return -ENODEV;
+	}
+
 	if (data->flags & MUA_IMM_ALLOC) {
-		if (data->flags & MUA_USAGE_PROTECTED)
-			name = CODECMM_SECURE_HEAP_NAME;
-		else if (data->flags & MUA_BUFFER_CACHED)
-			name = CODECMM_CACHED_HEAP_NAME;
-
-		MUA_PRINTK(MUA_INFO, "%s: dma_heap name is %s\n",
-			   __func__, name);
-
-		heap = dma_heap_find(name);
-		if (!heap) {
-			MUA_PRINTK(MUA_ERROR, "%s: dma_heap_find fail. heap name is %s\n",
-				   __func__, name);
+		cpu_addr = dma_alloc_coherent(dev, dmabuf->size, &dma_handle, GFP_KERNEL);
+		if (!cpu_addr) {
+			MUA_PRINTK(MUA_ERROR, "%s: dma_alloc_coherent failed, size=%zu\n",
+					   __func__, dmabuf->size);
 			kfree(buffer);
 			return -ENOMEM;
 		}
 
-		idmabuf = dma_heap_buffer_alloc(heap, dmabuf->size, O_RDWR,
-			DMA_HEAP_VALID_HEAP_FLAGS);
-		if (IS_ERR(idmabuf)) {
-			MUA_PRINTK(MUA_ERROR, "%s: dma_heap_buffer_alloc fail. name is %s\n",
-				__func__, name);
-			kfree(buffer);
-			return -ENOMEM;
-		}
-		MUA_PRINTK(MUA_INFO, "%s: idmabuf(%p) alloc success. heap name is %s, flags = %u\n",
-			__func__, idmabuf, name, data->flags);
-
-		ibuffer = idmabuf->priv;
-		buffer->ibuffer[0] = ibuffer;
-		buffer->ibuffer[1] = NULL;
-		buffer->idmabuf[0] = idmabuf;
+		buffer->cpu_addr = cpu_addr;
+		buffer->paddr = dma_handle;
+		buffer->idmabuf[0] = NULL;
 		buffer->idmabuf[1] = NULL;
+		buffer->ibuffer[0] = NULL;
+		buffer->ibuffer[1] = NULL;
 
-		attachment = dma_buf_attach(idmabuf, dma_heap_get_dev(heap));
-		if (!attachment) {
-			MUA_PRINTK(MUA_ERROR, "%s: Failed to set dma attach", __func__);
-			kfree(buffer);
-			return -ENOMEM;
-		}
-
-		sg = dma_buf_map_attachment(attachment, DMA_BIDIRECTIONAL);
-		if (!sg) {
-			MUA_PRINTK(MUA_ERROR, "%s: Failed to get dma sg", __func__);
-			dma_buf_detach(idmabuf, attachment);
-			kfree(buffer);
-			return -ENOMEM;
-		}
-
-		info.sgt = sg;
+		info.sgt = NULL;
 		info.obj = &buffer->base;
 		info.flags = data->flags;
 		info.size = alloc_buf_size;
 		info.scalar = data->scalar;
 		info.gpu_realloc = mua_process_gpu_realloc;
 		info.free = mua_handle_free;
-		MUA_PRINTK(MUA_INFO, "UVM FLAGS is MUA_IMM_ALLOC, %px  sgt = %px\n",
-			   info.obj, info.sgt);
+
+		MUA_PRINTK(MUA_INFO, "%s: IMM_ALLOC success cpu=%p dma=0x%lx size=%d\n",
+				   __func__, cpu_addr, (unsigned long)dma_handle,
+				   alloc_buf_size);
+
 	} else if (data->flags & MUA_DELAY_ALLOC) {
 		info.size = data->size;
 		info.obj = &buffer->base;
 		info.flags = data->flags;
 		info.delay_alloc = mua_process_delay_alloc;
 		info.free = mua_handle_free;
-		MUA_PRINTK(MUA_INFO, "UVM FLAGS is MUA_DELAY_ALLOC, %px\n", info.obj);
+
+		MUA_PRINTK(MUA_INFO, "%s: DELAY_ALLOC registered, size=%d\n",
+				   __func__, data->size);
+
 	} else {
-		MUA_PRINTK(MUA_ERROR, "unsupported MUA FLAGS.\n");
+		MUA_PRINTK(MUA_ERROR, "unsupported MUA FLAGS (0x%x).\n", data->flags);
 		kfree(buffer);
 		return -EINVAL;
 	}
 
 	dmabuf_bind_uvm_alloc(dmabuf, &info);
-	if (info.sgt) {
-		dma_buf_unmap_attachment(attachment, info.sgt, DMA_BIDIRECTIONAL);
-		dma_buf_detach(idmabuf, attachment);
-	}
 
 	return 0;
 }
@@ -1010,10 +884,9 @@ static int mua_probe(struct platform_device *pdev)
 	return misc_register(&mdev->dev);
 }
 
-static int mua_remove(struct platform_device *pdev)
+static void mua_remove(struct platform_device *pdev)
 {
 	misc_deregister(&mdev->dev);
-	return 0;
 }
 
 static const struct of_device_id mua_match[] = {
@@ -1031,11 +904,13 @@ static struct platform_driver mua_driver = {
 	.remove = mua_remove,
 };
 
+int __init mua_init(void);
 int __init mua_init(void)
 {
 	return platform_driver_register(&mua_driver);
 }
 
+void __exit mua_exit(void);
 void __exit mua_exit(void)
 {
 	platform_driver_unregister(&mua_driver);

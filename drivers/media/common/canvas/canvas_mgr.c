@@ -22,7 +22,7 @@
 static struct canvas_pool *global_pool;
 int hw_canvas_support;
 
-struct canvas_pool *get_canvas_pool(void)
+static struct canvas_pool *get_canvas_pool(void)
 {
 	return global_pool;
 }
@@ -271,7 +271,7 @@ int canvas_pool_get_canvas_info(int index, struct canvas_info *info)
 }
 EXPORT_SYMBOL(canvas_pool_get_canvas_info);
 
-void canvas_pool_dump_canvas_info(void)
+/*void canvas_pool_dump_canvas_info(void)
 {
 	int i, ret;
 	struct canvas_info info;
@@ -290,7 +290,7 @@ void canvas_pool_dump_canvas_info(void)
 				o1, o2, info.alloc_time, info.fixed_owner);
 		}
 	}
-}
+}*/
 
 u32
 canvas_pool_alloc_canvas_table(const char *owner, u32 *tab, int size,
@@ -361,8 +361,8 @@ u32 canvas_pool_canvas_alloced(int index)
 EXPORT_SYMBOL(canvas_pool_canvas_alloced);
 
 static ssize_t
-canvas_pool_map_show(struct class *class,
-		     struct class_attribute *attr, char *buf)
+canvas_pool_map_show(const struct class *class,
+		     const struct class_attribute *attr, char *buf)
 {
 	struct canvas_pool *pool = get_canvas_pool();
 	int max = min(pool->next_dump_index + 64, pool->canvas_max);
@@ -407,8 +407,8 @@ canvas_pool_map_show(struct class *class,
 static CLASS_ATTR_RO(canvas_pool_map);
 
 static ssize_t
-canvas_pool_states_show(struct class *class,
-			struct class_attribute *attr, char *buf)
+canvas_pool_states_show(const struct class *class,
+			const struct class_attribute *attr, char *buf)
 {
 	ssize_t size = 0;
 	int i;
@@ -436,8 +436,8 @@ canvas_pool_states_show(struct class *class,
 static CLASS_ATTR_RO(canvas_pool_states);
 
 static ssize_t
-canvas_pool_debug_show(struct class *class,
-		       struct class_attribute *attr, char *buf)
+canvas_pool_debug_show(const struct class *class,
+		       const struct class_attribute *attr, char *buf)
 {
 	ssize_t size = 0;
 
@@ -450,8 +450,8 @@ canvas_pool_debug_show(struct class *class,
 }
 
 static ssize_t
-canvas_pool_debug_store(struct class *class,
-			struct class_attribute *attr, const char *buf,
+canvas_pool_debug_store(const struct class *class,
+			const struct class_attribute *attr, const char *buf,
 			size_t size)
 {
 	u32 val;
@@ -539,6 +539,7 @@ static int canvas_pool_config(void)
 	return 0;
 }
 
+int amcanvas_manager_init(void);
 int amcanvas_manager_init(void)
 {
 	int r;
@@ -551,6 +552,7 @@ int amcanvas_manager_init(void)
 	return r;
 }
 
+void amcanvas_manager_exit(void);
 void amcanvas_manager_exit(void)
 {
 	class_unregister(&canvas_class);

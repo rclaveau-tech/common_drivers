@@ -1434,8 +1434,7 @@ static void hdcp2x_process_intr(u8 int_reg[])
 			p_hdcp->ds_repeater = false;
 		}
 	}
-	if (cp2tx_intr3_st & BIT(4))
-		;
+	if (cp2tx_intr3_st & BIT(4)) {}
 	if (cp2tx_intr0_st & BIT(3)) {
 		if (p_hdcp->cont_smng_method == 0) {
 			/* Samsung Frame TV can't handle single RepeaterAuth_Stream_Manage message
@@ -1728,7 +1727,7 @@ static void hdcptx_auth_start(struct hdcp_t *p_hdcp)
 	}
 }
 
-const static char *fail_string[] = {
+static const char *fail_string[] = {
 	[HDCP_FAIL_NONE] = "none",
 	[HDCP_FAIL_DDC_NACK] = "ddc_nack",
 	[HDCP_FAIL_BKSV_RXID] = "bksv_rxid",

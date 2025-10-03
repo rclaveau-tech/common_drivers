@@ -51,10 +51,10 @@ int hdmitx21_init_reg_map(struct platform_device *pdev)
 	return 0;
 }
 
-u32 get21_hdcp22_base(void)
+/*u32 get21_hdcp22_base(void)
 {
 	return 0;
-}
+}*/
 
 inline bool cor_reg_addr_mask(u32 addr)
 {
@@ -302,13 +302,13 @@ void hdmitx21_n_reset_reg_bit(u32 addr, u32 bit_nr)
 	hdmitx21_set_reg_bits(addr, 1, bit_nr, 1);
 }
 
-bool hdmitx21_get_bit(u32 addr, u32 bit_nr)
+/*bool hdmitx21_get_bit(u32 addr, u32 bit_nr)
 {
 	if (bit_nr > 31)
 		return 0;
 
 	return (hdmitx21_rd_reg(addr) & (1 << bit_nr)) == (1 << bit_nr);
-}
+}*/
 
 void hdmitx21_set_reg_bits(u32 addr, u32 value,
 			 u32 offset, u32 len)

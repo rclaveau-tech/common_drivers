@@ -88,16 +88,16 @@ static bool is_need_track(const struct dma_buf *d);
 
 static int trace_pool_init(struct trace_pool *pool);
 
-static void trace_elems_walk(struct codec_mm_track_s *trk);
+//static void trace_elems_walk(struct codec_mm_track_s *trk);
 
-static bool trace_elem_lookup(struct codec_mm_track_s *trk,
+/*static bool trace_elem_lookup(struct codec_mm_track_s *trk,
 			     struct task_struct *tsk,
 			     struct file *file,
 			     u32 fd,
-			     struct trace_elem *out);
+			     struct trace_elem *out);*/
 
-static void build_dma_buf_list(struct seq_file *m,
-				struct dma_buf_record_node *dma_buf_list);
+/*static void build_dma_buf_list(struct seq_file *m,
+				struct dma_buf_record_node *dma_buf_list);*/
 
 static bool is_fd_alive(u32 fd)
 {
@@ -112,7 +112,7 @@ static bool is_kprobes_enable(struct codec_mm_track_s *trk)
 	return !!trk->kps_h;
 }
 
-static char *ts_to_string(u64 ts, char *buf)
+/*static char *ts_to_string(u64 ts, char *buf)
 {
 	ulong rem_nsec;
 
@@ -124,7 +124,7 @@ static char *ts_to_string(u64 ts, char *buf)
 	sprintf(buf, "[%5lu.%06lu]", (ulong)ts, rem_nsec / 1000);
 
 	return buf;
-}
+}*/
 
 static inline void kp_info_show(const char *fname, struct file *file, u32 fd)
 {
@@ -279,7 +279,7 @@ static inline u64 get_time_us(void)
 	return div64_u64(local_clock(), 1000);
 }
 
-static ulong get_dbuf_addr(struct dma_buf *dbuf)
+/*static ulong get_dbuf_addr(struct dma_buf *dbuf)
 {
 	struct dma_heap *heap = NULL;
 	struct dma_buf_attachment *dba;
@@ -292,7 +292,7 @@ static ulong get_dbuf_addr(struct dma_buf *dbuf)
 		return 0;
 	}
 
-	/* create attachment for the dmabuf with the user device */
+	*//* create attachment for the dmabuf with the user device *//*
 	dba = dma_buf_attach(dbuf, dma_heap_get_dev(heap));
 	if (IS_ERR(dba)) {
 		dma_heap_put(heap);
@@ -300,7 +300,7 @@ static ulong get_dbuf_addr(struct dma_buf *dbuf)
 		return 0;
 	}
 
-	/* get the associated scatterlist for this buffer */
+	*//* get the associated scatterlist for this buffer *//*
 	sgt = dma_buf_map_attachment(dba, DMA_BIDIRECTIONAL);
 	if (IS_ERR(sgt)) {
 		dma_heap_put(heap);
@@ -311,17 +311,17 @@ static ulong get_dbuf_addr(struct dma_buf *dbuf)
 
 	addr = sg_dma_address(sgt->sgl);
 
-	/* unmap attachment and detach dbuf */
+	*//* unmap attachment and detach dbuf *//*
 	dma_buf_unmap_attachment(dba, sgt, DMA_BIDIRECTIONAL);
 	dma_buf_detach(dbuf, dba);
 	dma_heap_put(heap);
 
 	return addr;
-}
+}*/
 
-struct file *find_next_fd_rcu(struct task_struct *task, u32 *ret_fd)
+/*struct file *find_next_fd_rcu(struct task_struct *task, u32 *ret_fd)
 {
-	/* Must be called with rcu_read_lock held */
+	*//* Must be called with rcu_read_lock held *//*
 	struct files_struct *files;
 	u32 fd = *ret_fd;
 	struct file *file = NULL;
@@ -342,9 +342,9 @@ struct file *find_next_fd_rcu(struct task_struct *task, u32 *ret_fd)
 	*ret_fd = fd;
 
 	return file;
-}
+}*/
 
-static bool find_match_file(struct task_struct *tsk,
+/*static bool find_match_file(struct task_struct *tsk,
 			   struct file *file,
 			   struct seq_file *m)
 {
@@ -361,7 +361,7 @@ static bool find_match_file(struct task_struct *tsk,
 	rcu_read_lock();
 
 	for (;; fd++) {
-		f = find_next_fd_rcu(tsk, &fd);
+		f = fget_task_next(tsk, &fd);
 		if (!f)
 			break;
 
@@ -389,9 +389,9 @@ static bool find_match_file(struct task_struct *tsk,
 	rcu_read_unlock();
 
 	return found;
-}
+}*/
 
-static void find_ref_process(const struct dma_buf *dbuf, struct seq_file *m)
+/*static void find_ref_process(const struct dma_buf *dbuf, struct seq_file *m)
 {
 	struct task_struct *tsk = NULL;
 	bool have_leaf = false;
@@ -410,7 +410,7 @@ static void find_ref_process(const struct dma_buf *dbuf, struct seq_file *m)
 		cs_printf(m, "|   |__ leaf end\n");
 
 	read_unlock(&tasklist_lock);
-}
+}*/
 
 static bool is_need_track(const struct dma_buf *d)
 {
@@ -437,7 +437,7 @@ static bool is_need_track(const struct dma_buf *d)
 	return false;
 }
 
-static int walk_dbuf_callback(const struct dma_buf *dbuf, void *private)
+/*static int walk_dbuf_callback(const struct dma_buf *dbuf, void *private)
 {
 	struct file *f = dbuf->file;
 	struct seq_file *m = private;
@@ -455,7 +455,7 @@ static int walk_dbuf_callback(const struct dma_buf *dbuf, void *private)
 	find_ref_process(dbuf, m);
 
 	return 0;
-}
+}*/
 
 void codec_mm_dbuf_dump_config(u32 type)
 {
@@ -485,7 +485,7 @@ int is_dma_buf_file_need(struct file *file)
 	return false;
 }
 
-int aml_get_each_dmabuf(int (*callback)(const struct dma_buf *dmabuf,
+/*int aml_get_each_dmabuf(int (*callback)(const struct dma_buf *dmabuf,
 		    void *private), struct dma_buf_record_node *dma_buf_list, void *private)
 {
 	int ret = 0;
@@ -499,8 +499,9 @@ int aml_get_each_dmabuf(int (*callback)(const struct dma_buf *dmabuf,
 			break;
 	}
 	return ret;
-}
+}*/
 
+/*int codec_mm_dbuf_walk(struct seq_file *m);
 int codec_mm_dbuf_walk(struct seq_file *m)
 {
 	int ret;
@@ -521,9 +522,9 @@ int codec_mm_dbuf_walk(struct seq_file *m)
 		kfree(entry);
 	}
 	return ret;
-}
+}*/
 
-static void trace_elems_walk(struct codec_mm_track_s *trk)
+/*static void trace_elems_walk(struct codec_mm_track_s *trk)
 {
 	struct trace_elem *elem = NULL;
 	ulong bkt_task;
@@ -542,7 +543,7 @@ static void trace_elems_walk(struct codec_mm_track_s *trk)
 	}
 
 	spin_unlock_irqrestore(&trk->trk_slock, flags);
-}
+}*/
 
 static void trace_elem_fill(struct trace_elem *elem,
 			   struct file *file,
@@ -607,7 +608,7 @@ out:
 	spin_unlock_irqrestore(&trk->trk_slock, flags);
 }
 
-static bool find_match_task(struct codec_mm_track_s *trk,
+/*static bool find_match_task(struct codec_mm_track_s *trk,
 			 struct file *file,
 			 u32 fd,
 			 pid_t pid,
@@ -625,9 +626,9 @@ static bool find_match_task(struct codec_mm_track_s *trk,
 	}
 
 	return false;
-}
+}*/
 
-static bool trace_elem_lookup(struct codec_mm_track_s *trk,
+/*static bool trace_elem_lookup(struct codec_mm_track_s *trk,
 			   struct task_struct *task,
 			   struct file *file,
 			   u32 fd,
@@ -659,7 +660,7 @@ out:
 	spin_unlock_irqrestore(&trk->trk_slock, flags);
 
 	return found;
-}
+}*/
 
 static void __trace_sampling_del(struct codec_mm_track_s *trk,
 				       struct trace_elem *elem)
@@ -776,7 +777,7 @@ out:
 	spin_unlock_irqrestore(&trk->trk_slock, flags);
 }
 
-void codec_mm_kps_callback(void *priv,
+static void codec_mm_kps_callback(void *priv,
 			  const char *fname,
 			  int exe,
 			  int fid,
@@ -915,7 +916,7 @@ void codec_mm_sampling_close(void)
 	trk->kps_h = NULL;
 }
 
-static int find_dma_buf_in_tsk(struct task_struct *tsk,
+/*static int find_dma_buf_in_tsk(struct task_struct *tsk,
 			   struct seq_file *m,
 			   struct dma_buf_record_node *dma_buf_list)
 {
@@ -931,7 +932,7 @@ static int find_dma_buf_in_tsk(struct task_struct *tsk,
 	rcu_read_lock();
 
 	for (;; fd++) {
-		f = find_next_fd_rcu(tsk, &fd);
+		f = fget_task_next(tsk, &fd);
 		if (!f)
 			break;
 
@@ -962,9 +963,9 @@ static int find_dma_buf_in_tsk(struct task_struct *tsk,
 	rcu_read_unlock();
 
 	return 0;
-}
+}*/
 
-static void build_dma_buf_list(struct seq_file *m,
+/*static void build_dma_buf_list(struct seq_file *m,
 				struct dma_buf_record_node *dma_buf_list)
 {
 	struct task_struct *tsk = NULL;
@@ -978,22 +979,22 @@ static void build_dma_buf_list(struct seq_file *m,
 	}
 
 	read_unlock(&tasklist_lock);
-}
+}*/
 
-int dmabuf_track_cs_show(struct seq_file *m, struct codec_state_node *cs)
+/*static int dmabuf_track_cs_show(struct seq_file *m, struct codec_state_node *cs)
 {
-	/*
+	*//*
 	 * struct codec_mm_track_s *trk =
 	 *	container_of(cs, struct codec_mm_track_s, cs);
-	 */
+	 *//*
 	seq_printf(m, "\n #### Show %s status ####\n", cs->ops->name);
 
 	codec_mm_dbuf_walk(m);
 
 	return 0;
-}
+}*/
 
-int dmabuf_track_cs_store(int argc, const char *argv[])
+static int dmabuf_track_cs_store(int argc, const char *argv[])
 {
 	u32 val = UINT_MAX;
 	char *pval = NULL;
@@ -1035,7 +1036,7 @@ int dmabuf_track_cs_store(int argc, const char *argv[])
 	return 0;
 }
 
-CODEC_STATE_RW(dmabuf_track);
+CODEC_STATE_WO(dmabuf_track);
 
 int codec_mm_track_init(void)
 {
@@ -1053,5 +1054,5 @@ void codec_mm_track_exit(void)
 	codec_state_unregister(&trk->cs);
 }
 
-MODULE_IMPORT_NS(MINIDUMP);
+MODULE_IMPORT_NS("MINIDUMP");
 

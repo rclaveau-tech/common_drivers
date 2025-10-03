@@ -625,7 +625,7 @@ static int msync_init(void)
 	return 0;
 }
 
-void __exit msync_exit(void)
+static void __exit msync_exit(void)
 {
 }
 #endif

@@ -221,7 +221,7 @@ static void cvbs_s7_htxpll_clk_vco(const u32 clk)
 	pll_wait_lock(ANACTRL_HDMIPLL_CTRL0, 31);
 }
 
-void cvbs_s7_htxpll_clk_out(const u32 clk, u32 div)
+static void cvbs_s7_htxpll_clk_out(const u32 clk, u32 div)
 {
 	u32 pll_od1 = 0;
 	u32 pll_od10 = 0;

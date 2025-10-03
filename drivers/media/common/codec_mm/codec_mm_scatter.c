@@ -31,6 +31,7 @@
 #include <linux/list_sort.h>
 #include <linux/sort.h>
 #include <linux/swap.h>
+#include <linux/vmalloc.h>
 
 #include "codec_mm_priv.h"
 #include "codec_mm_scatter_priv.h"
@@ -1596,7 +1597,7 @@ static void dump_free_list(struct codec_mm_scatter_mgt *smgt)
 	codec_mm_list_unlock(smgt);
 }
 
-bool compare_expected_slot_sid(struct codec_mm_scatter_mgt *smgt, int sid)
+static bool compare_expected_slot_sid(struct codec_mm_scatter_mgt *smgt, int sid)
 {
 	if (sid == smgt->expected_slot_sid[0] || sid == smgt->expected_slot_sid[1])
 		return true;
@@ -1604,7 +1605,7 @@ bool compare_expected_slot_sid(struct codec_mm_scatter_mgt *smgt, int sid)
 	return false;
 }
 
-int free_scatter_pages_for_expected_slot(struct codec_mm_scatter *mms)
+static int free_scatter_pages_for_expected_slot(struct codec_mm_scatter *mms)
 {
 	struct codec_mm_scatter_mgt *smgt = (struct codec_mm_scatter_mgt *)mms->manager;
 	int index = 0;
@@ -1740,6 +1741,7 @@ int codec_mm_scatter_free_tail_pages_fast(struct codec_mm_scatter *mms,
 }
 EXPORT_SYMBOL(codec_mm_scatter_free_tail_pages_fast);
 
+int codec_mm_scatter_free_unused_pages(struct codec_mm_scatter *mms);
 int codec_mm_scatter_free_unused_pages(struct codec_mm_scatter *mms)
 {
 	int ret = 0;
@@ -1749,6 +1751,7 @@ int codec_mm_scatter_free_unused_pages(struct codec_mm_scatter *mms)
 }
 EXPORT_SYMBOL(codec_mm_scatter_free_unused_pages);
 
+int codec_mm_scatter_less_pages(struct codec_mm_scatter *mms, int nums);
 int codec_mm_scatter_less_pages(struct codec_mm_scatter *mms, int nums)
 {
 	int ret = 0;
@@ -2003,6 +2006,9 @@ EXPORT_SYMBOL(codec_mm_scatter_dec_owner_user);
  */
 struct codec_mm_scatter *
 codec_mm_scatter_alloc_new(struct codec_mm_scatter_mgt *smgt, int max_page,
+			   int page_num);
+struct codec_mm_scatter *
+codec_mm_scatter_alloc_new(struct codec_mm_scatter_mgt *smgt, int max_page,
 			   int page_num)
 {
 	struct codec_mm_scatter *mms;
@@ -2209,7 +2215,7 @@ int codec_mm_scatter_alloc_want_pages(struct codec_mm_scatter *mms,
 }
 EXPORT_SYMBOL(codec_mm_scatter_alloc_want_pages);
 
-int codec_mm_free_all_free_slots_in(struct codec_mm_scatter_mgt *smgt)
+static int codec_mm_free_all_free_slots_in(struct codec_mm_scatter_mgt *smgt)
 {
 	struct codec_mm_slot *slot, *to_free;
 
@@ -2438,7 +2444,7 @@ int codec_mm_dump_slot(struct codec_mm_slot *slot, void *buf, int size)
 }
 EXPORT_SYMBOL(codec_mm_dump_slot);
 
-int codec_mm_dump_all_slots_in(struct codec_mm_scatter_mgt *smgt)
+static int codec_mm_dump_all_slots_in(struct codec_mm_scatter_mgt *smgt)
 {
 	struct codec_mm_slot *slot, *fslot;
 	int total_pages = 0;
@@ -2487,7 +2493,7 @@ int codec_mm_dump_all_slots(void)
 	return 0;
 }
 
-int codec_mm_dump_all_hash_table_in(struct codec_mm_scatter_mgt *smgt)
+static int codec_mm_dump_all_hash_table_in(struct codec_mm_scatter_mgt *smgt)
 {
 #define INSTR2 "\tSID(%d):\tslots:%d,\tpages:%d:\tfree pages:%d\n"
 	struct codec_mm_slot *slot, *fslot;
@@ -2650,7 +2656,7 @@ int codec_mm_dump_all_scatters(void)
 	return 0;
 }
 
-int codec_mm_scatter_update_config(struct codec_mm_scatter_mgt *smgt)
+static int codec_mm_scatter_update_config(struct codec_mm_scatter_mgt *smgt)
 {
 	smgt->keep_size_PAGE = g_scatter.keep_size_PAGE;
 	smgt->reserved_block_mm_M = g_scatter.reserved_block_mm_M;
@@ -2671,7 +2677,7 @@ int codec_mm_scatter_update_config(struct codec_mm_scatter_mgt *smgt)
 	return 0;
 }
 
-void codec_mm_scatter_watermark_update(struct codec_mm_scatter_mgt *smgt)
+static void codec_mm_scatter_watermark_update(struct codec_mm_scatter_mgt *smgt)
 {
 	if (smgt->watermark_for_high) {
 		if ((smgt->watermark_for_high * SZ_1M) !=

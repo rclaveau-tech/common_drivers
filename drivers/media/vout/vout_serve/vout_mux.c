@@ -547,10 +547,9 @@ static int vout_mux_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int vout_mux_remove(struct platform_device *pdev)
+static void vout_mux_remove(struct platform_device *pdev)
 {
 	VOUTPR("%s\n", __func__);
-	return 0;
 }
 
 static struct platform_driver vout_mux_platform_driver = {
@@ -563,6 +562,7 @@ static struct platform_driver vout_mux_platform_driver = {
 	},
 };
 
+int __init vout_mux_init(void);
 int __init vout_mux_init(void)
 {
 	if (platform_driver_register(&vout_mux_platform_driver)) {
@@ -573,8 +573,8 @@ int __init vout_mux_init(void)
 	return 0;
 }
 
+void __exit vout_mux_exit(void);
 void __exit vout_mux_exit(void)
 {
 	platform_driver_unregister(&vout_mux_platform_driver);
 }
-

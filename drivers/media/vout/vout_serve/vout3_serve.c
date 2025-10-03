@@ -193,6 +193,7 @@ static struct vout_server_s nulldisp_vout3_server = {
 
 /* ********************************************************** */
 
+char *get_vout3_mode_internal(void);
 char *get_vout3_mode_internal(void)
 {
 	return vout3_mode;
@@ -211,6 +212,7 @@ int get_vout3_mode_uboot_state(void)
 }
 EXPORT_SYMBOL(get_vout3_mode_uboot_state);
 
+int set_vout3_mode_name(char *name);
 int set_vout3_mode_name(char *name)
 {
 	if (!name)
@@ -223,6 +225,7 @@ int set_vout3_mode_name(char *name)
 EXPORT_SYMBOL(set_vout3_mode_name);
 
 #define MAX_UEVENT_LEN 64
+int vout3_set_uevent(unsigned int vout_event, int val);
 int vout3_set_uevent(unsigned int vout_event, int val)
 {
 	char env[MAX_UEVENT_LEN];
@@ -336,8 +339,8 @@ static int set_vout3_init_mode(void)
 /* ************************************************************* */
 /* vout sysfs                                                    */
 /* ************************************************************* */
-static ssize_t vout3_mode_show(struct class *class,
-			       struct class_attribute *attr, char *buf)
+static ssize_t vout3_mode_show(const struct class *class,
+			       const struct class_attribute *attr, char *buf)
 {
 	int ret = 0;
 
@@ -346,8 +349,8 @@ static ssize_t vout3_mode_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout3_mode_store(struct class *class,
-				struct class_attribute *attr,
+static ssize_t vout3_mode_store(const struct class *class,
+				const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	char mode[64];
@@ -359,8 +362,8 @@ static ssize_t vout3_mode_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout3_fr_policy_show(struct class *class,
-				    struct class_attribute *attr, char *buf)
+static ssize_t vout3_fr_policy_show(const struct class *class,
+				    const struct class_attribute *attr, char *buf)
 {
 	int policy;
 	int ret = 0;
@@ -371,8 +374,8 @@ static ssize_t vout3_fr_policy_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout3_fr_policy_store(struct class *class,
-				     struct class_attribute *attr,
+static ssize_t vout3_fr_policy_store(const struct class *class,
+				     const struct class_attribute *attr,
 				     const char *buf, size_t count)
 {
 	int policy;
@@ -393,8 +396,8 @@ static ssize_t vout3_fr_policy_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout3_fr_hint_show(struct class *class,
-				  struct class_attribute *attr, char *buf)
+static ssize_t vout3_fr_hint_show(const struct class *class,
+				  const struct class_attribute *attr, char *buf)
 {
 	int fr_hint;
 	int ret = 0;
@@ -405,8 +408,8 @@ static ssize_t vout3_fr_hint_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout3_fr_hint_store(struct class *class,
-				   struct class_attribute *attr,
+static ssize_t vout3_fr_hint_store(const struct class *class,
+				   const struct class_attribute *attr,
 				   const char *buf, size_t count)
 {
 	int fr_hint;
@@ -424,8 +427,8 @@ static ssize_t vout3_fr_hint_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout3_fr_range_show(struct class *class,
-				   struct class_attribute *attr, char *buf)
+static ssize_t vout3_fr_range_show(const struct class *class,
+				   const struct class_attribute *attr, char *buf)
 {
 	const struct vinfo_s *info = NULL;
 
@@ -436,8 +439,8 @@ static ssize_t vout3_fr_range_show(struct class *class,
 	return sprintf(buf, "%d %d\n", info->vfreq_min, info->vfreq_max);
 }
 
-static ssize_t vout3_bist_show(struct class *class,
-			       struct class_attribute *attr, char *buf)
+static ssize_t vout3_bist_show(const struct class *class,
+			       const struct class_attribute *attr, char *buf)
 {
 	int ret = 0;
 
@@ -446,8 +449,8 @@ static ssize_t vout3_bist_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout3_bist_store(struct class *class,
-				struct class_attribute *attr,
+static ssize_t vout3_bist_store(const struct class *class,
+				const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	int ret = 0;
@@ -467,8 +470,8 @@ static ssize_t vout3_bist_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout3_bl_brightness_show(struct class *class,
-					struct class_attribute *attr, char *buf)
+static ssize_t vout3_bl_brightness_show(const struct class *class,
+					const struct class_attribute *attr, char *buf)
 {
 	unsigned int brightness;
 	int ret = 0;
@@ -481,8 +484,8 @@ static ssize_t vout3_bl_brightness_show(struct class *class,
 	return ret;
 }
 
-static ssize_t vout3_bl_brightness_store(struct class *class,
-					struct class_attribute *attr,
+static ssize_t vout3_bl_brightness_store(const struct class *class,
+					const struct class_attribute *attr,
 					const char *buf, size_t count)
 {
 	unsigned int brightness;
@@ -503,8 +506,8 @@ static ssize_t vout3_bl_brightness_store(struct class *class,
 	return count;
 }
 
-static ssize_t vout3_vinfo_show(struct class *class,
-				struct class_attribute *attr, char *buf)
+static ssize_t vout3_vinfo_show(const struct class *class,
+				const struct class_attribute *attr, char *buf)
 {
 	const struct vinfo_s *info = NULL;
 	ssize_t len = 0;
@@ -599,8 +602,8 @@ static ssize_t vout3_vinfo_show(struct class *class,
 	return len;
 }
 
-static ssize_t vout3_cap_show(struct class *class,
-			      struct class_attribute *attr, char *buf)
+static ssize_t vout3_cap_show(const struct class *class,
+			      const struct class_attribute *attr, char *buf)
 {
 	int ret;
 
@@ -628,7 +631,7 @@ static int vout3_attr_create(void)
 	int ret = 0;
 
 	/* create vout class */
-	vout3_class = class_create(THIS_MODULE, VOUT_CLASS_NAME);
+	vout3_class = class_create(VOUT_CLASS_NAME);
 	if (IS_ERR(vout3_class)) {
 		VOUTERR("vout3: create vout3 class fail\n");
 		return -1;
@@ -969,7 +972,7 @@ static int aml_vout3_probe(struct platform_device *pdev)
 	return ret;
 }
 
-static int aml_vout3_remove(struct platform_device *pdev)
+static void aml_vout3_remove(struct platform_device *pdev)
 {
 #ifdef CONFIG_AMLOGIC_LEGACY_EARLY_SUSPEND
 	unregister_early_suspend(&early_suspend);
@@ -977,8 +980,6 @@ static int aml_vout3_remove(struct platform_device *pdev)
 	vout3_attr_remove();
 	vout3_fops_remove();
 	vout3_unregister_server(&nulldisp_vout3_server);
-
-	return 0;
 }
 
 static void aml_vout3_shutdown(struct platform_device *pdev)
@@ -1019,11 +1020,13 @@ static struct platform_driver vout3_driver = {
 	},
 };
 
+int __init vout3_init_module(void);
 int __init vout3_init_module(void)
 {
 	return platform_driver_register(&vout3_driver);
 }
 
+__exit void vout3_exit_module(void);
 __exit void vout3_exit_module(void)
 {
 	platform_driver_unregister(&vout3_driver);

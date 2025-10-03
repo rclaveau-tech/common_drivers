@@ -59,7 +59,7 @@ static void write_yuv_to_buf(void)
 #endif
 }
 
-int vicp_test_config(struct vid_cmpr_top_s *vid_cmpr_top)
+static int vicp_test_config(struct vid_cmpr_top_s *vid_cmpr_top)
 {
 	int buffer_size = 0;
 	u8 *temp_addr;

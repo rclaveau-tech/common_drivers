@@ -315,7 +315,7 @@ void set_vid_cmpr_afbce(int enable, struct vid_cmpr_afbce_s *afbce, bool rdma_en
 	set_afbce_enable(enable_reg);
 }
 
-void f2v_get_vertical_phase(unsigned int zoom_ratio, enum f2v_vphase_type_e type,
+static void f2v_get_vertical_phase(unsigned int zoom_ratio, enum f2v_vphase_type_e type,
 	unsigned char bank_length, struct vid_cmpr_f2v_vphase_s *vphase)
 {
 	int offset_in, offset_out;

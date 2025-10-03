@@ -8,9 +8,9 @@
 #include <linux/amlogic/module_merge.h>
 #include "main.h"
 
-#if IS_ENABLED(CONFIG_AMLOGIC_DEBUG)
+/*#if IS_ENABLED(CONFIG_AMLOGIC_DEBUG)
 #include <linux/amlogic/gki_module.h>
-#endif
+#endif*/
 
 static int __init pm_main_init(void)
 {

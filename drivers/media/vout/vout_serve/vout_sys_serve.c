@@ -84,7 +84,7 @@ static inline void __iomem *check_vs_reg(void)
 	return vs_reg_map->p;
 }
 
-unsigned int vs_reg_read(void)
+static unsigned int vs_reg_read(void)
 {
 	void __iomem *p;
 	unsigned int ret = 0;
@@ -162,10 +162,7 @@ static int aml_vs_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int aml_vs_remove(struct platform_device *pdev)
-{
-	return 0;
-}
+static void aml_vs_remove(struct platform_device *pdev) {}
 
 static struct platform_driver aml_vs_driver = {
 	.probe     = aml_vs_probe,
@@ -176,6 +173,7 @@ static struct platform_driver aml_vs_driver = {
 	},
 };
 
+int __init vout_sys_serve_init(void);
 int __init vout_sys_serve_init(void)
 {
 	int ret = 0;
@@ -188,6 +186,7 @@ int __init vout_sys_serve_init(void)
 	return ret;
 }
 
+__exit void vout_sys_serve_exit(void);
 __exit void vout_sys_serve_exit(void)
 {
 	platform_driver_unregister(&aml_vs_driver);

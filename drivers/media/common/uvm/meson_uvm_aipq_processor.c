@@ -48,7 +48,7 @@ module_param(uvm_aipq_skip_height, int, 0644);
 #define NN_USE_HARDWARE 0
 #define NN_USE_GPU 1
 
-int aipq_print(int debug_flag, const char *fmt, ...)
+static int aipq_print(int debug_flag, const char *fmt, ...)
 {
 	if ((uvm_aipq_debug & debug_flag) ||
 	    debug_flag == PRINT_ERROR) {
@@ -65,7 +65,7 @@ int aipq_print(int debug_flag, const char *fmt, ...)
 	return 0;
 }
 
-int aipq_vf_set_value(struct uvm_aipq_info *aipq_info, bool enable_aipq)
+static int aipq_vf_set_value(struct uvm_aipq_info *aipq_info, bool enable_aipq)
 {
 	struct uvm_hook_mod *uhmod = NULL;
 	struct dma_buf *dmabuf = NULL;
@@ -177,7 +177,7 @@ int aipq_vf_set_value(struct uvm_aipq_info *aipq_info, bool enable_aipq)
 	return 0;
 }
 
-struct vframe_s *aipq_get_dw_vf(struct uvm_aipq_info *aipq_info)
+static struct vframe_s *aipq_get_dw_vf(struct uvm_aipq_info *aipq_info)
 {
 	struct uvm_hook_mod *uhmod = NULL;
 	struct dma_buf *dmabuf = NULL;
@@ -289,10 +289,10 @@ struct vframe_s *aipq_get_dw_vf(struct uvm_aipq_info *aipq_info)
 	return vf;
 }
 
-static int aipq_canvas[4] = {-1, -1, -1, -1};
-struct ge2d_context_s *context;
+//static int aipq_canvas[4] = {-1, -1, -1, -1};
+//struct ge2d_context_s *context;
 
-static int get_canvas(u32 index)
+/*static int get_canvas(u32 index)
 {
 	const char *owner = "aipq";
 
@@ -302,9 +302,9 @@ static int get_canvas(u32 index)
 	if (aipq_canvas[index] < 0)
 		aipq_print(PRINT_ERROR, "no canvas\n");
 	return aipq_canvas[index];
-}
+}*/
 
-int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
+/*int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 {
 	struct config_para_ex_s ge2d_config_s;
 	struct config_para_ex_s *ge2d_config = &ge2d_config_s;
@@ -384,7 +384,7 @@ int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 	    interlace_mode == VIDTYPE_INTERLACE_TOP) {
 		input_height >>= 1;
 	} else if (vf->height > uvm_aipq_skip_height) {
-		/*used to reduce bandwidth by change format to interlace*/
+		*//*used to reduce bandwidth by change format to interlace*//*
 		aipq_print(PRINT_OTHER, "use interlace format.\n");
 		input_height >>= 1;
 		src_format |= (GE2D_FMT_M24_YUV420T & (3 << 3));
@@ -421,7 +421,7 @@ int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 	ge2d_config->src_para.height = input_height;
 	ge2d_config->alu_const_color = 0;
 	ge2d_config->bitmask_en = 0;
-	ge2d_config->src1_gb_alpha = 0;/* 0xff; */
+	ge2d_config->src1_gb_alpha = 0;*//* 0xff; *//*
 	ge2d_config->src2_para.mem_type = CANVAS_TYPE_INVALID;
 	ge2d_config->dst_para.canvas_index = output_canvas;
 
@@ -448,9 +448,9 @@ int ge2d_vf_process(struct vframe_s *vf, struct ge2d_output_t *output)
 			   0, 0, output->width, output->height);
 
 	return 0;
-}
+}*/
 
-static int convert_rgb24_to_y8_process(struct ge2d_output_t *output)
+/*static int convert_rgb24_to_y8_process(struct ge2d_output_t *output)
 {
 	struct config_para_ex_s ge2d_config_s;
 	struct config_para_ex_s *ge2d_config = &ge2d_config_s;
@@ -500,7 +500,7 @@ static int convert_rgb24_to_y8_process(struct ge2d_output_t *output)
 	ge2d_config->src_para.height = input_height;
 	ge2d_config->alu_const_color = 0;
 	ge2d_config->bitmask_en = 0;
-	ge2d_config->src1_gb_alpha = 0;/* 0xff; */
+	ge2d_config->src1_gb_alpha = 0;*//* 0xff; *//*
 	ge2d_config->src2_para.mem_type = CANVAS_TYPE_INVALID;
 	ge2d_config->dst_para.canvas_index = output_canvas;
 
@@ -527,8 +527,8 @@ static int convert_rgb24_to_y8_process(struct ge2d_output_t *output)
 			   0, 0, output->width, output->height);
 
 	return 0;
-}
-void free_aipq_data(void *arg)
+}*/
+static void free_aipq_data(void *arg)
 {
 	if (arg) {
 		aipq_print(PRINT_OTHER, "%s\n", __func__);
@@ -560,7 +560,9 @@ int attach_aipq_hook_mod_info(int shared_fd,
 		aipq_info->need_do_aipq = 0;
 		enable_aipq = false;
 	} else {
+#ifdef CONFIG_AMLOGIC_MEDIA_VIDEO
 		get_output_pcrscr_info(&output_pts_inc_scale, &output_pts_inc_scale_base);
+#endif
 		if (!output_pts_inc_scale_base) {
 			aipq_print(PRINT_OTHER, "get output pcrscr info failed.\n");
 			output_fps = 0;
@@ -655,7 +657,7 @@ int attach_aipq_hook_mod_info(int shared_fd,
 	info->arg = nn_aipq;
 	info->free = free_aipq_data;
 	info->acquire_fence = NULL;
-	info->getinfo = aipq_getinfo;
+	//info->getinfo = aipq_getinfo;
 	info->setinfo = aipq_setinfo;
 
 	return 0;
@@ -675,7 +677,7 @@ int aipq_setinfo(void *arg, char *buf)
 	return ret;
 }
 
-static void dump_vf(struct vframe_s *vf, phys_addr_t addr, struct uvm_aipq_info *info, int num)
+/*static void dump_vf(struct vframe_s *vf, phys_addr_t addr, struct uvm_aipq_info *info, int num)
 {
 #ifdef CONFIG_AMLOGIC_ENABLE_VIDEO_PIPELINE_DUMP_DATA
 	struct file *fp;
@@ -739,9 +741,9 @@ static void dump_vf(struct vframe_s *vf, phys_addr_t addr, struct uvm_aipq_info 
 	codec_mm_unmap_phyaddr(data_uv);
 	filp_close(fp, NULL);
 #endif
-}
+}*/
 
-int aipq_getinfo(void *arg, char *buf)
+/*int aipq_getinfo(void *arg, char *buf)
 {
 	struct uvm_aipq_info *aipq_info = NULL;
 	int ret = -1;
@@ -843,4 +845,4 @@ int aipq_getinfo(void *arg, char *buf)
 		}
 	}
 	return 0;
-}
+}*/

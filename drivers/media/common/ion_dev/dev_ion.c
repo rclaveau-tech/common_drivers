@@ -118,7 +118,7 @@ unsigned int meson_ion_fb_heap_id_get(void)
 }
 EXPORT_SYMBOL(meson_ion_fb_heap_id_get);
 
-void __meson_ion_add_heap(struct ion_heap *heap,
+static void __meson_ion_add_heap(struct ion_heap *heap,
 			  struct heap_type_desc *desc)
 {
 	heap->ops = desc->ops;
@@ -180,10 +180,7 @@ static int dev_ion_probe(struct platform_device *pdev)
 	return ret;
 }
 
-static int dev_ion_remove(struct platform_device *pdev)
-{
-	return 0;
-}
+static void dev_ion_remove(struct platform_device *pdev) {}
 
 static const struct of_device_id amlogic_ion_dev_dt_match[] = {
 	{ .compatible = "amlogic, ion_dev", },
@@ -200,11 +197,13 @@ static struct platform_driver ion_driver = {
 	}
 };
 
+int __init ion_init(void);
 int __init ion_init(void)
 {
 	return platform_driver_register(&ion_driver);
 }
 
+void __exit ion_exit(void);
 void __exit ion_exit(void)
 {
 	platform_driver_unregister(&ion_driver);

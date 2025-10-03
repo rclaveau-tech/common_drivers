@@ -84,29 +84,29 @@ static long ge2d_compat_ioctl(struct file *filp, unsigned int cmd,
 			      unsigned long args);
 #endif
 static int ge2d_release(struct inode *inode, struct file *file);
-static ssize_t log_level_show(struct class *cla,
-			      struct class_attribute *attr,
+static ssize_t log_level_show(const struct class *cla,
+			      const struct class_attribute *attr,
 			      char *buf);
-static ssize_t log_level_store(struct class *cla,
-			       struct class_attribute *attr,
+static ssize_t log_level_store(const struct class *cla,
+			       const struct class_attribute *attr,
 			       const char *buf, size_t count);
-static ssize_t dump_reg_enable_show(struct class *cla,
-				    struct class_attribute *attr,
+static ssize_t dump_reg_enable_show(const struct class *cla,
+				    const struct class_attribute *attr,
 				    char *buf);
-static ssize_t dump_reg_enable_store(struct class *cla,
-				     struct class_attribute *attr,
+static ssize_t dump_reg_enable_store(const struct class *cla,
+				     const struct class_attribute *attr,
 				     const char *buf, size_t count);
-static ssize_t dump_reg_cnt_show(struct class *cla,
-				 struct class_attribute *attr,
+static ssize_t dump_reg_cnt_show(const struct class *cla,
+				 const struct class_attribute *attr,
 				 char *buf);
-static ssize_t dump_reg_cnt_store(struct class *cla,
-				  struct class_attribute *attr,
+static ssize_t dump_reg_cnt_store(const struct class *cla,
+				  const struct class_attribute *attr,
 				  const char *buf, size_t count);
-static ssize_t onoff_mode_show(struct class *cla,
-			       struct class_attribute *attr,
+static ssize_t onoff_mode_show(const struct class *cla,
+			       const struct class_attribute *attr,
 			       char *buf);
-static ssize_t onoff_mode_store(struct class *cla,
-				struct class_attribute *attr,
+static ssize_t onoff_mode_store(const struct class *cla,
+				const struct class_attribute *attr,
 				const char *buf, size_t count);
 
 static const struct file_operations ge2d_fops = {
@@ -193,15 +193,15 @@ static int parse_para(const char *para, int para_num, int *result)
 	return count;
 }
 
-static ssize_t dump_reg_enable_show(struct class *cla,
-				    struct class_attribute *attr,
+static ssize_t dump_reg_enable_show(const struct class *cla,
+				    const struct class_attribute *attr,
 				    char *buf)
 {
 	return snprintf(buf, 40, "%d\n", ge2d_dump_reg_enable);
 }
 
-static ssize_t dump_reg_enable_store(struct class *cla,
-				     struct class_attribute *attr,
+static ssize_t dump_reg_enable_store(const struct class *cla,
+				     const struct class_attribute *attr,
 				     const char *buf, size_t count)
 {
 	int res = 0;
@@ -215,15 +215,15 @@ static ssize_t dump_reg_enable_store(struct class *cla,
 	return count;
 }
 
-static ssize_t dump_reg_cnt_show(struct class *cla,
-				 struct class_attribute *attr,
+static ssize_t dump_reg_cnt_show(const struct class *cla,
+				 const struct class_attribute *attr,
 				 char *buf)
 {
 	return snprintf(buf, 40, "%d\n", ge2d_dump_reg_cnt);
 }
 
-static ssize_t dump_reg_cnt_store(struct class *cla,
-				  struct class_attribute *attr,
+static ssize_t dump_reg_cnt_store(const struct class *cla,
+				  const struct class_attribute *attr,
 				  const char *buf, size_t count)
 {
 	int res = 0;
@@ -235,15 +235,15 @@ static ssize_t dump_reg_cnt_store(struct class *cla,
 	return count;
 }
 
-static ssize_t log_level_show(struct class *cla,
-			      struct class_attribute *attr,
+static ssize_t log_level_show(const struct class *cla,
+			      const struct class_attribute *attr,
 			      char *buf)
 {
 	return snprintf(buf, 40, "%d\n", ge2d_log_level);
 }
 
-static ssize_t log_level_store(struct class *cla,
-			       struct class_attribute *attr,
+static ssize_t log_level_store(const struct class *cla,
+			       const struct class_attribute *attr,
 			       const char *buf, size_t count)
 {
 	int res = 0;
@@ -256,8 +256,8 @@ static ssize_t log_level_store(struct class *cla,
 	return count;
 }
 
-static ssize_t onoff_mode_show(struct class *cla,
-			       struct class_attribute *attr,
+static ssize_t onoff_mode_show(const struct class *cla,
+			       const struct class_attribute *attr,
 			       char *buf)
 {
 	u32 onoff_mode, on_cnt, off_cnt;
@@ -268,8 +268,8 @@ static ssize_t onoff_mode_show(struct class *cla,
 			onoff_mode, on_cnt, off_cnt);
 }
 
-static ssize_t onoff_mode_store(struct class *cla,
-				struct class_attribute *attr,
+static ssize_t onoff_mode_store(const struct class *cla,
+				const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	u32 parsed[3];
@@ -2122,7 +2122,7 @@ failed1:
 	return ret;
 }
 
-static int ge2d_remove(struct platform_device *pdev)
+static void ge2d_remove(struct platform_device *pdev)
 {
 	ge2d_log_info("%s\n", __func__);
 
@@ -2130,7 +2130,6 @@ static int ge2d_remove(struct platform_device *pdev)
 		release_cmd_queue_buffer(&pdev->dev, max_cmd_cnt);
 	ge2d_wq_deinit();
 	remove_ge2d_device();
-	return 0;
 }
 
 static struct platform_driver ge2d_driver = {
@@ -2185,11 +2184,13 @@ static int remove_ge2d_device(void)
 	return  0;
 }
 
+int __init ge2d_init_module(void);
 int __init ge2d_init_module(void)
 {
 	return platform_driver_register(&ge2d_driver);
 }
 
+void __exit ge2d_remove_module(void);
 void __exit ge2d_remove_module(void)
 {
 	platform_driver_unregister(&ge2d_driver);

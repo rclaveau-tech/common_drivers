@@ -900,6 +900,7 @@ static struct platform_driver codec_io_platform_driver = {
 		},
 };
 
+int __init codec_io_init(void);
 int __init codec_io_init(void)
 {
 	int ret;

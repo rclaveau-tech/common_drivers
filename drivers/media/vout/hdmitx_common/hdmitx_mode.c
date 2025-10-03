@@ -539,6 +539,7 @@ const struct hdmi_timing *hdmitx_mode_match_vesa_timing(struct vesa_standard_tim
  *mostly for edid parser usage.
  *Call hdmitx_dev_get_valid_vic() to get vic have been validated.
  */
+const struct hdmi_timing *hdmitx_mode_match_timing_name(const char *name);
 const struct hdmi_timing *hdmitx_mode_match_timing_name(const char *name)
 {
 	u32 i = 0;
@@ -567,6 +568,7 @@ const struct hdmi_timing *hdmitx_mode_match_timing_name(const char *name)
 }
 EXPORT_SYMBOL(hdmitx_mode_match_timing_name);
 
+bool hdmitx_mode_validate_y420_vic(enum hdmi_vic vic);
 bool hdmitx_mode_validate_y420_vic(enum hdmi_vic vic)
 {
 	const struct hdmi_timing *timing;
@@ -583,6 +585,7 @@ bool hdmitx_mode_validate_y420_vic(enum hdmi_vic vic)
 }
 EXPORT_SYMBOL(hdmitx_mode_validate_y420_vic);
 
+const char *hdmitx_mode_get_timing_name(enum hdmi_vic vic);
 const char *hdmitx_mode_get_timing_name(enum hdmi_vic vic)
 {
 	const struct hdmi_timing *timing =
@@ -617,7 +620,7 @@ int hdmi_timing_vrefresh(const struct hdmi_timing *t)
 	return DIV_ROUND_CLOSEST_ULL(mul_u32_u32(num, 1000), den);
 }
 
-bool hdmitx_mode_have_alternate_clock(const struct hdmi_timing *t)
+static bool hdmitx_mode_have_alternate_clock(const struct hdmi_timing *t)
 {
 	/*to be confirm if VESA can support frac rate.*/
 	if (t->vic == HDMI_0_UNKNOWN || t->vic >= HDMI_CEA_VIC_END)

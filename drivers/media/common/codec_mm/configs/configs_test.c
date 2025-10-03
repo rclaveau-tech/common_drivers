@@ -55,7 +55,7 @@ struct mconfig fast_profile[] = {
 	MC_PI32("rm",  &e),
 };
 
-int dump_set(const char *trigger, int id, const char *buf, int size)
+static int dump_set(const char *trigger, int id, const char *buf, int size)
 {
 	pr_err("trigger-->[%s]\n", buf);
 	return size;
@@ -103,6 +103,7 @@ static int config_test(void)
 	return 0;
 }
 
+int config_dump(void *buf, int size);
 int config_dump(void *buf, int size)
 {
 	config_test();
@@ -114,6 +115,7 @@ int config_dump(void *buf, int size)
 		LIST_MODE_FULL_CMDVAL_ALL);
 }
 
+int configs_config_setstr(const char *buf);
 int configs_config_setstr(const char *buf)
 {
 	int ret;

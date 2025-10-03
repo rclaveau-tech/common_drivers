@@ -639,14 +639,14 @@ static void edid_parseceatiming(struct rx_cap *prxcap,
 }
 
 static struct vsdb_phyaddr vsdb_local = {0};
-int get_vsdb_phy_addr(struct vsdb_phyaddr *vsdb)
+/*int get_vsdb_phy_addr(struct vsdb_phyaddr *vsdb)
 {
 	if (!vsdb)
 		return -1;
 
 	vsdb = &vsdb_local;
 	return vsdb->valid;
-}
+}*/
 
 static void set_vsdb_phy_addr(struct rx_cap *prxcap,
 	unsigned char *edid_offset)
@@ -1419,8 +1419,7 @@ static void hdmitx_edid_4k2k_parse(struct rx_cap *prxcap, u8 *dat,
 			store_cea_idx(prxcap, HDMI_93_3840x2160p24_16x9);
 		else if (*dat == 4)
 			store_cea_idx(prxcap, HDMI_98_4096x2160p24_256x135);
-		else
-			;
+		else {}
 		dat++;
 	}
 }

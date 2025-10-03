@@ -31,6 +31,8 @@
 #include <linux/init.h>
 #include <linux/amlogic/gki_module.h>
 
+#include "main.h"
+
 bool is_clr_resume_reason;
 
 #if IS_ENABLED(CONFIG_AMLOGIC_LEGACY_EARLY_SUSPEND)
@@ -148,8 +150,8 @@ end_late_resume:
 	mutex_unlock(&early_suspend_lock);
 }
 
-static ssize_t early_suspend_trigger_show(struct class *class,
-					  struct class_attribute *attr,
+static ssize_t early_suspend_trigger_show(const struct class *class,
+					  const struct class_attribute *attr,
 					  char *buf)
 {
 	unsigned int len;
@@ -159,8 +161,8 @@ static ssize_t early_suspend_trigger_show(struct class *class,
 	return len;
 }
 
-static ssize_t early_suspend_trigger_store(struct class *class,
-					   struct class_attribute *attr,
+static ssize_t early_suspend_trigger_store(const struct class *class,
+					   const struct class_attribute *attr,
 					   const char *buf, size_t count)
 {
 	int ret;
@@ -249,15 +251,15 @@ static void check_suspend_debug_mode(void)
 	}
 }
 
-void set_suspend_debug_flag(int suspend_flag)
+static void set_suspend_debug_flag(int suspend_flag)
 {
 	__invoke_psci_fn_smc(0x820000F3, 0, suspend_debug_flag &
 		(~(SUSPEND_DEBUG_LOGLEVEL | SUSPEND_DEBUG_INITCALL_DEBUG)),
 		  0);
 }
 
-static ssize_t suspend_debug_show(struct class *class,
-					  struct class_attribute *attr,
+static ssize_t suspend_debug_show(const struct class *class,
+					  const struct class_attribute *attr,
 					  char *buf)
 {
 	unsigned int len;
@@ -288,8 +290,8 @@ static ssize_t suspend_debug_show(struct class *class,
 	return len;
 }
 
-static ssize_t suspend_debug_store(struct class *class,
-					   struct class_attribute *attr,
+static ssize_t suspend_debug_store(const struct class *class,
+					   const struct class_attribute *attr,
 					   const char *buf, size_t count)
 {
 	int ret;
@@ -321,7 +323,7 @@ static int suspend_get_debug_env(char *buf)
 
 __setup("suspend_debug=", suspend_get_debug_env);
 
-void lgcy_early_suspend(void)
+static void lgcy_early_suspend(void)
 {
 	mutex_lock(&sysfs_trigger_lock);
 
@@ -331,7 +333,7 @@ void lgcy_early_suspend(void)
 	mutex_unlock(&sysfs_trigger_lock);
 }
 
-void lgcy_late_resume(void)
+static void lgcy_late_resume(void)
 {
 	mutex_lock(&sysfs_trigger_lock);
 
@@ -357,7 +359,7 @@ static struct notifier_block lgcy_early_suspend_notifier = {
 	.notifier_call = lgcy_early_suspend_notify,
 };
 
-unsigned int lgcy_early_suspend_exit(struct platform_device *pdev)
+static unsigned int lgcy_early_suspend_exit(struct platform_device *pdev)
 {
 	int ret;
 
@@ -465,8 +467,8 @@ EXPORT_SYMBOL_GPL(is_pm_s2idle_mode);
 
 /*Call it as suspend_reason because of historical reasons. */
 /*Actually, we should call it wakeup_reason.               */
-ssize_t suspend_reason_show(struct class *class,
-			    struct class_attribute *attr,
+static ssize_t suspend_reason_show(const struct class *class,
+			    const struct class_attribute *attr,
 			    char *buf)
 {
 	unsigned int len;
@@ -479,8 +481,8 @@ ssize_t suspend_reason_show(struct class *class,
 	return len;
 }
 
-ssize_t suspend_reason_store(struct class *class,
-			     struct class_attribute *attr,
+static ssize_t suspend_reason_store(const struct class *class,
+			     const struct class_attribute *attr,
 			     const char *buf, size_t count)
 {
 	int ret;
@@ -497,8 +499,8 @@ static CLASS_ATTR_RW(suspend_reason);
 
 static unsigned int suspend_mode;
 
-ssize_t suspend_mode_show(struct class *class,
-			    struct class_attribute *attr,
+static ssize_t suspend_mode_show(const struct class *class,
+			    const struct class_attribute *attr,
 			    char *buf)
 {
 	unsigned int len;
@@ -508,8 +510,8 @@ ssize_t suspend_mode_show(struct class *class,
 	return len;
 }
 
-ssize_t suspend_mode_store(struct class *class,
-			     struct class_attribute *attr,
+static ssize_t suspend_mode_store(const struct class *class,
+			     const struct class_attribute *attr,
 			     const char *buf, size_t count)
 {
 	int ret;
@@ -526,7 +528,7 @@ ssize_t suspend_mode_store(struct class *class,
 
 static CLASS_ATTR_RW(suspend_mode);
 
-ssize_t time_out_show(struct class *class, struct class_attribute *attr,
+static ssize_t time_out_show(const struct class *class, const struct class_attribute *attr,
 		      char *buf)
 {
 	unsigned int val = 0, len;
@@ -538,7 +540,7 @@ ssize_t time_out_show(struct class *class, struct class_attribute *attr,
 }
 
 static int sys_time_out;
-ssize_t time_out_store(struct class *class, struct class_attribute *attr,
+static ssize_t time_out_store(const struct class *class, const struct class_attribute *attr,
 		       const char *buf, size_t count)
 {
 	unsigned int time_out;
@@ -574,18 +576,17 @@ ATTRIBUTE_GROUPS(meson_pm);
 
 static struct class meson_pm_class = {
 	.name		= "meson_pm",
-	.owner		= THIS_MODULE,
 	.class_groups = meson_pm_groups,
 };
 
-int gx_pm_syscore_suspend(void)
+static int gx_pm_syscore_suspend(void)
 {
 	if (sys_time_out)
 		writel_relaxed(sys_time_out, debug_reg);
 	return 0;
 }
 
-void gx_pm_syscore_resume(void)
+static void gx_pm_syscore_resume(void)
 {
 	sys_time_out = 0;
 	set_resume_method(get_resume_reason());
@@ -650,7 +651,7 @@ static int meson_pm_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int __exit meson_pm_remove(struct platform_device *pdev)
+static void meson_pm_remove(struct platform_device *pdev)
 {
 	if (debug_reg)
 		iounmap(debug_reg);
@@ -662,7 +663,6 @@ static int __exit meson_pm_remove(struct platform_device *pdev)
 #if IS_ENABLED(CONFIG_AMLOGIC_LEGACY_EARLY_SUSPEND)
 	lgcy_early_suspend_exit(pdev);
 #endif
-	return 0;
 }
 
 static const struct of_device_id amlogic_pm_dt_match[] = {

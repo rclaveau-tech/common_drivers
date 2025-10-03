@@ -95,14 +95,14 @@ struct vicp_device_s {
 
 static struct vicp_device_s vicp_device;
 
-static ssize_t print_flag_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t print_flag_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current print_flag is %d.\n", print_flag);
 }
 
-static ssize_t print_flag_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t print_flag_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -140,8 +140,8 @@ static int parse_param(char *buf, char **parm)
 	return count;
 }
 
-static ssize_t reg_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t reg_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	pr_info("usage: this node used to read or write vicp reg.\n");
 	pr_info("usage: vicp reg range from 0x0000 to 0x038d.\n");
@@ -152,8 +152,8 @@ static ssize_t reg_show(struct class *class,
 	return 0;
 }
 
-static ssize_t reg_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t reg_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	char *buf_orig, *parm[8] = {NULL};
 	u32 val = 0, param_count;
@@ -215,14 +215,14 @@ static ssize_t reg_store(struct class *class,
 	return count;
 }
 
-static ssize_t demo_enable_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t demo_enable_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current demo_enable is %d.\n", demo_enable);
 }
 
-static ssize_t demo_enable_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t demo_enable_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -243,14 +243,14 @@ static ssize_t demo_enable_store(struct class *class,
 	return count;
 }
 
-static ssize_t input_width_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t input_width_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current input_width is %d.\n", input_width);
 }
 
-static ssize_t input_width_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t input_width_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -268,14 +268,14 @@ static ssize_t input_width_store(struct class *class,
 	return count;
 }
 
-static ssize_t input_height_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t input_height_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current input_height is %d.\n", input_height);
 }
 
-static ssize_t input_height_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t input_height_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -293,14 +293,14 @@ static ssize_t input_height_store(struct class *class,
 	return count;
 }
 
-static ssize_t output_width_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t output_width_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current output_width is %d.\n", output_width);
 }
 
-static ssize_t output_width_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t output_width_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -318,14 +318,14 @@ static ssize_t output_width_store(struct class *class,
 	return count;
 }
 
-static ssize_t output_height_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t output_height_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current output_height is %d.\n", output_height);
 }
 
-static ssize_t output_height_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t output_height_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -343,14 +343,14 @@ static ssize_t output_height_store(struct class *class,
 	return count;
 }
 
-static ssize_t input_color_format_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t input_color_format_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current input_color_format is %d.\n", input_color_format);
 }
 
-static ssize_t input_color_format_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t input_color_format_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -368,14 +368,14 @@ static ssize_t input_color_format_store(struct class *class,
 	return count;
 }
 
-static ssize_t output_color_format_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t output_color_format_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current output_color_format is %d.\n", output_color_format);
 }
 
-static ssize_t output_color_format_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t output_color_format_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -393,14 +393,14 @@ static ssize_t output_color_format_store(struct class *class,
 	return count;
 }
 
-static ssize_t input_color_dep_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t input_color_dep_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current input_color_dep is %d.\n", input_color_dep);
 }
 
-static ssize_t input_color_dep_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t input_color_dep_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -418,14 +418,14 @@ static ssize_t input_color_dep_store(struct class *class,
 	return count;
 }
 
-static ssize_t output_color_dep_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t output_color_dep_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current output_color_dep is %d.\n", output_color_dep);
 }
 
-static ssize_t output_color_dep_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t output_color_dep_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -443,14 +443,14 @@ static ssize_t output_color_dep_store(struct class *class,
 	return count;
 }
 
-static ssize_t dump_yuv_flag_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t dump_yuv_flag_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current dump_yuv_flag is %d.\n", dump_yuv_flag);
 }
 
-static ssize_t dump_yuv_flag_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t dump_yuv_flag_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -468,14 +468,14 @@ static ssize_t dump_yuv_flag_store(struct class *class,
 	return count;
 }
 
-static ssize_t scaler_en_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t scaler_en_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current scaler_en is %d.\n", scaler_en);
 }
 
-static ssize_t scaler_en_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t scaler_en_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -493,14 +493,14 @@ static ssize_t scaler_en_store(struct class *class,
 	return count;
 }
 
-static ssize_t hdr_en_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t hdr_en_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current hdr_en is %d.\n", hdr_en);
 }
 
-static ssize_t hdr_en_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t hdr_en_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -518,14 +518,14 @@ static ssize_t hdr_en_store(struct class *class,
 	return count;
 }
 
-static ssize_t crop_en_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t crop_en_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current crop_en is %d.\n", crop_en);
 }
 
-static ssize_t crop_en_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t crop_en_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -543,14 +543,14 @@ static ssize_t crop_en_store(struct class *class,
 	return count;
 }
 
-static ssize_t shrink_en_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t shrink_en_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current shrink_en is %d.\n", shrink_en);
 }
 
-static ssize_t shrink_en_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t shrink_en_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -568,13 +568,13 @@ static ssize_t shrink_en_store(struct class *class,
 	return count;
 }
 
-static ssize_t fgrain_en_show(struct class *class, struct class_attribute *attr, char *buf)
+static ssize_t fgrain_en_show(const struct class *class, const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current fgrain_en is %d.\n", fgrain_en);
 }
 
-static ssize_t fgrain_en_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t fgrain_en_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -592,14 +592,14 @@ static ssize_t fgrain_en_store(struct class *class,
 	return count;
 }
 
-static ssize_t debug_axis_en_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t debug_axis_en_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "current debug_axis_en is %d.\n", debug_axis_en);
 }
 
-static ssize_t debug_axis_en_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t debug_axis_en_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	int val;
 	ssize_t ret;
@@ -617,15 +617,15 @@ static ssize_t debug_axis_en_store(struct class *class,
 	return count;
 }
 
-static ssize_t axis_show(struct class *class,
-		struct class_attribute *attr, char *buf)
+static ssize_t axis_show(const struct class *class,
+		const struct class_attribute *attr, char *buf)
 {
 	return sprintf(buf, "left: %d, top: %d, width: %d, height: %d.\n",
 		axis.left, axis.top, axis.width, axis.height);
 }
 
-static ssize_t axis_store(struct class *class,
-		struct class_attribute *attr, const char *buf, size_t count)
+static ssize_t axis_store(const struct class *class,
+		const struct class_attribute *attr, const char *buf, size_t count)
 {
 	char *token = NULL;
 	char *params, *params_base;
@@ -670,13 +670,13 @@ static ssize_t axis_store(struct class *class,
 	return count;
 }
 
-static ssize_t rdma_en_show(struct class *cla, struct class_attribute *attr,
+static ssize_t rdma_en_show(const struct class *cla, const struct class_attribute *attr,
 	char *buf)
 {
 	return snprintf(buf, 80, "current rdma_enable is %d.\n", rdma_en);
 }
 
-static ssize_t rdma_en_store(struct class *cla, struct class_attribute *attr,
+static ssize_t rdma_en_store(const struct class *cla, const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	long tmp;
@@ -693,13 +693,13 @@ static ssize_t rdma_en_store(struct class *cla, struct class_attribute *attr,
 	return count;
 }
 
-static ssize_t debug_rdma_en_show(struct class *cla, struct class_attribute *attr,
+static ssize_t debug_rdma_en_show(const struct class *cla, const struct class_attribute *attr,
 	char *buf)
 {
 	return snprintf(buf, 80, "current debug_rdma_enable is %d.\n", debug_rdma_en);
 }
 
-static ssize_t debug_rdma_en_store(struct class *cla, struct class_attribute *attr,
+static ssize_t debug_rdma_en_store(const struct class *cla, const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	long tmp;
@@ -716,13 +716,13 @@ static ssize_t debug_rdma_en_store(struct class *cla, struct class_attribute *at
 	return count;
 }
 
-static ssize_t debug_reg_en_show(struct class *cla, struct class_attribute *attr,
+static ssize_t debug_reg_en_show(const struct class *cla, const struct class_attribute *attr,
 	char *buf)
 {
 	return snprintf(buf, 80, "current debug_reg_enable is %d.\n", debug_reg_en);
 }
 
-static ssize_t debug_reg_en_store(struct class *cla, struct class_attribute *attr,
+static ssize_t debug_reg_en_store(const struct class *cla, const struct class_attribute *attr,
 				const char *buf, size_t count)
 {
 	long tmp;
@@ -1237,14 +1237,12 @@ error:
 	return ret;
 }
 
-static int vicp_remove(struct platform_device *pdev)
+static void vicp_remove(struct platform_device *pdev)
 {
 	vicp_param_uninit();
 	pm_runtime_put_sync(&pdev->dev);
 	uninit_vicp_device();
 	vicp_clock_config(0);
-
-	return 0;
 }
 
 #ifdef CONFIG_PM
@@ -1305,11 +1303,13 @@ static struct platform_driver vicp_driver = {
 	}
 };
 
+int __init vicp_init_module(void);
 int __init vicp_init_module(void)
 {
 	return platform_driver_register(&vicp_driver);
 }
 
+void __exit vicp_remove_module(void);
 void __exit vicp_remove_module(void)
 {
 	platform_driver_unregister(&vicp_driver);
