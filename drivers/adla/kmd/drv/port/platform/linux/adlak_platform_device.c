@@ -80,7 +80,7 @@ static int adlak_destroy_cdev(struct adlak_device *padlak) {
 #endif
     device_destroy(padlak->class, padlak->cdev.dev);
     cdev_del(&padlak->cdev);
-    ida_simple_remove(&adlak_ida, MINOR(padlak->cdev.dev));
+    ida_free(&adlak_ida, MINOR(padlak->cdev.dev));
     return 0;
 }
 
@@ -91,7 +91,8 @@ static int adlak_create_cdev(struct adlak_device *padlak) {
     if (!padlak) {
         return ERR(ENOMEM);
     }
-    id = ida_simple_get(&adlak_ida, 0, ADLAK_MAX_DEVICES, ADLAK_GFP_KERNEL);
+    //id = ida_simple_get(&adlak_ida, 0, ADLAK_MAX_DEVICES, ADLAK_GFP_KERNEL);
+    id = ida_alloc(&adlak_ida, ADLAK_GFP_KERNEL);
     if (id < 0) {
         return id;
     }
